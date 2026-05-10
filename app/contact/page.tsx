@@ -16,9 +16,9 @@ export default function ContactPage() {
       <p>
         <a
           className="text-[var(--color-brand)] underline"
-          href="mailto:hello@gogotrip.kr"
+          href="mailto:hello@roadways.kr"
         >
-          hello@gogotrip.kr
+          hello@roadways.kr
         </a>
       </p>
 

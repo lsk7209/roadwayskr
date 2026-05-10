@@ -111,9 +111,9 @@ export default function PrivacyPage() {
         이메일:{" "}
         <a
           className="text-[var(--color-brand)] underline"
-          href="mailto:privacy@gogotrip.kr"
+          href="mailto:privacy@roadways.kr"
         >
-          privacy@gogotrip.kr
+          privacy@roadways.kr
         </a>
       </p>
 

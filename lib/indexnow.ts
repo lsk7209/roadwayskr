@@ -9,7 +9,7 @@
  * 사용 예: 행사 발행/수정 직후 fireIndexNow([url1, url2])
  */
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 
 export async function fireIndexNow(urls: string[]): Promise<void> {
   const key = process.env.INDEXNOW_KEY;

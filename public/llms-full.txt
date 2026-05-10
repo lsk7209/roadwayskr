@@ -8,7 +8,7 @@
 
 ## 사이트 정보
 - 이름: 여행고고
-- 최종 도메인: https://gogotrip.kr
+- 최종 도메인: https://roadways.kr
 - 임시 운영 URL: https://roadwayskr.vercel.app
 - 언어: 한국어
 - 대상 독자: 주말 나들이를 찾는 개인, 가족 여행자, 지역 축제 방문자, 국내 여행 일정 조사자

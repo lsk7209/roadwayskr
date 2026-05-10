@@ -1,7 +1,7 @@
 import { db, festivals } from "@/db";
 import { desc, eq } from "drizzle-orm";
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const FEED_TITLE = "여행고고 최신 축제";
 const FEED_DESCRIPTION = "전국에서 열리는 최신 축제와 행사 정보를 모아 전합니다.";
 const MAX_FEED_ITEMS = 50;

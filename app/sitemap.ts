@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const MIN_MONTHLY_ITEMS = 3;
 const MAX_MONTHLY_MONTHS = 18;
 const siteUrl = (path: string) => new URL(path, `${SITE_URL}/`).toString();

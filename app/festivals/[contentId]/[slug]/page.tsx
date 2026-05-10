@@ -18,7 +18,7 @@ interface Params {
   params: Promise<{ contentId: string; slug: string }>;
 }
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 
 // ─────────────────────────────────────────────────────────────
 // SSG 대상 contentId 사전 추출 (단, 가치 미달 페이지는 제외)

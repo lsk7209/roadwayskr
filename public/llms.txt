@@ -3,7 +3,7 @@
 여행고고는 한국관광공사 TourAPI 기반으로 전국 축제와 행사 정보를 정리하는 한국어 여행 정보 사이트입니다.
 
 ## 사이트
-- 최종 도메인: https://gogotrip.kr
+- 최종 도메인: https://roadways.kr
 - 임시 운영 URL: https://roadwayskr.vercel.app
 - 언어: ko-KR
 - 주제: 전국 축제, 지역별 행사, 이번 주말 갈 만한 곳, 월별 축제, 테마별 축제

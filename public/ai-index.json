@@ -2,7 +2,7 @@
   "site": {
     "name": "여행고고",
     "language": "ko-KR",
-    "canonicalUrl": "https://gogotrip.kr",
+    "canonicalUrl": "https://roadways.kr",
     "temporaryUrl": "https://roadwayskr.vercel.app",
     "description": "한국관광공사 TourAPI 기반 전국 축제·행사 큐레이션 사이트",
     "topics": ["국내여행", "축제", "행사", "주말나들이", "지역축제"]

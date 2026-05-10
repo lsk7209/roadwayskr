@@ -12,7 +12,7 @@ interface Params {
   params: Promise<{ year: string; month: string; areaSlug: string }>;
 }
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const MIN_ITEMS_FOR_INDEX = 3;
 const MAX_STATIC_MONTHS = 18;
 

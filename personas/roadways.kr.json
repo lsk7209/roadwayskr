@@ -1,6 +1,6 @@
 {
   "$schema": "../personas/_schema.json",
-  "domain": "gogotrip.kr",
+  "domain": "roadways.kr",
 
   "site_identity": {
     "name": "여행고고",
@@ -28,7 +28,7 @@
       "공연예술통합전산망(KOPIS) 데이터 활용",
       "지자체 공식 발표 1차 출처 우선"
     ],
-    "image": "https://gogotrip.kr/curator/gogo-jigi.png",
+    "image": "https://roadways.kr/curator/gogo-jigi.png",
     "sameAs": []
   },
 
@@ -93,8 +93,8 @@
     "Organization": {
       "@type": "Organization",
       "name": "여행고고",
-      "url": "https://gogotrip.kr",
-      "logo": "https://gogotrip.kr/logo.png",
+      "url": "https://roadways.kr",
+      "logo": "https://roadways.kr/logo.png",
       "description": "전국 축제·행사 정보를 가족 단위 시점으로 큐레이션하는 여행 미디어",
       "sameAs": []
     },
@@ -103,7 +103,7 @@
       "name": "고고지기",
       "alternateName": "여행고고 큐레이터",
       "description": "전국 축제·행사 큐레이터. 가족 단위 주말 나들이 정보 정리.",
-      "url": "https://gogotrip.kr/about/curator",
+      "url": "https://roadways.kr/about/curator",
       "knowsAbout": ["축제", "행사", "주말 나들이", "가족 여행", "지역 관광"],
       "worksFor": {
         "@type": "Organization",

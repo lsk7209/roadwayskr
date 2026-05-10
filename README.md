@@ -1,11 +1,11 @@
-# 여행고고 (gogotrip.kr)
+# 여행고고 (roadways.kr)
 
 전국 축제·행사 정보를 가족 단위 시점으로 큐레이션하는 pSEO 사이트.
 
 - **스택**: Next.js 15 App Router · Drizzle ORM · Turso(libSQL) · Vercel · Tailwind v4
 - **런타임**: Node.js 20~24 · pnpm 10
 - **데이터**: 한국관광공사 TourAPI 4.0 (KorService2)
-- **페르소나**: `personas/gogotrip.kr.json` (큐레이터: 고고지기)
+- **페르소나**: `personas/roadways.kr.json` (큐레이터: 고고지기)
 - **목표**: AdSense 검수 통과 + March 2026 코어 업데이트 안전 + 월 PV 30만
 
 ---
@@ -79,14 +79,14 @@ Vercel Project Environment Variables에 다음 값을 등록:
 
 배포 후 상태 확인:
 ```bash
-curl https://gogotrip.kr/api/health
+curl https://roadways.kr/api/health
 ```
 
 `vercel.json`은 `/api/health`를 6시간마다 호출해 DB 연결과 최신 동기화 상태를 주기적으로 확인합니다.
 
 ### 커스텀 도메인 연결
 
-현재 운영 URL은 `https://roadwayskr.vercel.app`입니다. `gogotrip.kr` 연결 시 Gabia DNS에서 아래처럼 변경합니다.
+현재 운영 URL은 `https://roadwayskr.vercel.app`입니다. `roadways.kr` 연결 시 DNS에서 아래처럼 변경합니다.
 
 | 호스트 | 타입 | 값 |
 |---|---|---|
@@ -95,12 +95,11 @@ curl https://gogotrip.kr/api/health
 
 DNS 반영 후:
 ```bash
-Resolve-DnsName gogotrip.kr
-Resolve-DnsName www.gogotrip.kr
-vercel alias set roadwayskr.vercel.app gogotrip.kr
+Resolve-DnsName roadways.kr
+Resolve-DnsName www.roadways.kr
 ```
 
-그다음 `.env.local`과 Vercel `SITE_URL`을 `https://gogotrip.kr`로 바꾸고 production 재배포를 실행합니다.
+그다음 `.env.local`과 Vercel `SITE_URL`을 `https://roadways.kr`로 바꿉니다. Vercel 도메인 연결과 재배포는 사용자가 GitHub 연동 화면에서 직접 처리합니다.
 
 ---
 
@@ -146,7 +145,7 @@ gogotrip/
 ├── scripts/
 │   └── sync-tourapi.ts         # 동기화 메인 (incremental | full)
 ├── personas/
-│   └── gogotrip.kr.json        # 큐레이터 페르소나 (고고지기)
+│   └── roadways.kr.json        # 큐레이터 페르소나 (고고지기)
 └── .github/workflows/
     └── sync-tourapi.yml        # 매일 04:00 KST cron
 ```
@@ -191,5 +190,5 @@ gogotrip/
 ## 문의·기여
 
 - 큐레이터: 고고지기
-- 사이트: https://gogotrip.kr
+- 사이트: https://roadways.kr
 - 데이터 출처: 한국관광공사 TourAPI (Open Government License)

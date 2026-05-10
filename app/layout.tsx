@@ -3,7 +3,7 @@ import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const NAVER_VERIFICATION =
   process.env.NAVER_VERIFICATION ?? "ce71e583d5763935ec467df1eba2d290d9552ae0";
 const GA_MEASUREMENT_ID =

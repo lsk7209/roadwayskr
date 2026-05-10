@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 
 export const metadata: Metadata = {
   title: "큐레이터 고고지기",
