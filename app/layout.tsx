@@ -8,6 +8,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const NAVER_VERIFICATION =
   process.env.NAVER_VERIFICATION ?? "ce71e583d5763935ec467df1eba2d290d9552ae0";
+const GOOGLE_SITE_VERIFICATION =
+  process.env.GOOGLE_SITE_VERIFICATION ?? "nS4LR8kOtTWrOVd6mtEwxiSyF457vBKjcVeMuGRua3Y";
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 const ADSENSE_PUBLISHER_ID =
   process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID ??
@@ -45,6 +47,7 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.ico" },
   other: {
     "naver-site-verification": NAVER_VERIFICATION,
+    "google-site-verification": GOOGLE_SITE_VERIFICATION,
   },
 };
 
