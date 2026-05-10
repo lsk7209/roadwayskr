@@ -12,7 +12,7 @@ interface FestivalListCardProps {
 }
 
 const TITLE_CLASS =
-  "line-clamp-2 font-semibold text-[15px] leading-snug text-[var(--color-ink)] sm:text-base";
+  "line-clamp-2 text-[15px] font-semibold leading-snug text-[var(--color-ink)]";
 
 export function FestivalListCard({
   festival,
@@ -22,35 +22,41 @@ export function FestivalListCard({
   const TitleTag = titleLevel === "h3" ? "h3" : "h2";
 
   return (
-    <li className="h-full">
-      <Link
-        href={href}
-        className="group flex h-full overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-card)] transition-colors duration-200 hover:border-[var(--color-brand)] hover:shadow-sm"
-      >
-        <div className="relative aspect-[16/9] w-full bg-[var(--color-line)] sm:aspect-[16/10]">
+    <li className="h-full min-w-0">
+      <Link href={href} className="group block h-full min-w-0">
+        <div className="relative aspect-square overflow-hidden rounded-[14px] bg-[var(--color-surface-strong)]">
           {festival.imageUrl ? (
             <Image
               src={festival.imageUrl}
               alt={festival.title}
               fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.025]"
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-[var(--color-ink-muted)]">
+            <div className="flex h-full w-full items-center justify-center text-sm text-[var(--color-muted)]">
               썸네일 준비중
             </div>
           )}
+          <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[var(--color-ink)] shadow-[var(--shadow-float)]">
+            주말 추천
+          </span>
+          <span
+            aria-hidden="true"
+            className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-[var(--color-ink)] shadow-[var(--shadow-float)]"
+          >
+            ♡
+          </span>
         </div>
 
-        <div className="p-4">
+        <div className="min-w-0 pt-3">
           <TitleTag className={TITLE_CLASS}>{festival.title}</TitleTag>
-          <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
+          <p className="mt-1 text-sm leading-5 text-[var(--color-muted)]">
             {festival.startDate} ~ {festival.endDate}
           </p>
           {festival.address && (
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+            <p className="mt-1 line-clamp-1 text-sm leading-5 text-[var(--color-muted)]">
               {festival.address}
             </p>
           )}

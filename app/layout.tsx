@@ -108,7 +108,7 @@ export default function RootLayout({
         ) : null}
         <AutoAds publisherId={ADSENSE_PUBLISHER_ID} />
         <header className="border-b border-[var(--color-line)] bg-[var(--color-card)]">
-          <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
             <Link href="/" className="text-lg font-bold tracking-tight">
               여행<span className="text-[var(--color-brand)]">고고</span>
             </Link>
@@ -126,10 +126,10 @@ export default function RootLayout({
           </div>
         </header>
 
-        <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
 
         <footer className="mt-16 border-t border-[var(--color-line)] bg-[var(--color-card)] py-8">
-          <div className="mx-auto max-w-5xl space-y-2 px-4 text-sm text-[var(--color-ink-muted)]">
+          <div className="mx-auto max-w-6xl space-y-2 px-4 text-sm text-[var(--color-ink-muted)]">
             <p>
               <strong className="text-[var(--color-ink)]">여행고고</strong> ·
               큐레이터{" "}

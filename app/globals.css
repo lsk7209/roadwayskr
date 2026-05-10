@@ -14,18 +14,25 @@
     sans-serif;
   --font-display: "Pretendard", system-ui, sans-serif;
 
-  /* 여행고고 컬러 시스템 - 따뜻한 베이지 + 활기찬 코랄 + 정확한 슬레이트 */
-  --color-paper: #faf7f2; /* 본문 배경 */
-  --color-ink: #1f2024; /* 본문 글 */
-  --color-ink-muted: #5b5e66;
-  --color-line: #e8e2d6; /* 구분선 */
+  --color-paper: #ffffff;
   --color-card: #ffffff;
-
-  --color-brand: #ff6b4a; /* 코랄 - 강조 */
-  --color-brand-dark: #e54e2c;
-  --color-trust: #2c5f7c; /* 슬레이트 블루 - 신뢰 신호 */
+  --color-surface-soft: #f7f7f7;
+  --color-surface-strong: #f2f2f2;
+  --color-ink: #222222;
+  --color-body: #3f3f3f;
+  --color-muted: #6a6a6a;
+  --color-ink-muted: #6a6a6a;
+  --color-line: #dddddd;
+  --color-line-soft: #ebebeb;
+  --color-brand: #ff385c;
+  --color-brand-dark: #e00b41;
+  --color-trust: #222222;
   --color-success: #2f9e6c;
   --color-warn: #d97a3a;
+
+  --shadow-float: rgba(0, 0, 0, 0.02) 0 0 0 1px,
+    rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
 }
 
 html,
@@ -39,31 +46,33 @@ body {
   overflow-wrap: break-word;
 }
 
-/* 본문 가독성 - 한국어 행간 */
 .prose-ko {
   line-height: 1.75;
   letter-spacing: 0;
 }
+
 .prose-ko p {
   margin-block: 1em;
 }
+
 .prose-ko h2 {
+  margin-block: 1.5em 0.5em;
   font-size: 1.375rem;
   font-weight: 700;
-  margin-block: 1.5em 0.5em;
-  letter-spacing: -0.02em;
-}
-.prose-ko h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-block: 1.25em 0.5em;
+  letter-spacing: 0;
 }
 
-/* AdSense CLS 가드 - 광고 슬롯 최소 높이 보장 */
-.ad-slot {
-  min-height: 280px;
-  display: block;
+.prose-ko h3 {
+  margin-block: 1.25em 0.5em;
+  font-size: 1.125rem;
+  font-weight: 600;
 }
+
+.ad-slot {
+  display: block;
+  min-height: 280px;
+}
+
 @media (min-width: 768px) {
   .ad-slot {
     min-height: 250px;
