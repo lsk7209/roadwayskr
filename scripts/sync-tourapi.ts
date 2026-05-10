@@ -1,15 +1,15 @@
-/**
- * TourAPI 변경분 동기화 (incremental)
+﻿/**
+ * TourAPI 변경분 ?�기??(incremental)
  *
- * 사용:
- *   pnpm sync:tourapi              # 어제 modified 분만 (cron용)
- *   pnpm sync:tourapi:full         # 전체 1년치 (최초 적재용)
- *   pnpm sync:tourapi:sample       # 검증용 20건만 적재
+ * ?�용:
+ *   pnpm sync:tourapi              # ?�제 modified 분만 (cron??
+ *   pnpm sync:tourapi:full         # ?�체 1?�치 (최초 ?�재??
+ *   pnpm sync:tourapi:sample       # 검증용 20건만 ?�재
  *
- * - 변경분 = areaBasedSyncList2 (modifiedtime 이후)
- * - 각 항목에 대해 detailCommon2 + detailIntro2 추가 호출 → 정규화 → upsert
- * - sync_runs 테이블에 이력 기록
- * - 일일 호출 한도(1만) 보호: 한 번 sync에 최대 2,500 항목까지
+ * - 변경분 = areaBasedSyncList2 (modifiedtime ?�후)
+ * - �???��???�??detailCommon2 + detailIntro2 추�? ?�출 ???�규????upsert
+ * - sync_runs ?�이블에 ?�력 기록
+ * - ?�일 ?�출 ?�도(1�? 보호: ??�?sync??최�? 2,500 ??��까�?
  */
 
 import { eq } from "drizzle-orm";
@@ -22,11 +22,12 @@ import {
   normalizeFestival,
   TourApiError,
 } from "../lib/tourapi";
+import { notifySearchEngines } from "../lib/search-indexing";
 
 type SyncMode = "incremental" | "full";
 
 const MAX_ITEMS_PER_RUN = 2_500;
-const RPS_DELAY_MS = 200; // 초당 ~5건. 일 한도 안전 영역.
+const RPS_DELAY_MS = 200; // 초당 ~5�? ???�도 ?�전 ?�역.
 const DEFAULT_FULL_RANGE_DAYS = 365;
 
 const options = parseOptions(process.argv.slice(2));
@@ -47,6 +48,7 @@ async function main() {
   let updated = 0;
   let skipped = 0;
   let errors = 0;
+  const changedUrls = new Set<string>();
   const errorSamples: Array<{ contentId?: string; error: string }> = [];
 
   try {
@@ -61,7 +63,7 @@ async function main() {
     const limited = items.slice(0, itemLimit);
     if (limited.length < items.length) {
       console.warn(
-        `[sync-tourapi] truncated: ${items.length} → ${limited.length} (한도 보호)`,
+        `[sync-tourapi] truncated: ${items.length} ??${limited.length} (?�도 보호)`,
       );
     }
 
@@ -77,6 +79,11 @@ async function main() {
         });
 
         const result = await upsertFestival(normalized);
+        if (result === "inserted" || result === "updated") {
+          changedUrls.add(
+            `${process.env.SITE_URL ?? "https://roadways.kr"}/festivals/${base.contentid}/${normalized.slug}`,
+          );
+        }
         if (result === "inserted") inserted++;
         else if (result === "updated") updated++;
         else skipped++;
@@ -87,7 +94,7 @@ async function main() {
           error: err instanceof Error ? err.message : String(err),
         });
         if (err instanceof TourApiError && err.resultCode === "22") {
-          console.error("[sync-tourapi] API 한도 초과 - 중단");
+          console.error("[sync-tourapi] API ?�도 초과 - 중단");
           break;
         }
       }
@@ -112,6 +119,10 @@ async function main() {
     console.log(
       `[sync-tourapi] done. inserted=${inserted} updated=${updated} skipped=${skipped} errors=${errors}`,
     );
+
+    if (changedUrls.size > 0) {
+      await notifySearchEngines([...changedUrls]);
+    }
   } catch (fatal) {
     await db
       .update(syncRuns)
@@ -150,7 +161,7 @@ async function collectIncremental() {
 }
 
 async function collectFullYear(from?: string, to?: string) {
-  // 오늘 ~ 12개월 후 행사 (전체 시도)
+  // ?�늘 ~ 12개월 ???�사 (?�체 ?�도)
   const today = new Date();
   const start = normalizeYmd(from) ?? today.toISOString().slice(0, 10).replace(/-/g, "");
   const end = normalizeYmd(to) ?? new Date(today.getTime() + DEFAULT_FULL_RANGE_DAYS * 86_400_000)
@@ -258,3 +269,4 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+

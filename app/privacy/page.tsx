@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+
 export const metadata: Metadata = {
   title: "개인정보처리방침",
   description: "여행고고 개인정보처리방침. 수집 항목·이용 목적·보유 기간·이용자의 권리 등을 안내합니다.",
-  alternates: { canonical: "/privacy" },
+  alternates: { canonical: `${SITE_URL}/privacy` },
   robots: { index: true, follow: true },
 };
 

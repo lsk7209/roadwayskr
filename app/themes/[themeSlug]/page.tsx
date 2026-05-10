@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, gte, sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { findThemeBySlug, THEMES } from "@/lib/themes";
+import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
 export const revalidate = 3600;
 
@@ -32,7 +33,7 @@ export async function generateMetadata({
     title: `${parsed.theme.name} 일정`,
     description: `${parsed.theme.name}로 분류된 진행 중·예정 축제와 행사 ${count}건을 정리했습니다. 지역, 일정, 장소를 한눈에 확인하세요.`,
     alternates: {
-      canonical: `${SITE_URL}/테마/${parsed.theme.slug}`,
+      canonical: `${SITE_URL}/themes/${parsed.theme.slug}`,
     },
     robots: indexable
       ? { index: true, follow: true }
@@ -66,7 +67,7 @@ export default async function ThemePage({ params }: Params) {
           홈
         </Link>{" "}
         ›{" "}
-        <Link href="/테마" className="hover:underline">
+        <Link href="/themes" className="hover:underline">
           테마별
         </Link>{" "}
         › <span>{theme.name}</span>
@@ -87,33 +88,11 @@ export default async function ThemePage({ params }: Params) {
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
           {items.map((festival) => (
-            <li
+            <FestivalListCard
               key={festival.contentId}
-              className="overflow-hidden rounded-lg border border-[var(--color-line)] bg-[var(--color-card)]"
-            >
-              <Link href={`/축제/${festival.contentId}/${festival.slug}`}>
-                {festival.imageUrl && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={festival.imageUrl}
-                    alt={festival.title}
-                    className="h-40 w-full object-cover"
-                    loading="lazy"
-                  />
-                )}
-                <div className="p-4">
-                  <h2 className="font-semibold">{festival.title}</h2>
-                  <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-                    {festival.startDate} ~ {festival.endDate}
-                  </p>
-                  {festival.address && (
-                    <p className="mt-1 truncate text-xs text-[var(--color-ink-muted)]">
-                      {festival.address}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            </li>
+              href={`/festivals/${festival.contentId}/${festival.slug}`}
+              festival={festival}
+            />
           ))}
         </ul>
       )}

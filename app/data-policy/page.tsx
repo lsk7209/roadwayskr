@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+
 export const metadata: Metadata = {
   title: "데이터 정책",
   description:
     "여행고고가 사용하는 행사·축제 데이터의 출처·갱신 주기·정확성 정책을 투명하게 공개합니다.",
-  alternates: { canonical: "/data-policy" },
+  alternates: { canonical: `${SITE_URL}/data-policy` },
 };
 
 export default function DataPolicyPage() {

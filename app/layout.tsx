@@ -2,37 +2,43 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
+import { AutoAds } from "@/components/ads/AutoAds";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const NAVER_VERIFICATION =
   process.env.NAVER_VERIFICATION ?? "ce71e583d5763935ec467df1eba2d290d9552ae0";
-const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-MH1JSZH1XG";
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+const ADSENSE_PUBLISHER_ID =
+  process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID ??
+  process.env.NEXT_PUBLIC_ADSENSE_PUB_ID;
+
+const SITE_NAME = "여행고고";
+const SITE_DESCRIPTION =
+  "전국 축제와 행사 정보를 지역, 일정, 테마 기준으로 정리하는 여행 큐레이션 서비스입니다.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "여행고고 - 전국 축제·행사 큐레이션",
-    template: "%s | 여행고고",
+    default: `${SITE_NAME} - 전국 축제·행사 큐레이션`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "전국 17개 시도 축제·행사 정보를 가족 단위 시점으로 큐레이션합니다. 거리·운영시간·입장료·주차 4대 기본 정보를 항상 정리합니다.",
+  description: SITE_DESCRIPTION,
   keywords: ["축제", "행사", "이번주말", "가족 나들이", "주말 여행", "지역 축제"],
-  applicationName: "여행고고",
+  applicationName: SITE_NAME,
   authors: [{ name: "고고지기", url: `${SITE_URL}/about/curator` }],
   alternates: { canonical: SITE_URL },
   openGraph: {
     type: "website",
     locale: "ko_KR",
     url: SITE_URL,
-    siteName: "여행고고",
-    title: "여행고고 - 전국 축제·행사 큐레이션",
-    description:
-      "이번 주말, 우리 동네 축제·행사를 가장 빠르고 정확하게.",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} - 전국 축제·행사 큐레이션`,
+    description: "이번 주말, 우리 동네 축제와 행사를 빠르고 정확하게 확인하세요.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "여행고고",
+    title: SITE_NAME,
     description: "전국 축제·행사 큐레이션",
   },
   robots: { index: true, follow: true },
@@ -53,52 +59,67 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Organization Schema (사이트 전역)
   const orgSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "여행고고",
+    name: SITE_NAME,
     url: SITE_URL,
     logo: `${SITE_URL}/logo.png`,
-    description:
-      "전국 축제·행사 정보를 가족 단위 시점으로 큐레이션하는 여행 미디어",
+    description: SITE_DESCRIPTION,
+  };
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   };
 
   return (
     <html lang="ko-KR">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
-        />
+        <JsonLd id="organization-jsonld" data={orgSchema} />
+        <JsonLd id="website-jsonld" data={webSiteSchema} />
+        {ADSENSE_PUBLISHER_ID ? (
+          <meta name="google-adsense-account" content={ADSENSE_PUBLISHER_ID} />
+        ) : null}
       </head>
       <body>
-        <Script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){window.dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
-          `}
-        </Script>
+        {GA_MEASUREMENT_ID ? (
+          <>
+            <Script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){window.dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        ) : null}
+        <AutoAds publisherId={ADSENSE_PUBLISHER_ID} />
         <header className="border-b border-[var(--color-line)] bg-[var(--color-card)]">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-            <Link href="/" className="font-bold tracking-tight text-lg">
+            <Link href="/" className="text-lg font-bold tracking-tight">
               여행<span className="text-[var(--color-brand)]">고고</span>
             </Link>
             <nav className="flex items-center gap-4 text-sm text-[var(--color-ink-muted)]">
-              <Link href="/이번주말" className="hover:text-[var(--color-ink)]">
+              <Link href="/weekend" className="hover:text-[var(--color-ink)]">
                 이번 주말
               </Link>
-              <Link href="/지역" className="hover:text-[var(--color-ink)]">
+              <Link href="/regions" className="hover:text-[var(--color-ink)]">
                 지역별
               </Link>
-              <Link href="/테마" className="hover:text-[var(--color-ink)]">
+              <Link href="/themes" className="hover:text-[var(--color-ink)]">
                 테마별
               </Link>
             </nav>
@@ -107,21 +128,18 @@ export default function RootLayout({
 
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
 
-        <footer className="border-t border-[var(--color-line)] bg-[var(--color-card)] py-8 mt-16">
-          <div className="mx-auto max-w-5xl px-4 text-sm text-[var(--color-ink-muted)] space-y-2">
+        <footer className="mt-16 border-t border-[var(--color-line)] bg-[var(--color-card)] py-8">
+          <div className="mx-auto max-w-5xl space-y-2 px-4 text-sm text-[var(--color-ink-muted)]">
             <p>
               <strong className="text-[var(--color-ink)]">여행고고</strong> ·
               큐레이터{" "}
-              <Link
-                href="/about/curator"
-                className="underline underline-offset-2"
-              >
+              <Link href="/about/curator" className="underline underline-offset-2">
                 고고지기
               </Link>
             </p>
             <p>
-              데이터 출처: 한국관광공사 TourAPI (Open API). 변경·취소 정보는 24시간
-              내 반영합니다.
+              데이터 출처: 한국관광공사 TourAPI. 변경·취소 정보는 수집 주기에 따라
+              반영됩니다.
             </p>
             <div className="flex gap-4 pt-2">
               <Link href="/about" className="hover:underline">

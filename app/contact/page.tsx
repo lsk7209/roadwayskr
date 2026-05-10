@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+
 export const metadata: Metadata = {
   title: "문의",
   description:
     "여행고고 사이트·콘텐츠 관련 문의를 보내실 수 있습니다. 정보 수정 요청, 제휴, 광고 문의를 받습니다.",
-  alternates: { canonical: "/contact" },
+  alternates: { canonical: `${SITE_URL}/contact` },
 };
 
 export default function ContactPage() {

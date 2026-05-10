@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { AREAS, findAreaBySlug } from "@/lib/regions";
+import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
 export const revalidate = 3600;
 
@@ -76,11 +77,11 @@ export default async function MonthlyAreaPage({ params }: Params) {
           홈
         </Link>{" "}
         ›{" "}
-        <Link href="/지역" className="hover:underline">
+        <Link href="/regions" className="hover:underline">
           지역별
         </Link>{" "}
         ›{" "}
-        <Link href={`/지역/${area.slug}`} className="hover:underline">
+        <Link href={`/regions/${area.slug}`} className="hover:underline">
           {area.name}
         </Link>{" "}
         › <span>{year}년 {month}월</span>
@@ -101,33 +102,11 @@ export default async function MonthlyAreaPage({ params }: Params) {
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
           {items.map((festival) => (
-            <li
+            <FestivalListCard
               key={festival.contentId}
-              className="overflow-hidden rounded-lg border border-[var(--color-line)] bg-[var(--color-card)]"
-            >
-              <Link href={`/축제/${festival.contentId}/${festival.slug}`}>
-                {festival.imageUrl && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={festival.imageUrl}
-                    alt={festival.title}
-                    className="h-40 w-full object-cover"
-                    loading="lazy"
-                  />
-                )}
-                <div className="p-4">
-                  <h2 className="font-semibold">{festival.title}</h2>
-                  <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-                    {festival.startDate} ~ {festival.endDate}
-                  </p>
-                  {festival.address && (
-                    <p className="mt-1 truncate text-xs text-[var(--color-ink-muted)]">
-                      {festival.address}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            </li>
+              href={`/festivals/${festival.contentId}/${festival.slug}`}
+              festival={festival}
+            />
           ))}
         </ul>
       )}

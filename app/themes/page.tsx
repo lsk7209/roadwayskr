@@ -1,17 +1,19 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { THEMES } from "@/lib/themes";
 
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "테마별 축제·행사",
+  title: "?�마�?축제·?�사",
   description:
-    "벚꽃축제, 음식축제, 음악축제, 전통축제처럼 관심사별로 전국 축제와 행사를 모았습니다.",
-  alternates: { canonical: "/테마" },
+    "벚꽃축제, ?�식축제, ?�악축제, ?�통축제처럼 관?�사별로 ?�국 축제?� ?�사�?모았?�니??",
+  alternates: { canonical: `${SITE_URL}/themes` },
 };
 
 export default async function ThemesIndex() {
@@ -21,9 +23,9 @@ export default async function ThemesIndex() {
 
   return (
     <article className="prose-ko">
-      <h1 className="text-3xl font-bold tracking-tight">테마별 축제·행사</h1>
+      <h1 className="text-3xl font-bold tracking-tight">?�마�?축제·?�사</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        관심사별로 진행 중·예정 행사를 골라볼 수 있어요.
+        관?�사별로 진행 중·예???�사�?골라�????�어??
       </p>
 
       <ul className="not-prose mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -32,16 +34,17 @@ export default async function ThemesIndex() {
           return (
             <li key={theme.slug}>
               <Link
-                href={`/테마/${theme.slug}`}
-                className="block h-full rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] p-4 transition-colors hover:border-[var(--color-brand)]"
+                href={`/themes/${theme.slug}`}
+                className="group block h-full rounded-xl border border-[var(--color-line)] bg-[var(--color-card)] p-4 transition-all hover:border-[var(--color-brand)] hover:shadow-sm"
               >
-                <div className="font-semibold">{theme.name}</div>
-                <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
+                <div className="font-semibold text-[var(--color-ink)]">
+                  {theme.name}
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">
                   {theme.description}
                 </p>
-                <div className="mt-3 text-xs text-[var(--color-ink-muted)]">
-                  진행·예정 {count}건
-                </div>
+                <div className="mt-3 text-sm text-[var(--color-ink-muted)]">
+                  진행·?�정 {count}�?                </div>
               </Link>
             </li>
           );
@@ -75,3 +78,4 @@ async function getCountsByTheme() {
 
   return counts;
 }
+

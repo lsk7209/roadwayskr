@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, eq, gte, sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { AREAS, findAreaBySlug } from "@/lib/regions";
+import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
 export const revalidate = 3600;
 
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const area = findAreaBySlug(decoded);
   if (!area) return {};
 
-  const url = `${SITE_URL}/지역/${area.slug}`;
+  const url = `${SITE_URL}/regions/${area.slug}`;
 
   // 가치 평가: 진행 중 + 예정 합쳐 최소 N건 이상이어야 색인
   const ongoing = await getCount(area.code);
@@ -70,7 +71,7 @@ export default async function AreaHub({ params }: Params) {
           홈
         </Link>{" "}
         ›{" "}
-        <Link href="/지역" className="hover:underline">
+        <Link href="/regions" className="hover:underline">
           지역별
         </Link>{" "}
         › <span>{area.name}</span>
@@ -91,33 +92,11 @@ export default async function AreaHub({ params }: Params) {
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
           {items.map((f) => (
-            <li
+            <FestivalListCard
               key={f.contentId}
-              className="rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] overflow-hidden"
-            >
-              <Link href={`/축제/${f.contentId}/${f.slug}`}>
-                {f.imageUrl && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={f.imageUrl}
-                    alt=""
-                    className="w-full h-40 object-cover"
-                    loading="lazy"
-                  />
-                )}
-                <div className="p-4">
-                  <h2 className="font-semibold">{f.title}</h2>
-                  <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-                    {f.startDate} ~ {f.endDate}
-                  </p>
-                  {f.address && (
-                    <p className="mt-1 text-xs text-[var(--color-ink-muted)] truncate">
-                      {f.address}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            </li>
+              href={`/festivals/${f.contentId}/${f.slug}`}
+              festival={f}
+            />
           ))}
         </ul>
       )}

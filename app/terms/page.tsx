@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+
 export const metadata: Metadata = {
   title: "이용약관",
   description: "여행고고 이용약관. 서비스 이용 조건, 면책, 책임 범위 등을 안내합니다.",
-  alternates: { canonical: "/terms" },
+  alternates: { canonical: `${SITE_URL}/terms` },
 };
 
 const LAST_UPDATED = "2026-05-08";

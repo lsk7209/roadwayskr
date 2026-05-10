@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
+const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+
 export const metadata: Metadata = {
   title: "여행고고 소개",
   description:
     "여행고고는 전국 17개 시도 축제·행사를 가족 단위 시점으로 큐레이션하는 여행 미디어입니다.",
-  alternates: { canonical: "/about" },
+  alternates: { canonical: `${SITE_URL}/about` },
 };
 
 export default function AboutPage() {

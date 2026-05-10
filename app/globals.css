@@ -42,7 +42,7 @@ body {
 /* 본문 가독성 - 한국어 행간 */
 .prose-ko {
   line-height: 1.75;
-  letter-spacing: -0.011em;
+  letter-spacing: 0;
 }
 .prose-ko p {
   margin-block: 1em;

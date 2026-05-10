@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "큐레이터 고고지기",
   description:
     "여행고고의 전속 큐레이터 고고지기 소개. 전국 축제·행사를 가족 단위 시점으로 답사·정리합니다.",
-  alternates: { canonical: "/about/curator" },
+  alternates: { canonical: `${SITE_URL}/about/curator` },
 };
 
 export default function CuratorPage() {

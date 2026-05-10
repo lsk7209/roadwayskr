@@ -1,8 +1,9 @@
-import { db, festivals } from "@/db";
+﻿import { db, festivals } from "@/db";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import { InfoCards } from "@/components/festival/InfoCards";
 import { EventSchema } from "@/components/festival/EventSchema";
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const festival = await getFestival(Number(contentId));
   if (!festival) return {};
 
-  const canonical = `${SITE_URL}/축제/${contentId}/${slug}`;
+  const canonical = `${SITE_URL}/festivals/${contentId}/${slug}`;
   const period =
     festival.startDate && festival.endDate
       ? ` (${festival.startDate} ~ ${festival.endDate})`
@@ -83,7 +84,7 @@ export default async function FestivalPage({ params }: Params) {
   if (!festival) return notFound();
 
   // 슬러그 불일치 시 canonical 보호 - 정식 슬러그로 안내 (Next 15 redirect는 별도 처리 권장)
-  const canonical = `${SITE_URL}/축제/${contentId}/${festival.slug}`;
+  const canonical = `${SITE_URL}/festivals/${contentId}/${festival.slug}`;
   const updatedAt = new Date(festival.updatedAt).toISOString();
   const overviewParagraphs = toParagraphs(festival.overview);
   const programParagraphs = toParagraphs(
@@ -103,7 +104,7 @@ export default async function FestivalPage({ params }: Params) {
           홈
         </Link>{" "}
         ›{" "}
-        <Link href="/지역" className="hover:underline">
+        <Link href="/regions" className="hover:underline">
           지역별
         </Link>{" "}
         › <span>{festival.title}</span>
@@ -124,12 +125,15 @@ export default async function FestivalPage({ params }: Params) {
       <CuratorNote festival={festival} />
 
       {festival.imageUrl && (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={festival.imageUrl}
-          alt={festival.title}
-          className="w-full rounded-lg my-6"
-        />
+        <div className="relative my-6 h-[220px] w-full overflow-hidden rounded-lg sm:h-[280px]">
+          <Image
+            src={festival.imageUrl}
+            alt={festival.title}
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
       )}
 
       {overviewParagraphs.length > 0 && (

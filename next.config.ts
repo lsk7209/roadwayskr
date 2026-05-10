@@ -2,8 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-
-  // TourAPI 이미지 호스트 + 일반적인 한국 관광 이미지 서버
+  trailingSlash: false,
+  poweredByHeader: false,
+  experimental: {
+    optimizePackageImports: ["drizzle-orm", "lucide-react", "date-fns"],
+  },
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "tong.visitkorea.or.kr" },
@@ -13,25 +16,43 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
-
-  // 한글 URL 인식 + canonical 일관성
-  trailingSlash: false,
-
-  // 빌드 시 페이지 가치 미달 셀은 noindex로 처리 (런타임에서)
-  poweredByHeader: false,
-
-  experimental: {
-    // 한글 URL 인코딩 일관성
-    optimizePackageImports: ["drizzle-orm"],
-  },
-
-  // sitemap.xml, robots.txt 같은 정적 자산 캐싱
   async headers() {
     return [
       {
         source: "/sitemap.xml",
         headers: [
           { key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600" },
+        ],
+      },
+      {
+        source: "/feed.xml",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/robots.txt",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/_next/image/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
         ],
       },
     ];

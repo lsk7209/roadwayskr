@@ -1,9 +1,9 @@
-import { db, festivals } from "@/db";
+﻿import { db, festivals } from "@/db";
 import { desc, eq } from "drizzle-orm";
 
 const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const FEED_TITLE = "여행고고 최신 축제";
-const FEED_DESCRIPTION = "전국에서 열리는 최신 축제와 행사 정보를 모아 전합니다.";
+const FEED_DESCRIPTION = "전국에서 열리는 최신 축제와 행사 정보를 모아 제공합니다.";
 const MAX_FEED_ITEMS = 50;
 
 export const revalidate = 3600;
@@ -67,7 +67,7 @@ ${rssItems}
 }
 
 function toRssItem(item: FeedItem) {
-  const link = new URL(`/축제/${item.contentId}/${item.slug}`, `${SITE_URL}/`).toString();
+  const link = new URL(`/festivals/${item.contentId}/${item.slug}`, `${SITE_URL}/`).toString();
   const description = buildDescription(item);
 
   return `    <item>
@@ -115,3 +115,4 @@ function escapeXml(value: string) {
     }
   });
 }
+

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db, festivals } from "@/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
 
@@ -9,46 +9,42 @@ const MIN_MONTHLY_ITEMS = 3;
 const MAX_MONTHLY_MONTHS = 18;
 const siteUrl = (path: string) => new URL(path, `${SITE_URL}/`).toString();
 
+export const revalidate = 3600;
+
 /**
- * Next.js 동적 sitemap.
- *
- * 정책:
- * - 정적 페이지: 고정 lastmod (배포 시각)
- * - 행사 페이지: festivals.updatedAt (실제 데이터 변경 시각)
- *   → Scaled Content Abuse 검출 회피를 위해 모든 페이지가 같은 시각이 되지 않도록 강제
- * - isIndexable=false 항목은 제외
- *
- * 단일 sitemap이 5만 URL/50MB 초과하면 분할 필요. 현재는 단일로 충분.
+ * Dynamic sitemap.
+ * Static pages use the latest festival update time so lastmod stays fresh.
+ * Festival pages use each row's updatedAt to avoid identical timestamps.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const lastUpdated = await getLatestFestivalUpdatedAt().catch(() => now);
 
-  // 정적 페이지
   const staticPages: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1.0 },
-    { url: siteUrl("/이번주말"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: siteUrl("/지역"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: siteUrl("/테마"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: siteUrl("/about"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: siteUrl("/about/curator"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: siteUrl("/contact"), lastModified: now, changeFrequency: "monthly", priority: 0.4 },
-    { url: siteUrl("/data-policy"), lastModified: now, changeFrequency: "monthly", priority: 0.4 },
-    { url: siteUrl("/privacy"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: siteUrl("/terms"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: SITE_URL, lastModified: lastUpdated, changeFrequency: "daily", priority: 1.0 },
+    { url: siteUrl("/weekend"), lastModified: lastUpdated, changeFrequency: "daily", priority: 0.9 },
+    { url: siteUrl("/plan"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.5 },
+    { url: siteUrl("/regions"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
+    { url: siteUrl("/themes"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
+    { url: siteUrl("/about"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
+    { url: siteUrl("/about/curator"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
+    { url: siteUrl("/contact"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
+    { url: siteUrl("/data-policy"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
+    { url: siteUrl("/privacy"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
+    { url: siteUrl("/terms"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  // 시도 허브 17개 (URL은 한글 그대로 두되, 클라이언트 호환을 위해 인코딩)
-  const areaPages: MetadataRoute.Sitemap = AREAS.map((a) => ({
-    url: siteUrl(`/지역/${a.slug}`),
-    lastModified: now,
+  const areaPages: MetadataRoute.Sitemap = AREAS.map((area) => ({
+    url: siteUrl(`/regions/${area.slug}`),
+    lastModified: lastUpdated,
     changeFrequency: "daily" as const,
     priority: 0.7,
   }));
 
-  // 행사 상세 페이지 - DB에서 indexable한 항목만
   let festivalPages: MetadataRoute.Sitemap = [];
   let monthlyAreaPages: MetadataRoute.Sitemap = [];
   let themePages: MetadataRoute.Sitemap = [];
+
   try {
     const rows = await db
       .select({
@@ -62,11 +58,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(festivals)
       .where(eq(festivals.isIndexable, true))
-      .limit(45_000); // sitemap 한도 보호
+      .limit(45_000);
 
-    festivalPages = rows.map((f) => ({
-      url: siteUrl(`/축제/${f.contentId}/${f.slug}`),
-      lastModified: f.updatedAt, // 실제 데이터 변경 시각 (lastmod 분산)
+    festivalPages = rows.map((festival) => ({
+      url: siteUrl(`/festivals/${festival.contentId}/${festival.slug}`),
+      lastModified: festival.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.6,
     }));
@@ -74,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     monthlyAreaPages = buildMonthlyAreaPages(rows, now);
     themePages = buildThemePages(rows, now);
   } catch {
-    // DB 없거나 마이그레이션 전이면 행사 페이지는 건너뜀
+    // Skip dynamic sitemap sections before DB setup or migration.
   }
 
   return [
@@ -84,6 +80,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...monthlyAreaPages,
     ...festivalPages,
   ];
+}
+
+async function getLatestFestivalUpdatedAt() {
+  const rows = await db
+    .select({ updatedAt: festivals.updatedAt })
+    .from(festivals)
+    .where(eq(festivals.isIndexable, true))
+    .orderBy(desc(festivals.updatedAt))
+    .limit(1);
+
+  return rows[0]?.updatedAt ?? new Date();
 }
 
 type SitemapFestivalRow = {
@@ -112,8 +119,8 @@ function buildThemePages(
 
     if (matched.length < MIN_MONTHLY_ITEMS) continue;
 
-      pages.push({
-        url: siteUrl(`/테마/${theme.slug}`),
+    pages.push({
+      url: siteUrl(`/themes/${theme.slug}`),
       lastModified: getLatestUpdatedAt(matched),
       changeFrequency: "weekly",
       priority: 0.6,
