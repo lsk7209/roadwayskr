@@ -3,6 +3,7 @@
 전국 축제·행사 정보를 가족 단위 시점으로 큐레이션하는 pSEO 사이트.
 
 - **스택**: Next.js 15 App Router · Drizzle ORM · Turso(libSQL) · Vercel · Tailwind v4
+- **런타임**: Node.js 20~24 · pnpm 10
 - **데이터**: 한국관광공사 TourAPI 4.0 (KorService2)
 - **페르소나**: `personas/gogotrip.kr.json` (큐레이터: 고고지기)
 - **목표**: AdSense 검수 통과 + March 2026 코어 업데이트 안전 + 월 PV 30만
