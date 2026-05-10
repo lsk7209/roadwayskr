@@ -1,7 +1,7 @@
-﻿import { db, festivals } from "@/db";
+import type { NextRequest } from "next/server";
+import { db, festivals } from "@/db";
 import { desc, eq } from "drizzle-orm";
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const FEED_TITLE = "여행고고 최신 축제";
 const FEED_DESCRIPTION = "전국에서 열리는 최신 축제와 행사 정보를 모아 제공합니다.";
 const MAX_FEED_ITEMS = 50;
@@ -9,7 +9,8 @@ const MAX_FEED_ITEMS = 50;
 export const revalidate = 3600;
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const requestHost = request.nextUrl.origin || "https://roadways.kr";
   const items = await db
     .select({
       contentId: festivals.contentId,
@@ -27,7 +28,7 @@ export async function GET() {
     .orderBy(desc(festivals.updatedAt))
     .limit(MAX_FEED_ITEMS);
 
-  return new Response(buildRss(items), {
+  return new Response(buildRss(items, requestHost), {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
       "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
@@ -47,15 +48,15 @@ type FeedItem = {
   updatedAt: Date;
 };
 
-function buildRss(items: FeedItem[]) {
+function buildRss(items: FeedItem[], siteUrl: string) {
   const now = new Date().toUTCString();
-  const rssItems = items.map(toRssItem).join("");
+  const rssItems = items.map((item) => toRssItem(item, siteUrl)).join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>${escapeXml(FEED_TITLE)}</title>
-    <link>${escapeXml(SITE_URL)}</link>
+    <link>${escapeXml(siteUrl)}</link>
     <description>${escapeXml(FEED_DESCRIPTION)}</description>
     <language>ko-KR</language>
     <lastBuildDate>${now}</lastBuildDate>
@@ -66,8 +67,8 @@ ${rssItems}
 `;
 }
 
-function toRssItem(item: FeedItem) {
-  const link = new URL(`/festivals/${item.contentId}/${item.slug}`, `${SITE_URL}/`).toString();
+function toRssItem(item: FeedItem, siteUrl: string) {
+  const link = new URL(`/festivals/${item.contentId}/${item.slug}`, `${siteUrl}/`).toString();
   const description = buildDescription(item);
 
   return `    <item>
@@ -115,4 +116,3 @@ function escapeXml(value: string) {
     }
   });
 }
-

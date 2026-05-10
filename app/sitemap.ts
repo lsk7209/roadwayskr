@@ -3,11 +3,18 @@ import { db, festivals } from "@/db";
 import { desc, eq } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
+import { headers } from "next/headers";
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const MIN_MONTHLY_ITEMS = 3;
 const MAX_MONTHLY_MONTHS = 18;
-const siteUrl = (path: string) => new URL(path, `${SITE_URL}/`).toString();
+const toAbsoluteUrl = (siteUrl: string, path: string) =>
+  new URL(path, `${siteUrl}/`).toString();
+
+function resolveSiteUrl(headerList: Headers, fallbackHost = "roadways.kr") {
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
+  const scheme = headerList.get("x-forwarded-proto") ?? "https";
+  return `${scheme}://${host}`;
+}
 
 export const revalidate = 3600;
 
@@ -19,23 +26,26 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const lastUpdated = await getLatestFestivalUpdatedAt().catch(() => now);
+  const headerList = await headers();
+  const siteUrl = resolveSiteUrl(headerList);
+  const urlWithPath = (path: string) => toAbsoluteUrl(siteUrl, path);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: lastUpdated, changeFrequency: "daily", priority: 1.0 },
-    { url: siteUrl("/weekend"), lastModified: lastUpdated, changeFrequency: "daily", priority: 0.9 },
-    { url: siteUrl("/plan"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.5 },
-    { url: siteUrl("/regions"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
-    { url: siteUrl("/themes"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
-    { url: siteUrl("/about"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
-    { url: siteUrl("/about/curator"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
-    { url: siteUrl("/contact"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
-    { url: siteUrl("/data-policy"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
-    { url: siteUrl("/privacy"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
-    { url: siteUrl("/terms"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
+    { url: siteUrl, lastModified: lastUpdated, changeFrequency: "daily", priority: 1.0 },
+    { url: urlWithPath("/weekend"), lastModified: lastUpdated, changeFrequency: "daily", priority: 0.9 },
+    { url: urlWithPath("/plan"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.5 },
+    { url: urlWithPath("/regions"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
+    { url: urlWithPath("/themes"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
+    { url: urlWithPath("/about"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
+    { url: urlWithPath("/about/curator"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
+    { url: urlWithPath("/contact"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
+    { url: urlWithPath("/data-policy"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
+    { url: urlWithPath("/privacy"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
+    { url: urlWithPath("/terms"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const areaPages: MetadataRoute.Sitemap = AREAS.map((area) => ({
-    url: siteUrl(`/regions/${area.slug}`),
+    url: urlWithPath(`/regions/${area.slug}`),
     lastModified: lastUpdated,
     changeFrequency: "daily" as const,
     priority: 0.7,
@@ -61,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .limit(45_000);
 
     festivalPages = rows.map((festival) => ({
-      url: siteUrl(`/festivals/${festival.contentId}/${festival.slug}`),
+      url: urlWithPath(`/festivals/${festival.contentId}/${festival.slug}`),
       lastModified: festival.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.6,
@@ -120,7 +130,7 @@ function buildThemePages(
     if (matched.length < MIN_MONTHLY_ITEMS) continue;
 
     pages.push({
-      url: siteUrl(`/themes/${theme.slug}`),
+      url: urlWithPath(`/themes/${theme.slug}`),
       lastModified: getLatestUpdatedAt(matched),
       changeFrequency: "weekly",
       priority: 0.6,
@@ -148,7 +158,7 @@ function buildMonthlyAreaPages(
       if (matched.length < MIN_MONTHLY_ITEMS) continue;
 
       pages.push({
-        url: siteUrl(`/${year}/${month}/${area.slug}`),
+        url: urlWithPath(`/${year}/${month}/${area.slug}`),
         lastModified: getLatestUpdatedAt(matched),
         changeFrequency: "weekly",
         priority: 0.55,

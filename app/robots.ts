@@ -1,9 +1,14 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 const ROBOTS_RULE_INDEX = ["/"];
 
 export default function robots(): MetadataRoute.Robots {
+  const headerList = headers();
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "roadways.kr";
+  const scheme = headerList.get("x-forwarded-proto") ?? "https";
+  const SITE_URL = `${scheme}://${host}`;
+
   return {
     rules: [
       {
