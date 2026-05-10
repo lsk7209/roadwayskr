@@ -61,6 +61,8 @@ GitHub Repository Secrets에 다음 값을 등록:
 - `TURSO_AUTH_TOKEN`
 - `TOUR_API_SERVICE_KEY`
 
+동기화 스크립트는 로컬에서는 `.env.local`을 읽고, GitHub Actions에서는 Repository Secrets로 전달된 환경 변수를 그대로 사용합니다.
+
 ---
 
 ## 운영 배포 체크

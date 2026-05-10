@@ -14,12 +14,12 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:push": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs push",
-    "db:studio": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs studio",
-    "sync:tourapi": "node --env-file=.env.local --import tsx scripts/sync-tourapi.ts",
-    "sync:tourapi:full": "node --env-file=.env.local --import tsx scripts/sync-tourapi.ts --mode=full",
-    "sync:tourapi:sample": "node --env-file=.env.local --import tsx scripts/sync-tourapi.ts --mode=full --limit=20",
-    "adsense:check": "node --env-file=.env.local --import tsx scripts/adsense-readiness.ts"
+    "db:push": "node --import ./scripts/load-env.mjs ./node_modules/drizzle-kit/bin.cjs push",
+    "db:studio": "node --import ./scripts/load-env.mjs ./node_modules/drizzle-kit/bin.cjs studio",
+    "sync:tourapi": "node --import ./scripts/load-env.mjs --import tsx scripts/sync-tourapi.ts",
+    "sync:tourapi:full": "node --import ./scripts/load-env.mjs --import tsx scripts/sync-tourapi.ts --mode=full",
+    "sync:tourapi:sample": "node --import ./scripts/load-env.mjs --import tsx scripts/sync-tourapi.ts --mode=full --limit=20",
+    "adsense:check": "node --import ./scripts/load-env.mjs --import tsx scripts/adsense-readiness.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
