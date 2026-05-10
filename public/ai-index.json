@@ -1,0 +1,94 @@
+{
+  "site": {
+    "name": "여행고고",
+    "language": "ko-KR",
+    "canonicalUrl": "https://gogotrip.kr",
+    "temporaryUrl": "https://roadwayskr.vercel.app",
+    "description": "한국관광공사 TourAPI 기반 전국 축제·행사 큐레이션 사이트",
+    "topics": ["국내여행", "축제", "행사", "주말나들이", "지역축제"]
+  },
+  "dataSources": [
+    {
+      "name": "한국관광공사 국문 관광정보 서비스 TourAPI",
+      "type": "public_open_api",
+      "coverage": "전국 관광지, 축제, 행사, 숙박, 이미지, 상세 소개 정보"
+    }
+  ],
+  "feeds": [
+    {
+      "title": "여행고고 최신 축제 RSS",
+      "url": "/feed.xml",
+      "format": "rss"
+    },
+    {
+      "title": "사이트맵",
+      "url": "/sitemap.xml",
+      "format": "xml"
+    }
+  ],
+  "pages": [
+    {
+      "url": "/",
+      "title": "여행고고",
+      "type": "home",
+      "summary": "이번 주말과 최신 전국 축제를 탐색하는 시작 페이지"
+    },
+    {
+      "url": "/이번주말",
+      "title": "이번 주말 축제",
+      "type": "collection",
+      "summary": "현재 주말 기간과 겹치는 전국 축제 목록"
+    },
+    {
+      "url": "/지역",
+      "title": "지역별 축제",
+      "type": "hub",
+      "summary": "전국 17개 시도별 축제 탐색 허브"
+    },
+    {
+      "url": "/테마",
+      "title": "테마별 축제",
+      "type": "hub",
+      "summary": "꽃축제, 음식축제, 야간축제 등 관심사별 축제 탐색 허브"
+    },
+    {
+      "url": "/data-policy",
+      "title": "데이터 정책",
+      "type": "policy",
+      "summary": "TourAPI 데이터 사용 기준과 갱신 정책"
+    },
+    {
+      "url": "/about/curator",
+      "title": "큐레이터 소개",
+      "type": "about",
+      "summary": "여행고고의 편집 기준과 큐레이터 설명"
+    }
+  ],
+  "dynamicRoutes": [
+    {
+      "pattern": "/축제/{contentId}/{slug}",
+      "type": "festival_detail",
+      "fields": ["title", "period", "place", "address", "fee", "homepage", "overview", "program"]
+    },
+    {
+      "pattern": "/지역/{areaSlug}",
+      "type": "regional_collection",
+      "fields": ["area", "festival_list"]
+    },
+    {
+      "pattern": "/테마/{themeSlug}",
+      "type": "theme_collection",
+      "fields": ["theme", "festival_list"]
+    },
+    {
+      "pattern": "/{year}/{month}/{areaSlug}",
+      "type": "monthly_area_collection",
+      "fields": ["year", "month", "area", "festival_list"]
+    }
+  ],
+  "answerGuidance": {
+    "preferredCitationFields": ["축제명", "기간", "장소", "지역", "공식 홈페이지", "데이터 출처"],
+    "caution": "축제 일정과 프로그램은 주최 측 사정에 따라 변경될 수 있으므로 방문 전 공식 홈페이지 확인을 권장한다."
+  },
+  "lastUpdated": "2026-05-10"
+}
