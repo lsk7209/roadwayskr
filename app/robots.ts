@@ -3,8 +3,8 @@ import { headers } from "next/headers";
 
 const ROBOTS_RULE_INDEX = ["/"];
 
-export default function robots(): MetadataRoute.Robots {
-  const headerList = headers();
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const headerList = await headers();
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "roadways.kr";
   const scheme = headerList.get("x-forwarded-proto") ?? "https";
   const SITE_URL = `${scheme}://${host}`;
