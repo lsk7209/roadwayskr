@@ -77,8 +77,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    monthlyAreaPages = buildMonthlyAreaPages(rows, now);
-    themePages = buildThemePages(rows, now);
+    monthlyAreaPages = buildMonthlyAreaPages(rows, now, siteUrl);
+    themePages = buildThemePages(rows, now, siteUrl);
   } catch {
     // Skip dynamic sitemap sections before DB setup or migration.
   }
@@ -114,6 +114,7 @@ type SitemapFestivalRow = {
 function buildThemePages(
   rows: SitemapFestivalRow[],
   now: Date,
+  siteUrl: string,
 ): MetadataRoute.Sitemap {
   const today = now.toISOString().slice(0, 10);
   const pages: MetadataRoute.Sitemap = [];
@@ -130,7 +131,7 @@ function buildThemePages(
     if (matched.length < MIN_MONTHLY_ITEMS) continue;
 
     pages.push({
-      url: urlWithPath(`/themes/${theme.slug}`),
+      url: toAbsoluteUrl(siteUrl, `/themes/${theme.slug}`),
       lastModified: getLatestUpdatedAt(matched),
       changeFrequency: "weekly",
       priority: 0.6,
@@ -143,6 +144,7 @@ function buildThemePages(
 function buildMonthlyAreaPages(
   rows: SitemapFestivalRow[],
   now: Date,
+  siteUrl: string,
 ): MetadataRoute.Sitemap {
   const months = getStaticMonths(now, MAX_MONTHLY_MONTHS);
   const pages: MetadataRoute.Sitemap = [];
@@ -158,7 +160,7 @@ function buildMonthlyAreaPages(
       if (matched.length < MIN_MONTHLY_ITEMS) continue;
 
       pages.push({
-        url: urlWithPath(`/${year}/${month}/${area.slug}`),
+        url: toAbsoluteUrl(siteUrl, `/${year}/${month}/${area.slug}`),
         lastModified: getLatestUpdatedAt(matched),
         changeFrequency: "weekly",
         priority: 0.55,
