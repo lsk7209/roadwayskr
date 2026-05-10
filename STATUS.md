@@ -16,6 +16,7 @@ GitHub 첫 커밋/푸시 준비
 - 라우팅: 외부 URL은 한글 유지, 내부 App Router 폴더는 Windows dev 안정성을 위해 ASCII 사용
 - 데이터: KorService2 GW는 areacode 빈 값이 있어 lDongRegnCd로 17개 시도 매핑
 - 배포: Vercel 직접 배포 금지, Git push 후 자동 Vercel 배포만 사용
+- Vercel GitHub 연동: 사용자가 직접 처리, Codex는 명시 요청 전 연결/변경 금지
 ## 주의
 - .env.local은 운영 Turso 기준이며 토큰 출력/커밋 금지
 - 현재 운영 URL은 `https://roadwayskr.vercel.app`
