@@ -32,13 +32,14 @@ const planCards = [
   },
   {
     title: "지금 확인",
-    description: "업데이트 상태와 운영 점검 내역을 /plan에서 한 번에 확인하세요.",
+    description:
+      "업데이트 상태와 운영 점검 내역을 /plan에서 한 번에 확인하세요.",
     href: "/plan",
   },
 ];
 
 export const metadata: Metadata = {
-  title: "Roadways - 주말 축제 가이드",
+  title: "여행고고 - 주말 축제 가이드",
   description:
     "한국의 주말 축제 정보를 빠르게 찾고, 지역·테마별로 비교합니다. 실시간 정보, 최신 데이터, 정렬 최적화로 가독성 높은 여행 안내를 제공합니다.",
   alternates: { canonical: SITE_URL },
@@ -84,13 +85,16 @@ export default async function Home() {
   return (
     <div className="space-y-14">
       <section className="mx-auto max-w-3xl text-center">
-        <p className="text-sm font-semibold tracking-[0.12em] text-[var(--color-brand)]">Roadways Guide</p>
+        <p className="text-sm font-semibold tracking-[0.12em] text-[var(--color-brand)]">
+          여행고고
+        </p>
         <h1 className="mt-3 text-[32px] font-bold leading-tight text-[var(--color-ink)] sm:text-[38px]">
-          주말 축제는 Roadways로 한 번에
+          주말 축제는 여행고고로 한 번에
         </h1>
         <p className="prose-body mt-4 text-[1.04rem] leading-8 text-[var(--color-ink-muted)]">
-          전국 축제 정보를 한 페이지에서 찾고, 지역과 테마로 나누어 빠르게 비교하세요.  
-          새로고침 없이 핵심 항목을 파악할 수 있는 구성으로 가독성을 우선 반영했습니다.
+          전국 축제 정보를 한 페이지에서 찾고, 지역과 테마로 나누어 빠르게
+          비교하세요. 새로고침 없이 핵심 항목을 파악할 수 있는 구성으로 가독성을
+          우선 반영했습니다.
         </p>
 
         <div className="mt-8 grid gap-3 md:grid-cols-3">
@@ -100,8 +104,12 @@ export default async function Home() {
               href={item.href}
               className="rounded-2xl border border-[var(--color-line)] bg-white p-4 text-left shadow-[var(--shadow-float)] transition hover:border-[var(--color-brand)]"
             >
-              <p className="text-sm font-semibold text-[var(--color-ink)]">{item.label}</p>
-              <p className="mt-1 text-sm text-[var(--color-muted)]">{item.value}</p>
+              <p className="text-sm font-semibold text-[var(--color-ink)]">
+                {item.label}
+              </p>
+              <p className="mt-1 text-sm text-[var(--color-muted)]">
+                {item.value}
+              </p>
             </Link>
           ))}
         </div>
@@ -110,12 +118,17 @@ export default async function Home() {
       <section className="rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-card)] p-6">
         <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-[24px] font-semibold leading-tight">이번 주말 추천</h2>
+            <h2 className="text-[24px] font-semibold leading-tight">
+              이번 주말 추천
+            </h2>
             <p className="mt-2 prose-body text-[var(--color-ink-muted)]">
               기간 기준으로 필터링한 실제 진행 축제를 우선 표시합니다.
             </p>
           </div>
-          <Link href="/weekend" className="text-sm font-semibold text-[var(--color-brand)] hover:underline">
+          <Link
+            href="/weekend"
+            className="text-sm font-semibold text-[var(--color-brand)] hover:underline"
+          >
             전체 보기
           </Link>
         </div>
@@ -140,10 +153,18 @@ export default async function Home() {
 
       <section className="grid gap-4 md:grid-cols-3">
         {planCards.map((card) => (
-          <article key={card.title} className="rounded-2xl border border-[var(--color-line)] bg-white p-5">
+          <article
+            key={card.title}
+            className="rounded-2xl border border-[var(--color-line)] bg-white p-5"
+          >
             <h3 className="text-lg font-bold">{card.title}</h3>
-            <p className="prose-body mt-2 leading-8 text-[var(--color-ink-muted)]">{card.description}</p>
-            <Link href={card.href} className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand)] hover:underline">
+            <p className="prose-body mt-2 leading-8 text-[var(--color-ink-muted)]">
+              {card.description}
+            </p>
+            <Link
+              href={card.href}
+              className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand)] hover:underline"
+            >
               바로 이동
             </Link>
           </article>
@@ -152,7 +173,9 @@ export default async function Home() {
 
       <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <div>
-          <h2 className="text-[24px] font-semibold leading-tight">신뢰 운영 기준</h2>
+          <h2 className="text-[24px] font-semibold leading-tight">
+            신뢰 운영 기준
+          </h2>
           <p className="prose-body mt-2 text-[var(--color-ink-muted)]">
             검색·광고·분석에 불필요한 리스크를 줄이는 기준입니다.
           </p>
@@ -178,10 +201,17 @@ export default async function Home() {
       >
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-[24px] font-semibold leading-tight">최신 업데이트</h2>
-            <p className="prose-body mt-2 text-[var(--color-ink-muted)]">새로 반영된 항목부터 한눈에 확인합니다.</p>
+            <h2 className="text-[24px] font-semibold leading-tight">
+              최신 업데이트
+            </h2>
+            <p className="prose-body mt-2 text-[var(--color-ink-muted)]">
+              새로 반영된 항목부터 한눈에 확인합니다.
+            </p>
           </div>
-          <Link href="/plan" className="text-sm font-semibold text-[var(--color-brand)] hover:underline">
+          <Link
+            href="/plan"
+            className="text-sm font-semibold text-[var(--color-brand)] hover:underline"
+          >
             운영 상태 보기
           </Link>
         </div>

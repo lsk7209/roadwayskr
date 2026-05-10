@@ -8,6 +8,7 @@ import Image from "next/image";
 import { InfoCards } from "@/components/festival/InfoCards";
 import { EventSchema } from "@/components/festival/EventSchema";
 import { CuratorNote } from "@/components/festival/CuratorNote";
+import { JsonLd, buildBreadcrumbListLd } from "@/components/seo/JsonLd";
 import {
   cleanTourText,
   extractFirstUrl,
@@ -103,9 +104,16 @@ export default async function FestivalPage({ params }: Params) {
   const playTime = cleanTourText(festival.playTime);
   const address = cleanTourText(festival.address);
 
+  const breadcrumbLd = buildBreadcrumbListLd([
+    { name: "홈", url: SITE_URL },
+    { name: "지역별", url: `${SITE_URL}/regions` },
+    { name: festival.title, url: canonical },
+  ]);
+
   return (
     <article className="prose-ko">
       <EventSchema festival={festival} url={canonical} />
+      <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
 
       <nav className="text-xs text-[var(--color-ink-muted)] mb-2">
         <Link href="/" className="hover:underline">

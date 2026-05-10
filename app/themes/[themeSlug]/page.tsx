@@ -6,6 +6,11 @@ import { and, gte, sql } from "drizzle-orm";
 import { db, festivals } from "@/db";
 import { findThemeBySlug, THEMES } from "@/lib/themes";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import {
+  JsonLd,
+  buildCollectionPageLd,
+  buildBreadcrumbListLd,
+} from "@/components/seo/JsonLd";
 
 export const revalidate = 3600;
 
@@ -20,9 +25,7 @@ export async function generateStaticParams() {
   return THEMES.map((theme) => ({ themeSlug: theme.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const parsed = await parseParams(params);
   if (!parsed) return {};
 
@@ -60,8 +63,26 @@ export default async function ThemePage({ params }: Params) {
     .orderBy(festivals.startDate)
     .limit(80);
 
+  const pageUrl = `${SITE_URL}/themes/${theme.slug}`;
+  const collectionLd = buildCollectionPageLd({
+    name: `${theme.name} 일정`,
+    description: `${theme.name}로 분류된 진행 중·예정 축제와 행사 목록`,
+    url: pageUrl,
+    items: items.map((f) => ({
+      name: f.title,
+      url: `${SITE_URL}/festivals/${f.contentId}/${f.slug}`,
+    })),
+  });
+  const breadcrumbLd = buildBreadcrumbListLd([
+    { name: "홈", url: SITE_URL },
+    { name: "테마별", url: `${SITE_URL}/themes` },
+    { name: theme.name, url: pageUrl },
+  ]);
+
   return (
     <article className="prose-body prose-ko">
+      <JsonLd id="ld-collection" data={collectionLd} />
+      <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
       <nav className="mb-2 text-xs text-[var(--color-ink-muted)]">
         <Link href="/" className="hover:underline">
           홈
@@ -73,9 +94,7 @@ export default async function ThemePage({ params }: Params) {
         › <span>{theme.name}</span>
       </nav>
 
-      <h1 className="text-3xl font-bold tracking-tight">
-        {theme.name} 일정
-      </h1>
+      <h1 className="text-3xl font-bold tracking-tight">{theme.name} 일정</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
         {theme.description}. 진행 중·예정 행사 {items.length}건
       </p>

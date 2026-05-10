@@ -6,6 +6,11 @@ import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db, festivals } from "@/db";
 import { AREAS, findAreaBySlug } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import {
+  JsonLd,
+  buildCollectionPageLd,
+  buildBreadcrumbListLd,
+} from "@/components/seo/JsonLd";
 
 export const revalidate = 3600;
 
@@ -29,9 +34,7 @@ export async function generateStaticParams() {
   );
 }
 
-export async function generateMetadata({
-  params,
-}: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const parsed = await parseParams(params);
   if (!parsed) return {};
 
@@ -70,8 +73,27 @@ export default async function MonthlyAreaPage({ params }: Params) {
     .orderBy(festivals.startDate)
     .limit(80);
 
+  const pageUrl = `${SITE_URL}/monthly/${year}/${month}/${area.slug}`;
+  const collectionLd = buildCollectionPageLd({
+    name: `${year}년 ${month}월 ${area.name} 축제·행사`,
+    description: `${year}년 ${month}월 ${area.name}에서 열리는 축제와 행사 목록`,
+    url: pageUrl,
+    items: items.map((f) => ({
+      name: f.title,
+      url: `${SITE_URL}/festivals/${f.contentId}/${f.slug}`,
+    })),
+  });
+  const breadcrumbLd = buildBreadcrumbListLd([
+    { name: "홈", url: SITE_URL },
+    { name: "지역별", url: `${SITE_URL}/regions` },
+    { name: area.name, url: `${SITE_URL}/regions/${area.slug}` },
+    { name: `${year}년 ${month}월`, url: pageUrl },
+  ]);
+
   return (
     <article className="prose-body prose-ko">
+      <JsonLd id="ld-collection" data={collectionLd} />
+      <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
       <nav className="text-xs text-[var(--color-ink-muted)] mb-2">
         <Link href="/" className="hover:underline">
           홈
@@ -84,7 +106,10 @@ export default async function MonthlyAreaPage({ params }: Params) {
         <Link href={`/regions/${area.slug}`} className="hover:underline">
           {area.name}
         </Link>{" "}
-        › <span>{year}년 {month}월</span>
+        ›{" "}
+        <span>
+          {year}년 {month}월
+        </span>
       </nav>
 
       <h1 className="text-3xl font-bold tracking-tight">
@@ -96,8 +121,8 @@ export default async function MonthlyAreaPage({ params }: Params) {
 
       {items.length < MIN_ITEMS_FOR_INDEX ? (
         <p className="mt-6 rounded border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-ink-muted)]">
-          이 월별 지역 조합은 현재 행사 수가 적어 검색 색인은 보류합니다. 더 넓은
-          지역 페이지에서 진행 중·예정 행사를 확인해 주세요.
+          이 월별 지역 조합은 현재 행사 수가 적어 검색 색인은 보류합니다. 더
+          넓은 지역 페이지에서 진행 중·예정 행사를 확인해 주세요.
         </p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">

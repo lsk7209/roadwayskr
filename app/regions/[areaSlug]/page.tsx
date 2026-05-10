@@ -6,6 +6,11 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import { db, festivals } from "@/db";
 import { AREAS, findAreaBySlug } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import {
+  JsonLd,
+  buildCollectionPageLd,
+  buildBreadcrumbListLd,
+} from "@/components/seo/JsonLd";
 
 export const revalidate = 3600;
 
@@ -20,9 +25,7 @@ export async function generateStaticParams() {
   return AREAS.map((a) => ({ areaSlug: a.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { areaSlug } = await params;
   const decoded = safeDecode(areaSlug);
   if (!decoded) return {};
@@ -67,8 +70,26 @@ export default async function AreaHub({ params }: Params) {
     .orderBy(festivals.startDate)
     .limit(60);
 
+  const pageUrl = `${SITE_URL}/regions/${area.slug}`;
+  const collectionLd = buildCollectionPageLd({
+    name: `${area.name} 축제·행사`,
+    description: `${area.name}의 진행 중·예정 축제와 행사 목록`,
+    url: pageUrl,
+    items: items.map((f) => ({
+      name: f.title,
+      url: `${SITE_URL}/festivals/${f.contentId}/${f.slug}`,
+    })),
+  });
+  const breadcrumbLd = buildBreadcrumbListLd([
+    { name: "홈", url: SITE_URL },
+    { name: "지역별", url: `${SITE_URL}/regions` },
+    { name: area.name, url: pageUrl },
+  ]);
+
   return (
     <article className="prose-body prose-ko">
+      <JsonLd id="ld-collection" data={collectionLd} />
+      <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
       <nav className="text-xs text-[var(--color-ink-muted)] mb-2">
         <Link href="/" className="hover:underline">
           홈
@@ -89,8 +110,8 @@ export default async function AreaHub({ params }: Params) {
 
       {items.length < MIN_ITEMS_FOR_INDEX ? (
         <p className="mt-6 rounded border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-ink-muted)]">
-          현재 등록된 진행·예정 행사가 적습니다. 데이터 동기화 직후이거나 비수기일
-          수 있어요. 인근 지역 페이지를 둘러보세요.
+          현재 등록된 진행·예정 행사가 적습니다. 데이터 동기화 직후이거나
+          비수기일 수 있어요. 인근 지역 페이지를 둘러보세요.
         </p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
