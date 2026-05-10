@@ -29,6 +29,16 @@
 | 사이트맵 | `/sitemap.xml` |
 | 데이터 정책 | `/data-policy` |
 
+## Markdown 미러
+| 문서 | URL |
+| --- | --- |
+| 사이트 개요 | `/docs/home.md` |
+| 이번 주말 축제 | `/docs/weekend.md` |
+| 지역별 축제 | `/docs/regions.md` |
+| 테마별 축제 | `/docs/themes.md` |
+| 축제 상세 페이지 | `/docs/festival-detail.md` |
+| 데이터 정책 | `/docs/data-policy.md` |
+
 ## 제공하는 정보
 - 축제명
 - 축제 기간

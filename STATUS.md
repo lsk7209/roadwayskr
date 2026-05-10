@@ -1,12 +1,12 @@
 # Status | 마지막: 2026-05-10
 ## 현재 작업
-AEO/GEO 정적 인덱스 파일 추가 완료
+주요 페이지 Markdown 미러 추가 완료
 ## 최근 변경 (최근 5개만)
+- 05-10: `public/docs/*.md` 주요 페이지 Markdown 미러 추가
 - 05-10: `public/llms.txt`, `public/llms-full.txt`, `public/ai-index.json` 추가
 - 05-10: 네이버/다음 제출용 `/feed.xml` RSS 라우트 추가
 - 05-10: GitHub Actions secrets 3개 등록 및 워크플로우 활성 상태 확인
 - 05-10: Git push 기반 자동 Vercel 배포 원칙 반영
-- 05-10: `packageManager=pnpm@10.33.0` 및 Actions pnpm 10 고정
 ## TODO
 - [ ] Gabia DNS: `@ A 76.76.21.21`, `www CNAME cname.vercel-dns.com` 적용
 - [ ] DNS 반영 후 `SITE_URL=https://gogotrip.kr`로 재설정 및 재배포

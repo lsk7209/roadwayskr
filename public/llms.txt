@@ -18,6 +18,14 @@
 - 데이터 정책: /data-policy
 - 큐레이터 소개: /about/curator
 
+## Markdown 미러
+- /docs/home.md
+- /docs/weekend.md
+- /docs/regions.md
+- /docs/themes.md
+- /docs/festival-detail.md
+- /docs/data-policy.md
+
 ## 데이터 출처
 - 한국관광공사 국문 관광정보 서비스 TourAPI
 - 행사 상세 페이지는 TourAPI의 기본정보, 소개정보, 날짜, 장소, 이미지, 연락처, 홈페이지 정보를 바탕으로 구성합니다.

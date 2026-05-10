@@ -26,6 +26,32 @@
       "format": "xml"
     }
   ],
+  "markdownMirrors": [
+    {
+      "url": "/docs/home.md",
+      "title": "여행고고 사이트 개요"
+    },
+    {
+      "url": "/docs/weekend.md",
+      "title": "이번 주말 축제"
+    },
+    {
+      "url": "/docs/regions.md",
+      "title": "지역별 축제"
+    },
+    {
+      "url": "/docs/themes.md",
+      "title": "테마별 축제"
+    },
+    {
+      "url": "/docs/festival-detail.md",
+      "title": "축제 상세 페이지"
+    },
+    {
+      "url": "/docs/data-policy.md",
+      "title": "여행고고 데이터 정책"
+    }
+  ],
   "pages": [
     {
       "url": "/",
