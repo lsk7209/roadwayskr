@@ -36,7 +36,7 @@ export default async function RegionsIndex() {
   );
 
   return (
-    <article className="prose-ko">
+    <article className="prose-body prose-ko">
       <h1 className="text-3xl font-bold tracking-tight">지역별 축제·행사</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
         전국 17개 시도별로 진행 중·예정 행사를 모았어요.

@@ -13,8 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const { satIso, sunIso } = getThisWeekend();
 
   return {
-    title: `이번 주말 (${satIso} ~ ${sunIso}) 가볼만한 행사`,
-    description: `이번 주말 ${satIso}부터 ${sunIso}까지 진행되는 전국 축제와 행사를 정리했습니다.`,
+    title: `주말 축제 (${satIso} ~ ${sunIso}) 일정 보기`,
+    description: `주말 행사 ${satIso} ~ ${sunIso} 기간에 열리는 진행 중·예정 축제 리스트를 지역별로 정리했습니다.`,
     alternates: { canonical: `${SITE_URL}/weekend` },
   };
 }
@@ -42,17 +42,16 @@ export default async function ThisWeekendPage() {
   }
 
   return (
-    <article className="prose-ko">
-      <h1 className="text-3xl font-bold tracking-tight">이번 주말 행사</h1>
+    <article className="prose-body prose-ko">
+      <h1 className="text-3xl font-bold tracking-tight">주말 축제 모아보기</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        {satIso} 토요일부터 {sunIso} 일요일까지 진행되는 전국 축제·행사{" "}
-        {items.length}건을 모았습니다.
+        {satIso} ~ {sunIso} 기간에 열리는 진행 중·예정 축제 {items.length}건을 지역별로
+        묶어 보여드립니다.
       </p>
 
       {items.length === 0 ? (
-        <p className="mt-6 text-sm text-[var(--color-ink-muted)]">
-          이번 주말 진행되는 행사가 아직 확인되지 않았습니다. 데이터가 갱신된 뒤
-          다시 확인해 주세요.
+        <p className="mt-6 text-[var(--color-ink-muted)]">
+          이번 주말에 맞는 축제가 아직 등록되지 않았습니다. 데이터 동기화 후 다시 확인해 주세요.
         </p>
       ) : (
         <div className="not-prose mt-8 space-y-10">
@@ -93,7 +92,7 @@ export default async function ThisWeekendPage() {
       )}
 
       <p className="mt-12 text-xs text-[var(--color-ink-muted)]">
-        매주 토·일 기준으로 자동 갱신됩니다. 데이터 출처: 한국관광공사 TourAPI.
+        주말 축제 데이터는 공개 API와 운영 DB 동기화를 통해 수시로 갱신됩니다.
       </p>
     </article>
   );

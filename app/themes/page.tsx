@@ -22,7 +22,7 @@ export default async function ThemesIndex() {
   );
 
   return (
-    <article className="prose-ko">
+    <article className="prose-body prose-ko">
       <h1 className="text-3xl font-bold tracking-tight">테마별 축제·행사</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
         관심사별로 진행 중·예정 행사를 골라볼 수 있어요.

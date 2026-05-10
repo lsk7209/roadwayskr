@@ -160,7 +160,7 @@ function buildMonthlyAreaPages(
       if (matched.length < MIN_MONTHLY_ITEMS) continue;
 
       pages.push({
-        url: toAbsoluteUrl(siteUrl, `/${year}/${month}/${area.slug}`),
+        url: toAbsoluteUrl(siteUrl, `/monthly/${year}/${month}/${area.slug}`),
         lastModified: getLatestUpdatedAt(matched),
         changeFrequency: "weekly",
         priority: 0.55,

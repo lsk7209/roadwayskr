@@ -1,59 +1,47 @@
 ﻿# Domain Activation Checklist (roadways.kr)
 
-`https://roadways.kr` returning 404 on your side is usually a domain/DNS issue, not an application bug.
+`https://roadways.kr` returns 404 in your environment today, which indicates a domain routing issue (DNS / domain attachment), not an app bug.
 
-## 1) Add domains in Vercel
-- Open project settings in Vercel.
-- Go to Settings -> Domains.
-- Confirm ownership:
+## 1) Confirm Vercel domain attachment
+- Open project Settings → Domains.
+- Domain list should include:
   - `roadways.kr`
   - `www.roadways.kr`
-- This project currently appears as:
-  - limsubs-projects/roadwayskr (linked)
+- Ensure this project is the only project handling these domains.
 
-## 2) Apply DNS records
-- For root domain, check nameserver at registrar:
+## 2) Apply DNS (권장: 네임서버 방식)
+- **루트 네임서버를 Vercel로 교체**
   - `ns1.vercel-dns.com`
   - `ns2.vercel-dns.com`
-- For subdomain, check registrar also points `www` via `CNAME` to Vercel DNS or your default project route.
+- 또는 registrar A/CNAME 방식 사용 시,
+  - `roadways.kr` → `76.76.21.21` (A, 필요 시 Vercel에서 권장 값 확인)
+  - `www.roadways.kr` → `cname.vercel-dns.com` (CNAME)
 
-Suggested default values (verify in your Vercel UI):
-- roadways.kr -> 76.76.21.21 (A)
-- www.roadways.kr -> cname.vercel-dns.com
+현재 확인값(요청한 환경 기준):
+- NS: `ns1.serverhostgroup.com`, `ns2.serverhostgroup.com`, `ns3.serverhostgroup.com`
+- A: `216.150.1.1`
+- 이 상태면 요청이 Vercel이 아닌 기존 LiteSpeed 서버로 갑니다.
 
-현재 확인 결과:
-- Vercel 도메인 상태에서 `roadways.kr`는 `roadwayskr`와 `klick-main-page`에 중복 등록되어 있음.
-- DNS Nameserver가 `ns1.hosting.co.kr`, `ns2.hosting.co.kr`로 되어 있고 Vercel 설정값과 불일치.
-- 응답은 현재 `LiteSpeed 404`로, 도메인 라우팅이 Vercel까지 도달하지 못한 상태.
-
-권장 조치:
-1) Vercel 도메인 충돌 정리(이 프로젝트로 강제 이동):
-   - `vercel domains add roadways.kr --scope limsubs-projects --force`
-   - `vercel domains add www.roadways.kr --scope limsubs-projects --force`
-2) Registrar NS 변경:
-   - `ns1.hosting.co.kr` → `ns1.vercel-dns.com`
-   - `ns2.hosting.co.kr` → `ns2.vercel-dns.com`
-
-## 3) Validate in order
-1. Check DNS propagation
+## 3) 즉시 조치 순서
+1. 네임서버 변경 또는 Vercel 네임서버 등록(위 2번 기준)
+2. 레지스트라에서 TTL 반영 대기(10~40분 단위 확인, 최대 24~48시간)
+3. Vercel 프로젝트 루트 도메인 상태가 `roadways.kr`에서 Active인지 확인
+4. 아래 검사
    - `Resolve-DnsName roadways.kr`
    - `Resolve-DnsName www.roadways.kr`
-2. Confirm HTTPS reachability
    - `curl -I https://roadways.kr`
-3. Confirm head contains naver meta tag and canonical
-   - open source HTML and verify `naver-site-verification` and `https://roadways.kr/`
-4. Check SEO files
-   - `https://roadways.kr/sitemap.xml`
-   - `https://roadways.kr/robots.txt`
-   - `https://roadways.kr/feed.xml`
+   - `curl -I https://www.roadways.kr`
+   - `curl -I https://roadways.kr/sitemap.xml`
+   - `curl -I https://roadways.kr/robots.txt`
+   - `curl -I https://roadways.kr/feed.xml`
 
-## 4) Vercel environment check
-Set:
-- SITE_URL=https://roadways.kr
-- NAVER_VERIFICATION=ce71e583d5763935ec467df1eba2d290d9552ae0
-- NEXT_PUBLIC_GA_MEASUREMENT_ID=G-MH1JSZH1XG
+## 4) Vercel env 확인
+- `SITE_URL=https://roadways.kr`
+- `NAVER_VERIFICATION=ce71e583d5763935ec467df1eba2d290d9552ae0`
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-MH1JSZH1XG`
 
-## 5) Completion criteria
-- `https://roadways.kr` returns HTTP 200.
-- response html contains naver verification meta.
-- `robots.txt` includes https://roadways.kr sitemap and host.
+## 5) 완료 기준
+- `https://roadways.kr` HTTP 200 응답
+- `robots.txt`에 `https://roadways.kr`가 sitemap/host로 노출
+- `https://roadways.kr/sitemap.xml`에서 `<urlset>` 응답
+- `https://roadways.kr/feed.xml`에서 `<rss version="2.0">` 응답

@@ -61,7 +61,7 @@ export default async function ThemePage({ params }: Params) {
     .limit(80);
 
   return (
-    <article className="prose-ko">
+    <article className="prose-body prose-ko">
       <nav className="mb-2 text-xs text-[var(--color-ink-muted)]">
         <Link href="/" className="hover:underline">
           홈

@@ -8,21 +8,39 @@ import { FestivalListCard } from "@/components/festival/FestivalListCard";
 const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 
 const quickFilters = [
-  { href: "/weekend", label: "이번 주말", value: "가까운 일정" },
-  { href: "/regions", label: "지역별", value: "17개 시도" },
-  { href: "/themes", label: "테마별", value: "꽃·음식·문화" },
+  { href: "/weekend", label: "주말 축제", value: "주말 기준 실시간 정렬" },
+  { href: "/regions", label: "지역", value: "전국 지역별 추천 축제" },
+  { href: "/themes", label: "테마", value: "아이들과,데이트,가족,공연" },
 ] as const;
 
 const trustItems = [
-  "행사 기간과 장소를 먼저 확인합니다.",
-  "주차·입장료·운영 정보는 상세 페이지에서 분리해 보여줍니다.",
-  "sitemap, robots, ads.txt, JSON-LD를 운영 기준으로 점검합니다.",
+  "주요 페이지에 메타·정규 URL·스키마를 기본값으로 반영해 검색 노출을 안정화했습니다.",
+  "sitemap, robots, feed를 분리 관리하여 수집 경로를 명확하게 유지합니다.",
+  "광고는 콘텐츠 흐름을 깨지 않게 배치하고, 자동노출 가이드를 준수해 검수 리스크를 낮춥니다.",
 ] as const;
 
+const planCards = [
+  {
+    title: "가볍게 보기",
+    description: "카드 한 번에 4개 이하만 먼저 노출해 렌더링 부담을 낮춥니다.",
+    href: "/weekend",
+  },
+  {
+    title: "빠르게 찾기",
+    description: "지역/테마 필터에서 원하는 축제를 바로 탐색할 수 있습니다.",
+    href: "/regions",
+  },
+  {
+    title: "지금 확인",
+    description: "업데이트 상태와 운영 점검 내역을 /plan에서 한 번에 확인하세요.",
+    href: "/plan",
+  },
+];
+
 export const metadata: Metadata = {
-  title: "여행고고 - 이번 주말 축제·행사 큐레이션",
+  title: "Roadways - 주말 축제 가이드",
   description:
-    "전국 축제와 행사를 주말, 지역, 테마 기준으로 빠르게 정리합니다. 가족 나들이와 주말 여행에 필요한 기본 정보를 한곳에서 확인하세요.",
+    "한국의 주말 축제 정보를 빠르게 찾고, 지역·테마별로 비교합니다. 실시간 정보, 최신 데이터, 정렬 최적화로 가독성 높은 여행 안내를 제공합니다.",
   alternates: { canonical: SITE_URL },
 };
 
@@ -64,94 +82,50 @@ export default async function Home() {
   const latest = await getLatestEvents().catch(() => []);
 
   return (
-    <div className="space-y-16">
-      <section className="pt-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-semibold text-[var(--color-brand)]">
-            Weekend festival guide
-          </p>
-          <h1 className="mt-3 text-[28px] font-bold leading-tight text-[var(--color-ink)] sm:text-[34px]">
-            이번 주말, 어디 갈지 고르는 가장 쉬운 방법
-          </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[var(--color-muted)]">
-            전국 축제와 행사를 사진, 일정, 지역 기준으로 정리했습니다. 먼저 끌리는
-            장면을 고르고, 상세 페이지에서 기간과 장소를 확인하세요.
-          </p>
-        </div>
+    <div className="space-y-14">
+      <section className="mx-auto max-w-3xl text-center">
+        <p className="text-sm font-semibold tracking-[0.12em] text-[var(--color-brand)]">Roadways Guide</p>
+        <h1 className="mt-3 text-[32px] font-bold leading-tight text-[var(--color-ink)] sm:text-[38px]">
+          주말 축제는 Roadways로 한 번에
+        </h1>
+        <p className="prose-body mt-4 text-[1.04rem] leading-8 text-[var(--color-ink-muted)]">
+          전국 축제 정보를 한 페이지에서 찾고, 지역과 테마로 나누어 빠르게 비교하세요.  
+          새로고침 없이 핵심 항목을 파악할 수 있는 구성으로 가독성을 우선 반영했습니다.
+        </p>
 
-        <Link
-          href="/weekend"
-          className="mx-auto mt-8 flex max-w-sm items-center justify-between rounded-full border border-[var(--color-line)] bg-white px-5 py-4 text-left shadow-[var(--shadow-float)] md:hidden"
-        >
-          <span>
-            <span className="block text-sm font-semibold text-[var(--color-ink)]">
-              어디로 떠날까요?
-            </span>
-            <span className="mt-1 block text-sm text-[var(--color-muted)]">
-              이번 주말 행사 검색
-            </span>
-          </span>
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--color-brand)] text-white">
-            ⌕
-          </span>
-        </Link>
-
-        <div className="mx-auto mt-8 hidden max-w-4xl rounded-full border border-[var(--color-line)] bg-white p-2 shadow-[var(--shadow-float)] md:block">
-          <div className="grid gap-1 md:grid-cols-[1fr_1fr_1fr_auto] md:items-center">
-            {quickFilters.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-full px-5 py-3 transition hover:bg-[var(--color-surface-soft)]"
-              >
-                <span className="block text-xs font-semibold text-[var(--color-ink)]">
-                  {item.label}
-                </span>
-                <span className="mt-1 block text-sm text-[var(--color-muted)]">
-                  {item.value}
-                </span>
-              </Link>
-            ))}
+        <div className="mt-8 grid gap-3 md:grid-cols-3">
+          {quickFilters.map((item) => (
             <Link
-              href="/weekend"
-              className="grid h-12 w-full place-items-center rounded-full bg-[var(--color-brand)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-dark)] md:w-12 md:px-0"
-              aria-label="이번 주말 행사 검색"
+              key={item.href}
+              href={item.href}
+              className="rounded-2xl border border-[var(--color-line)] bg-white p-4 text-left shadow-[var(--shadow-float)] transition hover:border-[var(--color-brand)]"
             >
-              <span aria-hidden="true">⌕</span>
+              <p className="text-sm font-semibold text-[var(--color-ink)]">{item.label}</p>
+              <p className="mt-1 text-sm text-[var(--color-muted)]">{item.value}</p>
             </Link>
-          </div>
+          ))}
         </div>
       </section>
 
-      <section
-        style={{
-          contentVisibility: "auto",
-          containIntrinsicSize: "1px 820px",
-        }}
-      >
-        <div className="mb-6 flex items-end justify-between gap-4">
+      <section className="rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-card)] p-6">
+        <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-[22px] font-semibold leading-tight">
-              이번 주말 진행 중·시작하는 행사
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">
-              사진을 먼저 보고 마음에 드는 행사를 골라보세요.
+            <h2 className="text-[24px] font-semibold leading-tight">이번 주말 추천</h2>
+            <p className="mt-2 prose-body text-[var(--color-ink-muted)]">
+              기간 기준으로 필터링한 실제 진행 축제를 우선 표시합니다.
             </p>
           </div>
-          <Link
-            href="/weekend"
-            className="shrink-0 text-sm font-semibold text-[var(--color-brand)] hover:underline"
-          >
-            전체 보기 →
+          <Link href="/weekend" className="text-sm font-semibold text-[var(--color-brand)] hover:underline">
+            전체 보기
           </Link>
         </div>
 
         {weekend.length === 0 ? (
-          <p className="rounded-[14px] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-muted)]">
-            동기화된 데이터가 아직 없습니다. TourAPI 동기화 후 다시 확인해 주세요.
+          <p className="rounded-2xl bg-[var(--color-surface-soft)] p-5 text-sm leading-7 text-[var(--color-muted)]">
+            데이터가 아직 적재되지 않았습니다. 잠시 후 다시 확인해 주세요.
           </p>
         ) : (
-          <ul className="grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {weekend.map((festival) => (
               <FestivalListCard
                 key={festival.contentId}
@@ -164,53 +138,60 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="border-y border-[var(--color-line-soft)] py-10">
-        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <div>
-            <h2 className="text-[22px] font-semibold leading-tight">
-              애드센스 검수용 기본 신뢰 요소
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-              광고보다 콘텐츠가 먼저 보이도록 구성하고, 검색엔진이 읽을 수 있는
-              구조화 데이터를 함께 유지합니다.
-            </p>
-          </div>
-          <ul className="grid gap-4 sm:grid-cols-3">
-            {trustItems.map((item) => (
-              <li
-                key={item}
-                className="rounded-[14px] border border-[var(--color-line)] p-5 text-sm leading-6 text-[var(--color-body)]"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
+      <section className="grid gap-4 md:grid-cols-3">
+        {planCards.map((card) => (
+          <article key={card.title} className="rounded-2xl border border-[var(--color-line)] bg-white p-5">
+            <h3 className="text-lg font-bold">{card.title}</h3>
+            <p className="prose-body mt-2 leading-8 text-[var(--color-ink-muted)]">{card.description}</p>
+            <Link href={card.href} className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand)] hover:underline">
+              바로 이동
+            </Link>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+        <div>
+          <h2 className="text-[24px] font-semibold leading-tight">신뢰 운영 기준</h2>
+          <p className="prose-body mt-2 text-[var(--color-ink-muted)]">
+            검색·광고·분석에 불필요한 리스크를 줄이는 기준입니다.
+          </p>
         </div>
+        <ul className="grid gap-3 sm:grid-cols-3">
+          {trustItems.map((item) => (
+            <li
+              key={item}
+              className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-card)] p-4 text-sm leading-8 text-[var(--color-body)]"
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section
         style={{
           contentVisibility: "auto",
-          containIntrinsicSize: "1px 680px",
+          containIntrinsicSize: "1px 760px",
         }}
+        className="rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-surface-soft)] p-6"
       >
-        <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-[22px] font-semibold leading-tight">
-              최근 업데이트한 행사
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">
-              새로 정리되거나 정보가 갱신된 행사입니다.
-            </p>
+            <h2 className="text-[24px] font-semibold leading-tight">최신 업데이트</h2>
+            <p className="prose-body mt-2 text-[var(--color-ink-muted)]">새로 반영된 항목부터 한눈에 확인합니다.</p>
           </div>
+          <Link href="/plan" className="text-sm font-semibold text-[var(--color-brand)] hover:underline">
+            운영 상태 보기
+          </Link>
         </div>
 
         {latest.length === 0 ? (
-          <p className="rounded-[14px] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-muted)]">
-            최신 업데이트 목록을 불러오지 못했습니다.
+          <p className="mt-4 rounded-2xl bg-white p-5 text-sm leading-7 text-[var(--color-muted)]">
+            최근 업데이트된 데이터가 없습니다.
           </p>
         ) : (
-          <ul className="grid gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="mt-4 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {latest.map((festival) => (
               <FestivalListCard
                 key={`latest-${festival.contentId}`}
@@ -221,39 +202,6 @@ export default async function Home() {
             ))}
           </ul>
         )}
-      </section>
-
-      <section className="pb-8">
-        <h2 className="text-[22px] font-semibold leading-tight">자주 묻는 질문</h2>
-        <div className="mt-4 divide-y divide-[var(--color-line-soft)] border-y border-[var(--color-line-soft)]">
-          <details className="py-5">
-            <summary className="cursor-pointer text-base font-semibold">
-              행사 정보가 바뀌면 반영되나요?
-            </summary>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--color-muted)]">
-              TourAPI 데이터 갱신 주기에 맞춰 변경된 행사 기간, 장소, 이미지 정보를
-              다시 반영합니다.
-            </p>
-          </details>
-          <details className="py-5">
-            <summary className="cursor-pointer text-base font-semibold">
-              광고는 어떻게 노출되나요?
-            </summary>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--color-muted)]">
-              Google AdSense 자동광고를 사용하되, 콘텐츠 탐색 흐름을 해치지 않는
-              범위에서 운영합니다.
-            </p>
-          </details>
-          <details className="py-5">
-            <summary className="cursor-pointer text-base font-semibold">
-              검색엔진 제출도 자동으로 되나요?
-            </summary>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--color-muted)]">
-              sitemap, robots, IndexNow 키를 유지해 신규·갱신 URL을 검색엔진이 더
-              쉽게 발견할 수 있도록 구성했습니다.
-            </p>
-          </details>
-        </div>
       </section>
     </div>
   );

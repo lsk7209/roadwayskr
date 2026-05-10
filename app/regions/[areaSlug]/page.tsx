@@ -68,7 +68,7 @@ export default async function AreaHub({ params }: Params) {
     .limit(60);
 
   return (
-    <article className="prose-ko">
+    <article className="prose-body prose-ko">
       <nav className="text-xs text-[var(--color-ink-muted)] mb-2">
         <Link href="/" className="hover:underline">
           홈

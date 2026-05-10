@@ -3,69 +3,57 @@ import type { Metadata } from "next";
 const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 
 export const metadata: Metadata = {
-  title: "여행고고 소개",
+  title: "서비스 소개",
   description:
-    "여행고고는 전국 17개 시도 축제·행사를 가족 단위 시점으로 큐레이션하는 여행 미디어입니다.",
+    "여행고고는 주말 축제 정보를 빠르게 찾을 수 있는 큐레이션 가이드입니다.",
   alternates: { canonical: `${SITE_URL}/about` },
 };
 
 export default function AboutPage() {
   return (
-    <article className="prose-ko max-w-3xl">
-      <h1 className="text-3xl font-bold tracking-tight">여행고고 소개</h1>
+    <article className="prose-body prose-ko max-w-3xl">
+      <h1 className="text-3xl font-bold tracking-tight">서비스 소개</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        전국 축제·행사를 가족 단위 시점으로 정리하는 한국형 여행 미디어
+        Roadways는 전국 축제·행사 정보를 주제별로 정리하고, 방문 동선을 빠르게
+        잡을 수 있도록 만든 서비스입니다.
       </p>
 
-      <h2>우리가 하는 일</h2>
-      <p>
-        여행고고는 전국 17개 시도, 250여 개 시군구의 축제·행사 정보를 한 곳에
-        모아 보여 드립니다. 한국관광공사 TourAPI를 비롯한 공공데이터를 매일 새벽
-        자동으로 동기화하고, 큐레이터 고고지기가 가족 단위 방문객의 시점에서
-        정보를 정리합니다.
-      </p>
-
-      <h2>4대 기본 정보 원칙</h2>
-      <p>
-        모든 행사 페이지에는 <strong>거리</strong>·<strong>운영시간</strong>·
-        <strong>입장료</strong>·<strong>어린이 동반 가능 여부</strong>를 4대
-        기본 정보 카드로 항상 노출합니다. 자녀와 함께 떠나는 주말 나들이를
-        준비할 때 가장 먼저 확인해야 할 항목들이라고 보기 때문입니다.
-      </p>
-
-      <h2>편집 방침</h2>
+      <h2>무엇을 제공하나요</h2>
       <ul className="list-disc pl-5 space-y-1">
-        <li>검증된 사실만 짧은 문장으로 전달합니다.</li>
-        <li>
-          출처가 분명하지 않으면 &lsquo;공식 발표 기준&rsquo;으로 표기합니다.
-        </li>
-        <li>
-          행사가 변경·취소될 경우 24시간 내 반영하고, 모든 페이지 하단에
-          마지막 업데이트 시각을 노출합니다.
-        </li>
-        <li>
-          호들갑이나 광고형 카피
-          (&lsquo;꼭 가보세요!!&rsquo;, &lsquo;강추!!&rsquo;)를 쓰지 않습니다.
-        </li>
+        <li>주말 집중 축제 목록과 지역별 정렬</li>
+        <li>테마 기반 추천 리스트</li>
+        <li>월별 지역 조합 페이지로 탐색 경로 단축</li>
+        <li>운영 상태 점검을 위한 /plan 페이지</li>
       </ul>
 
-      <h2>운영자</h2>
+      <h2>콘텐츠 신뢰 기준</h2>
       <p>
-        큐레이터:{" "}
-        <a className="underline" href="/about/curator">
-          고고지기
-        </a>
-        <br />
-        문의:{" "}
-        <a className="underline" href="/contact">
-          문의 페이지
-        </a>
-        <br />
-        데이터 정책:{" "}
-        <a className="underline" href="/data-policy">
-          데이터 정책 페이지
-        </a>
+        일정·장소·운영 상태 정보를 우선 반영하고, 수집 경로는 공개 소스와 내부
+        정합성 점검을 거쳐 제공합니다. 깨짐·오류 페이지를 줄이기 위해 라우트별
+        상태를 정기 점검하고 있습니다.
       </p>
+
+      <h2>빠른 안내</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>
+          큐레이터 소개:{" "}
+          <a className="underline" href="/about/curator">
+            /about/curator
+          </a>
+        </li>
+        <li>
+          문의:{" "}
+          <a className="underline" href="/contact">
+            /contact
+          </a>
+        </li>
+        <li>
+          정책:{" "}
+          <a className="underline" href="/data-policy">
+            /data-policy
+          </a>
+        </li>
+      </ul>
     </article>
   );
 }
