@@ -20,7 +20,8 @@ interface Params {
 }
 
 const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
-const BODY_PARAGRAPH_CLASS = "text-[1rem] leading-[1.9] text-[var(--color-ink)]";
+const BODY_PARAGRAPH_CLASS =
+  "text-[1rem] leading-[1.9] text-[var(--color-ink)]";
 const BODY_GAP_CLASS = "mt-3 flex flex-col gap-4";
 const SECTION_TITLE_CLASS = "text-lg font-semibold";
 const ROUTE_ACTION_CLASS =
@@ -72,7 +73,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description,
       url: canonical,
       type: "article",
-      images: festival.imageUrl ? [{ url: festival.imageUrl }] : undefined,
+      images: festival.imageUrl
+        ? [{ url: festival.imageUrl, width: 1200, height: 630 }]
+        : [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
     robots: isIndexable
       ? { index: true, follow: true }
@@ -146,7 +149,10 @@ export default async function FestivalPage({ params }: Params) {
           <h2 className={SECTION_TITLE_CLASS}>행사 소개</h2>
           <div className={BODY_GAP_CLASS}>
             {overviewParagraphs.map((paragraph, index) => (
-              <p key={`${index}-${paragraph.slice(0, 16)}`} className={BODY_PARAGRAPH_CLASS}>
+              <p
+                key={`${index}-${paragraph.slice(0, 16)}`}
+                className={BODY_PARAGRAPH_CLASS}
+              >
                 {paragraph}
               </p>
             ))}
@@ -159,7 +165,10 @@ export default async function FestivalPage({ params }: Params) {
           <h2 className={SECTION_TITLE_CLASS}>프로그램</h2>
           <div className={BODY_GAP_CLASS}>
             {programParagraphs.map((paragraph, index) => (
-              <p key={`${index}-${paragraph.slice(0, 16)}`} className={BODY_PARAGRAPH_CLASS}>
+              <p
+                key={`${index}-${paragraph.slice(0, 16)}`}
+                className={BODY_PARAGRAPH_CLASS}
+              >
                 {paragraph}
               </p>
             ))}
@@ -205,7 +214,10 @@ export default async function FestivalPage({ params }: Params) {
                   strokeWidth="1.8"
                   fill="none"
                 />
-                <path d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" fill="currentColor" />
+                <path
+                  d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+                  fill="currentColor"
+                />
               </svg>
               카카오맵 보기
             </a>
