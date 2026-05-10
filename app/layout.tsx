@@ -1,8 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import "./globals.css";
 
 const SITE_URL = process.env.SITE_URL ?? "https://gogotrip.kr";
+const NAVER_VERIFICATION =
+  process.env.NAVER_VERIFICATION ?? "ce71e583d5763935ec467df1eba2d290d9552ae0";
+const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-MH1JSZH1XG";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,6 +37,9 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   icons: { icon: "/favicon.ico" },
+  other: {
+    "naver-site-verification": NAVER_VERIFICATION,
+  },
 };
 
 export const viewport: Viewport = {
@@ -65,6 +73,19 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <Script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
         <header className="border-b border-[var(--color-line)] bg-[var(--color-card)]">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
             <Link href="/" className="font-bold tracking-tight text-lg">

@@ -1,15 +1,15 @@
 # Status | 마지막: 2026-05-10
 ## 현재 작업
-주요 페이지 Markdown 미러 추가 완료
+네이버 소유 확인 메타와 GA4 태그 추가 완료
 ## 최근 변경 (최근 5개만)
+- 05-10: `naver-site-verification` 메타 태그와 GA4 `G-MH1JSZH1XG` 추가
 - 05-10: `public/docs/*.md` 주요 페이지 Markdown 미러 추가
 - 05-10: `public/llms.txt`, `public/llms-full.txt`, `public/ai-index.json` 추가
 - 05-10: 네이버/다음 제출용 `/feed.xml` RSS 라우트 추가
 - 05-10: GitHub Actions secrets 3개 등록 및 워크플로우 활성 상태 확인
-- 05-10: Git push 기반 자동 Vercel 배포 원칙 반영
 ## TODO
-- [ ] Gabia DNS: `@ A 76.76.21.21`, `www CNAME cname.vercel-dns.com` 적용
-- [ ] DNS 반영 후 `SITE_URL=https://gogotrip.kr`로 재설정 및 재배포
+- [ ] `roadways.kr` DNS/Vercel 도메인 연결 확인: 현재 `158.247.212.123`에서 404
+- [ ] 운영 도메인 확정 후 `SITE_URL`을 최종 도메인으로 통일
 ## 결정사항
 - 배포: Codex는 Vercel 직접 배포 금지, Git push 후 사용자가 연결한 Vercel 자동 배포만 사용
 - CI: GitHub Actions secrets로 Turso/TourAPI 값을 주입하고 `.env.local`은 로컬 전용 유지
@@ -17,4 +17,4 @@
 ## 주의
 - `.env.local`에는 운영 Turso 키와 TourAPI 키가 있으므로 출력/커밋 금지
 - GitHub secrets: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `TOUR_API_SERVICE_KEY`
-- `gogotrip.kr` 현재 DNS는 이전 IP라 Vercel alias 활성 전 DNS 변경 필요
+- 네이버 확인 URL `https://roadways.kr`는 현재 앱이 아니라 다른 IP로 연결되어 404 발생
