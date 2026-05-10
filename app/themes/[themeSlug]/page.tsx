@@ -102,9 +102,20 @@ export default async function ThemePage({ params }: Params) {
 
 async function parseParams(params: Params["params"]) {
   const { themeSlug } = await params;
-  const theme = findThemeBySlug(decodeURIComponent(themeSlug));
+  const decoded = safeDecode(themeSlug);
+  if (!decoded) return null;
+
+  const theme = findThemeBySlug(decoded);
 
   return theme ? { theme } : null;
+}
+
+function safeDecode(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
 }
 
 async function getCount(themeName: string) {

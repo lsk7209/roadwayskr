@@ -24,7 +24,8 @@ export async function generateMetadata({
   params,
 }: Params): Promise<Metadata> {
   const { areaSlug } = await params;
-  const decoded = decodeURIComponent(areaSlug);
+  const decoded = safeDecode(areaSlug);
+  if (!decoded) return {};
   const area = findAreaBySlug(decoded);
   if (!area) return {};
 
@@ -46,7 +47,9 @@ export async function generateMetadata({
 
 export default async function AreaHub({ params }: Params) {
   const { areaSlug } = await params;
-  const decoded = decodeURIComponent(areaSlug);
+  const decoded = safeDecode(areaSlug);
+  if (!decoded) return notFound();
+
   const area = findAreaBySlug(decoded);
   if (!area) return notFound();
 
@@ -117,4 +120,12 @@ async function getCount(areaCode: string): Promise<number> {
       ),
     );
   return Number(rows[0]?.cnt ?? 0);
+}
+
+function safeDecode(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
 }

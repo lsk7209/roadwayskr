@@ -54,16 +54,16 @@ export function InfoCards({ festival }: Props) {
   ];
 
   return (
-    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4 my-6">
+    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {cards.map((c) => (
         <div
           key={c.label}
-          className="rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] p-3"
+          className="rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] p-3 sm:p-4"
         >
           <dt className="text-xs text-[var(--color-ink-muted)]">{c.label}</dt>
           <dd
             className={
-              "mt-1 text-sm font-semibold " +
+              "mt-1 text-sm leading-tight font-semibold break-words " +
               (c.accent
                 ? "text-[var(--color-brand)]"
                 : "text-[var(--color-ink)]")
