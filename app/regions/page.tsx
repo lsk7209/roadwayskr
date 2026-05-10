@@ -9,9 +9,9 @@ const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "지??�� 축제·?�사",
+  title: "지역별 축제·행사",
   description:
-    "?�국 17�??�도�?축제·?�사�??�눈?? ?�울·경기·강원부???�주까�? 지???�위�?모았?�니??",
+    "전국 17개 시도 축제·행사를 한눈에 확인하세요. 서울·경기·강원부터 제주까지 지역 단위로 모았습니다.",
   alternates: { canonical: `${SITE_URL}/regions` },
 };
 
@@ -37,9 +37,9 @@ export default async function RegionsIndex() {
 
   return (
     <article className="prose-ko">
-      <h1 className="text-3xl font-bold tracking-tight">지??�� 축제·?�사</h1>
+      <h1 className="text-3xl font-bold tracking-tight">지역별 축제·행사</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        ?�국 17�??�도별로 진행 중·예???�사�?모았?�요.
+        전국 17개 시도별로 진행 중·예정 행사를 모았어요.
       </p>
 
       <ul className="not-prose mt-8 grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
@@ -55,7 +55,8 @@ export default async function RegionsIndex() {
                   {a.name}
                 </div>
                 <div className="mt-1 text-sm text-[var(--color-ink-muted)]">
-                  진행·?�정 {cnt}�?                </div>
+                  진행·예정 {cnt}건
+                </div>
               </Link>
             </li>
           );
