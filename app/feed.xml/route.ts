@@ -51,12 +51,14 @@ type FeedItem = {
 function buildRss(items: FeedItem[], siteUrl: string) {
   const now = new Date().toUTCString();
   const rssItems = items.map((item) => toRssItem(item, siteUrl)).join("");
+  const escapedFeedLink = escapeXml(siteUrl);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(FEED_TITLE)}</title>
-    <link>${escapeXml(siteUrl)}</link>
+    <atom:link href="${escapedFeedLink}" rel="self" type="application/rss+xml" />
+    <link>${escapedFeedLink}</link>
     <description>${escapeXml(FEED_DESCRIPTION)}</description>
     <language>ko-KR</language>
     <lastBuildDate>${now}</lastBuildDate>
@@ -72,10 +74,10 @@ function toRssItem(item: FeedItem, siteUrl: string) {
   const description = buildDescription(item);
 
   return `    <item>
-      <title>${escapeXml(item.title)}</title>
+      <title>${sanitizeXmlText(item.title)}</title>
       <link>${escapeXml(link)}</link>
       <guid isPermaLink="true">${escapeXml(link)}</guid>
-      <description>${escapeXml(description)}</description>
+      <description>${sanitizeXmlText(description)}</description>
       <pubDate>${item.updatedAt.toUTCString()}</pubDate>
     </item>
 `;
@@ -99,7 +101,9 @@ function truncate(value: string, maxLength: number) {
 }
 
 function escapeXml(value: string) {
-  return value.replace(/[<>&'"]/g, (char) => {
+  const safeValue = sanitizeXmlCharacters(value);
+
+  return safeValue.replace(/[<>&'"]/g, (char) => {
     switch (char) {
       case "<":
         return "&lt;";
@@ -115,4 +119,15 @@ function escapeXml(value: string) {
         return char;
     }
   });
+}
+
+function sanitizeXmlText(value: string) {
+  return escapeXml(sanitizeXmlCharacters(value));
+}
+
+function sanitizeXmlCharacters(value: string) {
+  return value
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, "")
+    .replace(/\uFFFE|\uFFFF/g, "")
+    .replace(/&#xD;/g, "");
 }
