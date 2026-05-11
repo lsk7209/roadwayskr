@@ -5,10 +5,17 @@ import type { Festival } from "@/db";
 interface FestivalListCardProps {
   festival: Pick<
     Festival,
-    "contentId" | "slug" | "title" | "startDate" | "endDate" | "address" | "imageUrl"
+    | "contentId"
+    | "slug"
+    | "title"
+    | "startDate"
+    | "endDate"
+    | "address"
+    | "imageUrl"
   >;
   href: string;
   titleLevel?: "h2" | "h3";
+  priority?: boolean;
 }
 
 const TITLE_CLASS =
@@ -18,6 +25,7 @@ export function FestivalListCard({
   festival,
   href,
   titleLevel = "h2",
+  priority = false,
 }: FestivalListCardProps) {
   const TitleTag = titleLevel === "h3" ? "h3" : "h2";
 
@@ -32,7 +40,8 @@ export function FestivalListCard({
               fill
               sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw"
               className="object-cover transition-transform duration-300 group-hover:scale-[1.025]"
-              loading="lazy"
+              priority={priority}
+              loading={priority ? undefined : "lazy"}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-sm text-[var(--color-muted)]">

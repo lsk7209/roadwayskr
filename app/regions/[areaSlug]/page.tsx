@@ -115,11 +115,12 @@ export default async function AreaHub({ params }: Params) {
         </p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
-          {items.map((f) => (
+          {items.map((f, i) => (
             <FestivalListCard
               key={f.contentId}
               href={`/festivals/${f.contentId}/${f.slug}`}
               festival={f}
+              priority={i === 0}
             />
           ))}
         </ul>

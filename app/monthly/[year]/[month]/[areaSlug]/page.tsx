@@ -126,11 +126,12 @@ export default async function MonthlyAreaPage({ params }: Params) {
         </p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
-          {items.map((festival) => (
+          {items.map((festival, i) => (
             <FestivalListCard
               key={festival.contentId}
               href={`/festivals/${festival.contentId}/${festival.slug}`}
               festival={festival}
+              priority={i === 0}
             />
           ))}
         </ul>

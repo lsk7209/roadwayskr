@@ -139,12 +139,13 @@ export default async function Home() {
           </p>
         ) : (
           <ul className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {weekend.map((festival) => (
+            {weekend.map((festival, i) => (
               <FestivalListCard
                 key={festival.contentId}
                 href={`/festivals/${festival.contentId}/${festival.slug}`}
                 festival={festival}
                 titleLevel="h3"
+                priority={i === 0}
               />
             ))}
           </ul>
