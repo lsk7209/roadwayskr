@@ -3,18 +3,14 @@ import { db, festivals } from "@/db";
 import { desc, eq } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
-import { headers } from "next/headers";
 
 const MIN_MONTHLY_ITEMS = 3;
 const MAX_MONTHLY_MONTHS = 18;
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 const toAbsoluteUrl = (siteUrl: string, path: string) =>
   new URL(path, `${siteUrl}/`).toString();
-
-function resolveSiteUrl(headerList: Headers, fallbackHost = "roadways.kr") {
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
-  const scheme = headerList.get("x-forwarded-proto") ?? "https";
-  return `${scheme}://${host}`;
-}
 
 export const revalidate = 3600;
 
@@ -26,8 +22,7 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const lastUpdated = await getLatestFestivalUpdatedAt().catch(() => now);
-  const headerList = await headers();
-  const siteUrl = resolveSiteUrl(headerList);
+  const siteUrl = SITE_URL;
   const urlWithPath = (path: string) => toAbsoluteUrl(siteUrl, path);
 
   const staticPages: MetadataRoute.Sitemap = [
