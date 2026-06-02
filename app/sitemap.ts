@@ -11,6 +11,8 @@ const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
   .replace(/\/+$/, "");
 const toAbsoluteUrl = (siteUrl: string, path: string) =>
   new URL(path, `${siteUrl}/`).toString();
+const encodePathSegment = (value: string | number) =>
+  encodeURIComponent(String(value));
 
 export const revalidate = 3600;
 
@@ -61,7 +63,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     areaPages = buildAreaPages(rows, now, siteUrl);
     festivalPages = rows.map((festival) => ({
-      url: urlWithPath(`/festivals/${festival.contentId}/${festival.slug}`),
+      url: urlWithPath(
+        `/festivals/${encodePathSegment(festival.contentId)}/${encodePathSegment(festival.slug)}`,
+      ),
       lastModified: festival.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.6,

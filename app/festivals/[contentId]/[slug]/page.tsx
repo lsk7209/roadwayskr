@@ -21,6 +21,8 @@ interface Params {
 }
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const encodePathSegment = (value: string | number) =>
+  encodeURIComponent(String(value));
 const BODY_PARAGRAPH_CLASS =
   "text-[1rem] leading-[1.9] text-[var(--color-ink)]";
 const BODY_GAP_CLASS = "mt-3 flex flex-col gap-4";
@@ -48,11 +50,11 @@ export async function generateStaticParams() {
 // 메타데이터 (검색 결과·OG·canonical)
 // ─────────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const { contentId, slug } = await params;
+  const { contentId } = await params;
   const festival = await getFestival(Number(contentId));
   if (!festival) return {};
 
-  const canonical = `${SITE_URL}/festivals/${contentId}/${slug}`;
+  const canonical = `${SITE_URL}/festivals/${encodePathSegment(contentId)}/${encodePathSegment(festival.slug)}`;
   const period =
     festival.startDate && festival.endDate
       ? ` (${festival.startDate} ~ ${festival.endDate})`
@@ -93,7 +95,7 @@ export default async function FestivalPage({ params }: Params) {
   if (!festival) return notFound();
 
   // 슬러그 불일치 시 canonical 보호 - 정식 슬러그로 안내 (Next 15 redirect는 별도 처리 권장)
-  const canonical = `${SITE_URL}/festivals/${contentId}/${festival.slug}`;
+  const canonical = `${SITE_URL}/festivals/${encodePathSegment(contentId)}/${encodePathSegment(festival.slug)}`;
   const updatedAt = new Date(festival.updatedAt).toISOString();
   const overviewParagraphs = toParagraphs(festival.overview);
   const programParagraphs = toParagraphs(
