@@ -39,13 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: urlWithPath("/terms"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  const areaPages: MetadataRoute.Sitemap = AREAS.map((area) => ({
-    url: urlWithPath(`/regions/${area.slug}`),
-    lastModified: lastUpdated,
-    changeFrequency: "daily" as const,
-    priority: 0.7,
-  }));
-
+  let areaPages: MetadataRoute.Sitemap = [];
   let festivalPages: MetadataRoute.Sitemap = [];
   let monthlyAreaPages: MetadataRoute.Sitemap = [];
   let themePages: MetadataRoute.Sitemap = [];
@@ -65,6 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .where(eq(festivals.isIndexable, true))
       .limit(45_000);
 
+    areaPages = buildAreaPages(rows, now, siteUrl);
     festivalPages = rows.map((festival) => ({
       url: urlWithPath(`/festivals/${festival.contentId}/${festival.slug}`),
       lastModified: festival.updatedAt,
@@ -105,6 +100,35 @@ type SitemapFestivalRow = {
   themesCsv: string | null;
   updatedAt: Date;
 };
+
+function buildAreaPages(
+  rows: SitemapFestivalRow[],
+  now: Date,
+  siteUrl: string,
+): MetadataRoute.Sitemap {
+  const today = now.toISOString().slice(0, 10);
+  const pages: MetadataRoute.Sitemap = [];
+
+  for (const area of AREAS) {
+    const matched = rows.filter(
+      (row) =>
+        row.areaCode === area.code &&
+        Boolean(row.endDate) &&
+        row.endDate! >= today,
+    );
+
+    if (matched.length < MIN_MONTHLY_ITEMS) continue;
+
+    pages.push({
+      url: toAbsoluteUrl(siteUrl, `/regions/${area.slug}`),
+      lastModified: getLatestUpdatedAt(matched),
+      changeFrequency: "daily",
+      priority: 0.7,
+    });
+  }
+
+  return pages;
+}
 
 function buildThemePages(
   rows: SitemapFestivalRow[],
