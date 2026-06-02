@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { db, festivals } from "@/db";
 import { THEMES } from "@/lib/themes";
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
 export const revalidate = 3600;
 

@@ -18,7 +18,7 @@ interface Params {
   params: Promise<{ areaSlug: string }>;
 }
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 const MIN_ITEMS_FOR_INDEX = 3;
 
 export async function generateStaticParams() {

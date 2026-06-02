@@ -1,4 +1,4 @@
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
 const INDEXNOW_URL = "https://api.indexnow.org/indexnow";
 const BING_PING =

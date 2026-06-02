@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
 const quickFilters = [
   { href: "/weekend", label: "주말 축제", value: "주말 기준 실시간 정렬" },

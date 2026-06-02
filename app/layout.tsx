@@ -5,7 +5,7 @@ import "./globals.css";
 import { AutoAds } from "@/components/ads/AutoAds";
 import { JsonLd } from "@/components/seo/JsonLd";
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 const NAVER_VERIFICATION =
   process.env.NAVER_VERIFICATION ?? "ce71e583d5763935ec467df1eba2d290d9552ae0";
 const GOOGLE_SITE_VERIFICATION =

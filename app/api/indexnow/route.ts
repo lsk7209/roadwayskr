@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
 const ENDPOINTS = [
   "https://searchadvisor.naver.com/indexnow",

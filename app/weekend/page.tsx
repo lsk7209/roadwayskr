@@ -7,7 +7,7 @@ import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
 export const revalidate = 86400;
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
 export async function generateMetadata(): Promise<Metadata> {
   const { satIso, sunIso } = getThisWeekend();

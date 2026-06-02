@@ -20,7 +20,7 @@ interface Params {
   params: Promise<{ contentId: string; slug: string }>;
 }
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 const BODY_PARAGRAPH_CLASS =
   "text-[1rem] leading-[1.9] text-[var(--color-ink)]";
 const BODY_GAP_CLASS = "mt-3 flex flex-col gap-4";

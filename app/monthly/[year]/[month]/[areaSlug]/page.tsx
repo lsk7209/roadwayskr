@@ -18,7 +18,7 @@ interface Params {
   params: Promise<{ year: string; month: string; areaSlug: string }>;
 }
 
-const SITE_URL = process.env.SITE_URL ?? "https://roadways.kr";
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 const MIN_ITEMS_FOR_INDEX = 3;
 const MAX_STATIC_MONTHS = 18;
 
@@ -46,7 +46,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `${year}년 ${month}월 ${area.name} 축제·행사`,
     description: `${year}년 ${month}월 ${area.name}에서 열리는 축제와 행사 ${count}건을 정리했습니다. 일정·장소·입장료를 한눈에 확인하세요.`,
-    alternates: { canonical: `${SITE_URL}/${year}/${month}/${area.slug}` },
+    alternates: {
+      canonical: `${SITE_URL}/monthly/${year}/${month}/${area.slug}`,
+    },
     robots: indexable
       ? { index: true, follow: true }
       : { index: false, follow: true },
