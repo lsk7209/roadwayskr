@@ -91,6 +91,46 @@ export default async function ThisWeekendPage() {
         </div>
       )}
 
+      <section className="mt-12 rounded-2xl border border-[var(--color-line-soft)] bg-white p-6">
+        <h2 className="text-2xl font-semibold">Weekend planning checklist</h2>
+        <div className="mt-4 space-y-4 leading-8 text-[var(--color-ink-muted)]">
+          <p>
+            This weekend page is a planning index for festivals that overlap
+            the selected Saturday and Sunday. It groups events by region so
+            readers can compare nearby options, then move into the individual
+            event page for dates, venue information, and source context. The
+            list is useful for discovery, but it should not be treated as the
+            final authority for attendance, tickets, parking, weather, or safety
+            notices.
+          </p>
+          <p>
+            Before leaving home, check the organizer page or local government
+            announcement for the most recent status. Festival schedules can
+            change because of rain, heat warnings, crowd control, construction,
+            road restrictions, or venue maintenance. Families should also verify
+            stroller access, restrooms, nursing rooms, pet rules, food
+            availability, and nearby transit before committing to a route.
+          </p>
+          <p>
+            Roadways keeps this page crawlable with a clear heading hierarchy,
+            canonical URL, internal links to region pages, sitemap and robots
+            support, and visible policy links in the site footer. The purpose is
+            to help visitors and search crawlers understand why the page exists
+            even when the number of current weekend events is small. When no
+            current data is available, the page still explains the update method
+            and directs readers to broader regional and theme indexes.
+          </p>
+          <p>
+            Advertising may be served through Google AdSense Auto Ads only. Ads
+            do not decide which events appear, and no manual ad placement is
+            added inside the event cards. If a listing looks wrong, duplicated,
+            or outdated, use the contact page with the event name and URL so the
+            data can be reviewed. This correction path is part of the site
+            quality process.
+          </p>
+        </div>
+      </section>
+
       <p className="mt-12 text-xs text-[var(--color-ink-muted)]">
         주말 축제 데이터는 공개 API와 운영 DB 동기화를 통해 수시로 갱신됩니다.
       </p>

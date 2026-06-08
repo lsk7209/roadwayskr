@@ -172,6 +172,50 @@ export default async function Home() {
         ))}
       </section>
 
+      <section className="rounded-2xl border border-[var(--color-line-soft)] bg-white p-6">
+        <h2 className="text-[24px] font-semibold leading-tight">
+          Roadways review and visitor guidance
+        </h2>
+        <div className="prose-body mt-4 space-y-4 leading-8 text-[var(--color-ink-muted)]">
+          <p>
+            Roadways is a public festival and local event guide for people who
+            need to compare weekend plans quickly. The site organizes event
+            dates, regions, themes, venue hints, and update timing so visitors
+            can decide whether an event is worth checking further before they
+            travel. It is designed as an editorial discovery layer, not as an
+            official organizer, ticket seller, emergency notice channel, or
+            transport authority.
+          </p>
+          <p>
+            Before visiting any festival, readers should confirm the latest
+            schedule, weather, parking, admission rules, cancellation notices,
+            accessibility information, and public transit options through the
+            organizer or local government page. Outdoor events can change
+            quickly because of rain, crowd control, safety inspections, or
+            venue conditions. Roadways helps narrow the list, but final travel
+            decisions should be based on current official information.
+          </p>
+          <p>
+            The home page keeps trust pages, sitemap, robots, feed, data policy,
+            regional links, theme links, and weekend links visible so search
+            crawlers and AdSense reviewers can understand the site structure
+            without relying only on dynamic festival cards. Advertising may
+            appear through Google AdSense Auto Ads, but manual ad slots are not
+            inserted into this guidance section and advertising does not affect
+            event ordering or editorial notes.
+          </p>
+          <p>
+            Data quality is handled conservatively. Festival pages are indexable
+            only when the data has enough useful fields for a reader, and
+            sitemap entries are generated from pages that are suitable for
+            search. If a listing is outdated or missing important visitor
+            context, readers can use the contact page to request a correction.
+            This keeps the site useful for real users while reducing thin-page
+            and low-value-content risk during AdSense review.
+          </p>
+        </div>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <div>
           <h2 className="text-[24px] font-semibold leading-tight">
