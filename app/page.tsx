@@ -39,9 +39,9 @@ const planCards = [
 ];
 
 export const metadata: Metadata = {
-  title: "여행고고 - 주말 축제 가이드",
+  title: "Roadways - weekend festival guide",
   description:
-    "한국의 주말 축제 정보를 빠르게 찾고, 지역·테마별로 비교합니다. 실시간 정보, 최신 데이터, 정렬 최적화로 가독성 높은 여행 안내를 제공합니다.",
+    "Roadways helps visitors compare Korean weekend festivals by date, region, theme, venue context, update status, and official source checks.",
   alternates: { canonical: SITE_URL },
 };
 
@@ -212,6 +212,21 @@ export default async function Home() {
             context, readers can use the contact page to request a correction.
             This keeps the site useful for real users while reducing thin-page
             and low-value-content risk during AdSense review.
+          </p>
+          <p>
+            Readers can start from the weekend page when they have a fixed date,
+            from the region page when travel distance matters, or from the theme
+            page when they want flower, food, music, family, night market, or
+            cultural events. Each path links back into individual festival pages
+            so the user journey remains clear for both people and crawlers.
+          </p>
+          <p>
+            The site avoids doorway pages and empty category shells by keeping
+            explanatory text, navigation, correction guidance, and policy links
+            available even when a specific data slice is small. This approach
+            supports search indexing, improves AdSense review evidence, and
+            gives visitors a practical checklist before they rely on any event
+            listing.
           </p>
         </div>
       </section>

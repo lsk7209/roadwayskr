@@ -13,8 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const { satIso, sunIso } = getThisWeekend();
 
   return {
-    title: `주말 축제 (${satIso} ~ ${sunIso}) 일정 보기`,
-    description: `주말 행사 ${satIso} ~ ${sunIso} 기간에 열리는 진행 중·예정 축제 리스트를 지역별로 정리했습니다.`,
+    title: `Roadways weekend festivals (${satIso} ~ ${sunIso})`,
+    description: `Roadways weekend festival index for ${satIso} ~ ${sunIso}, grouped by region with schedule, venue, source-check, and visitor planning context.`,
     alternates: { canonical: `${SITE_URL}/weekend` },
   };
 }
