@@ -125,6 +125,9 @@ export default function RootLayout({
               <Link href="/themes" className="hover:text-[var(--color-ink)]">
                 테마별
               </Link>
+              <Link href="/blog" className="hover:text-[var(--color-ink)]">
+                Blog
+              </Link>
             </nav>
           </div>
         </header>
