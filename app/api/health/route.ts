@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { desc, sql } from "drizzle-orm";
+import { isAuthorizedCronRequest } from "@/lib/http/cron-auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,7 +12,11 @@ const REQUIRED_ENV = [
   "SITE_URL",
 ] as const;
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!isAuthorizedCronRequest(request)) {
+    return healthResponse({ error: "unauthorized" }, 401);
+  }
+
   const startedAt = Date.now();
   const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]);
 
