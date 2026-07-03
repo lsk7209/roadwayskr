@@ -3,6 +3,7 @@ import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
 import { AutoAds } from "@/components/ads/AutoAds";
+import CoupangAffiliateBanner from "@/components/affiliate/CoupangAffiliateBanner";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
@@ -133,6 +134,7 @@ export default function RootLayout({
         </header>
 
         <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <CoupangAffiliateBanner />
 
         <footer className="mt-16 border-t border-[var(--color-line)] bg-[var(--color-card)] py-8">
           <div className="mx-auto max-w-6xl space-y-2 px-4 text-sm text-[var(--color-ink-muted)]">
