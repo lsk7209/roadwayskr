@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db, festivals } from "@/db";
 import { sql } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
+import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
@@ -62,6 +63,11 @@ export default async function RegionsIndex() {
           );
         })}
       </ul>
+
+      <HubSourceGuide
+        title="지역별"
+        scope="선택한 시도 코드"
+      />
     </article>
   );
 }

@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { THEMES } from "@/lib/themes";
+import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
@@ -51,6 +52,11 @@ export default async function ThemesIndex() {
           );
         })}
       </ul>
+
+      <HubSourceGuide
+        title="테마별"
+        scope="행사 제목·소개·장소·프로그램에서 추출한 테마"
+      />
     </article>
   );
 }
