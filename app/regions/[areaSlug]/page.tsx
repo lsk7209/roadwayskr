@@ -6,6 +6,7 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import { db, festivals } from "@/db";
 import { AREAS, findAreaBySlug } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
 import {
   JsonLd,
   buildCollectionPageLd,
@@ -125,6 +126,8 @@ export default async function AreaHub({ params }: Params) {
           ))}
         </ul>
       )}
+
+      <HubSourceGuide title={`${area.name} 행사`} scope={`${area.name} 지역`} />
     </article>
   );
 }
