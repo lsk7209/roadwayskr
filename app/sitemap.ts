@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db, festivals } from "@/db";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
 
@@ -59,7 +59,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         updatedAt: festivals.updatedAt,
       })
       .from(festivals)
-      .where(eq(festivals.isIndexable, true))
+      .where(
+        and(
+          eq(festivals.isIndexable, true),
+          ne(festivals.status, "ended"),
+        ),
+      )
       .limit(45_000);
 
     areaPages = buildAreaPages(rows, now, siteUrl);

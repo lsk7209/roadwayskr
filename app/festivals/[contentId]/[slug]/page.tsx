@@ -65,7 +65,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     cleanTourText(festival.description) ??
     `${festival.title} 일정·장소·입장료·주차 정보를 한눈에 정리했습니다.`;
 
-  const isIndexable = festival.isIndexable && festival.status !== "cancelled";
+  const isIndexable =
+    festival.isIndexable &&
+    festival.status !== "cancelled" &&
+    festival.status !== "ended";
 
   return {
     title,
