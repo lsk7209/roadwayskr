@@ -1,9 +1,10 @@
 import { db, festivals } from "@/db";
 import type { Metadata } from "next";
-import { and, desc, gte, lte, sql } from "drizzle-orm";
+import { and, desc, gte, lte } from "drizzle-orm";
 import Link from "next/link";
 
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
@@ -63,7 +64,7 @@ async function getThisWeekend() {
       and(
         lte(festivals.startDate, fmt(sun)),
         gte(festivals.endDate, fmt(sat)),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
       ),
     )
     .limit(12);
@@ -73,7 +74,7 @@ async function getLatestEvents() {
   return db
     .select()
     .from(festivals)
-    .where(sql`${festivals.isIndexable} = 1`)
+    .where(currentFestivalCondition())
     .orderBy(desc(festivals.updatedAt))
     .limit(8);
 }
@@ -265,7 +266,7 @@ export default async function Home() {
               최신 업데이트
             </h2>
             <p className="prose-body mt-2 text-[var(--color-ink-muted)]">
-              새로 반영된 항목부터 한눈에 확인합니다.
+              진행 중·예정 축제 중 새로 반영된 항목을 확인합니다. 방문 전 공식 일정도 확인해 주세요.
             </p>
           </div>
           <Link

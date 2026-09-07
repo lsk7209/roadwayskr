@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db, festivals } from "@/db";
-import { and, gte, lte, sql } from "drizzle-orm";
+import { and, gte, lte } from "drizzle-orm";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 import { findAreaByCode } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
@@ -28,7 +29,7 @@ export default async function ThisWeekendPage() {
       and(
         lte(festivals.startDate, sunIso),
         gte(festivals.endDate, satIso),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
       ),
     )
     .orderBy(festivals.startDate)
