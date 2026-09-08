@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { db, festivals } from "@/db";
-import { and, desc, eq, ne } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 const MIN_MONTHLY_ITEMS = 3;
 const MAX_MONTHLY_MONTHS = 18;
@@ -59,12 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         updatedAt: festivals.updatedAt,
       })
       .from(festivals)
-      .where(
-        and(
-          eq(festivals.isIndexable, true),
-          ne(festivals.status, "ended"),
-        ),
-      )
+      .where(currentFestivalCondition(now))
       .limit(45_000);
 
     areaPages = buildAreaPages(rows, now, siteUrl);

@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 
 const repoRoot = new URL("../", import.meta.url);
 
-describe("ended festival indexing", () => {
+describe("inactive festival indexing", () => {
   it("keeps ended detail routes crawlable but noindexed", async () => {
     const page = await readFile(
       new URL("app/festivals/[contentId]/[slug]/page.tsx", repoRoot),
@@ -12,14 +12,14 @@ describe("ended festival indexing", () => {
     );
 
     assert.match(page, /festival\.status !== "ended"/);
+    assert.match(page, /festival\.status !== "cancelled"/);
     assert.match(page, /alternates: \{ canonical \}/);
     assert.match(page, /if \(!festival\) return notFound\(\)/);
   });
 
-  it("excludes only ended festivals from the sitemap query", async () => {
+  it("excludes cancelled, ended, expired and hidden festivals from the sitemap query", async () => {
     const sitemap = await readFile(new URL("app/sitemap.ts", repoRoot), "utf8");
 
-    assert.match(sitemap, /ne\(festivals\.status, "ended"\)/);
-    assert.match(sitemap, /eq\(festivals\.isIndexable, true\)/);
+    assert.match(sitemap, /currentFestivalCondition\(now\)/);
   });
 });

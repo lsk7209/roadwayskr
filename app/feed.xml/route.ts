@@ -1,10 +1,11 @@
 import type { NextRequest } from "next/server";
 import { db, festivals } from "@/db";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 const FEED_TITLE = "RoadWays 축제 리스트";
 const FEED_DESCRIPTION =
-  "진행 중인 지역 축제 일정과 장소·기간·요약 정보를 빠르게 확인할 수 있습니다.";
+  "진행 중·예정 지역 축제의 일정과 장소·기간·요약 정보를 빠르게 확인할 수 있습니다.";
 const MAX_FEED_ITEMS = 50;
 
 export const revalidate = 3600;
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       updatedAt: festivals.updatedAt,
     })
     .from(festivals)
-    .where(eq(festivals.isIndexable, true))
+    .where(currentFestivalCondition())
     .orderBy(desc(festivals.updatedAt))
     .limit(MAX_FEED_ITEMS);
 

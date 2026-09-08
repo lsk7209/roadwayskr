@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db, festivals } from "@/db";
 import { sql } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
@@ -23,7 +24,7 @@ async function getCountsByArea() {
       cnt: sql<number>`count(*)`,
     })
     .from(festivals)
-    .where(sql`${festivals.isIndexable} = 1 AND ${festivals.status} != 'ended'`)
+    .where(currentFestivalCondition())
     .groupBy(festivals.areaCode);
 
   return Object.fromEntries(

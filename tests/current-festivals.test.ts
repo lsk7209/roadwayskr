@@ -64,3 +64,20 @@ test("date-overlapping cancelled events cannot enter weekend discovery", async (
     assert.deepEqual(result.map(row => row.id), [1]);
   } finally { client.close(); }
 });
+
+test("every current-discovery surface reuses the canonical condition", async () => {
+  const surfaces = [
+    "../app/regions/page.tsx",
+    "../app/regions/[areaSlug]/page.tsx",
+    "../app/themes/page.tsx",
+    "../app/themes/[themeSlug]/page.tsx",
+    "../app/monthly/[year]/[month]/[areaSlug]/page.tsx",
+    "../app/sitemap.ts",
+    "../app/feed.xml/route.ts",
+  ];
+
+  for (const path of surfaces) {
+    const source = await readFile(new URL(path, import.meta.url), "utf8");
+    assert.match(source, /currentFestivalCondition\(/, `${path} must exclude cancelled and expired festivals`);
+  }
+});

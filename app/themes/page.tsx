@@ -1,10 +1,10 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { THEMES } from "@/lib/themes";
 import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
@@ -62,15 +62,12 @@ export default async function ThemesIndex() {
 }
 
 async function getCountsByTheme() {
-  const today = new Date().toISOString().slice(0, 10);
   const rows = await db
     .select({
       themesCsv: festivals.themesCsv,
     })
     .from(festivals)
-    .where(
-      sql`${festivals.isIndexable} = 1 AND ${festivals.endDate} >= ${today}`,
-    );
+    .where(currentFestivalCondition());
 
   const counts: Record<string, number> = {};
   for (const row of rows) {

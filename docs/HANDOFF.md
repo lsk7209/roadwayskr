@@ -1,3 +1,16 @@
+# Current checkpoint — 2026-09-08 cancelled-event discovery LOCAL
+
+- Goal: continue the DAU-ranked non-READY AdSense quality workflow by keeping cancelled events out of every surface described as current/ongoing; no approval prediction or account mutation.
+- Source gate: isolated clone `D:/web/_worktrees/roadways/cancelled-current-20260908` is based on canonical remote `main` commit `4e65239deca9047f00cacafc48eea52663119a1b`. The stale, unrelated-history, dirty primary checkout remains untouched.
+- Defect: homepage/weekend used `currentFestivalCondition`, but region/theme counts and lists, RSS, and sitemap used weaker filters. A cancelled future-dated event could be counted/listed and advertised in RSS/sitemap even though its detail metadata is `noindex`.
+- Repair: all current-discovery queries reuse the canonical Asia/Seoul-aware condition: indexable, status ongoing/upcoming, and end date today or later. Existing area/theme/month-overlap predicates remain composed with it, including directly visited monthly pages.
+- Intended files: seven runtime discovery files, `tests/current-festivals.test.ts`, `tests/ended-festival-indexing.test.ts`, and this handoff.
+- Tests-first: new surface-wiring test failed on regions before repair. Final full test suite 9/9, TypeScript, scoped ESLint, and diff check pass.
+- Validation gap: local full build compiled and typechecked, then failed during page-data collection only because this isolated clone has no `TURSO_DATABASE_URL`. No production credential was copied or fabricated. Same-SHA hosted build is the release gate.
+- Side effects: dependency install only in the isolated clone. No DB read/write, sync, content publication, account/CMP, AdSense submission, indexing notification, or direct Vercel mutation.
+- Rollback: revert the focused release commit; no data/account rollback required.
+- Single next step: independent actual-diff review, exact-file commit/push, then same-SHA hosted build and public region/theme/feed/sitemap verification.
+
 # Current checkpoint — 2026-09-07 Roadways current-event discovery
 
 Goal: original ten-site AdSense quality improvement; this site slice corrects expired events promoted on the homepage. Approval is not guaranteed or claimed.

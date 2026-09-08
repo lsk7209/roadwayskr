@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { and, gte, sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { findThemeBySlug, THEMES } from "@/lib/themes";
@@ -11,6 +11,7 @@ import {
   buildCollectionPageLd,
   buildBreadcrumbListLd,
 } from "@/components/seo/JsonLd";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 export const revalidate = 3600;
 
@@ -49,14 +50,12 @@ export default async function ThemePage({ params }: Params) {
   if (!parsed) return notFound();
 
   const { theme } = parsed;
-  const today = new Date().toISOString().slice(0, 10);
   const items = await db
     .select()
     .from(festivals)
     .where(
       and(
-        gte(festivals.endDate, today),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
         sql`${festivals.themesCsv} LIKE ${`%,${theme.name},%`}`,
       ),
     )
@@ -139,14 +138,12 @@ function safeDecode(value: string) {
 }
 
 async function getCount(themeName: string) {
-  const today = new Date().toISOString().slice(0, 10);
   const rows = await db
     .select({ cnt: sql<number>`count(*)` })
     .from(festivals)
     .where(
       and(
-        gte(festivals.endDate, today),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
         sql`${festivals.themesCsv} LIKE ${`%,${themeName},%`}`,
       ),
     );

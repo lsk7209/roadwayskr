@@ -11,6 +11,7 @@ import {
   buildCollectionPageLd,
   buildBreadcrumbListLd,
 } from "@/components/seo/JsonLd";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 export const revalidate = 3600;
 
@@ -69,7 +70,7 @@ export default async function MonthlyAreaPage({ params }: Params) {
         eq(festivals.areaCode, area.code),
         lte(festivals.startDate, endIso),
         gte(festivals.endDate, startIso),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
       ),
     )
     .orderBy(festivals.startDate)
@@ -176,7 +177,7 @@ async function getCount(
         eq(festivals.areaCode, areaCode),
         lte(festivals.startDate, endIso),
         gte(festivals.endDate, startIso),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
       ),
     );
 

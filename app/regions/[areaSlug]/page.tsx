@@ -1,12 +1,13 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { AREAS, findAreaBySlug } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 import {
   JsonLd,
   buildCollectionPageLd,
@@ -57,15 +58,13 @@ export default async function AreaHub({ params }: Params) {
   const area = findAreaBySlug(decoded);
   if (!area) return notFound();
 
-  const today = new Date().toISOString().slice(0, 10);
   const items = await db
     .select()
     .from(festivals)
     .where(
       and(
         eq(festivals.areaCode, area.code),
-        gte(festivals.endDate, today),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
       ),
     )
     .orderBy(festivals.startDate)
@@ -133,15 +132,13 @@ export default async function AreaHub({ params }: Params) {
 }
 
 async function getCount(areaCode: string): Promise<number> {
-  const today = new Date().toISOString().slice(0, 10);
   const rows = await db
     .select({ cnt: sql<number>`count(*)` })
     .from(festivals)
     .where(
       and(
         eq(festivals.areaCode, areaCode),
-        gte(festivals.endDate, today),
-        sql`${festivals.isIndexable} = 1`,
+        currentFestivalCondition(),
       ),
     );
   return Number(rows[0]?.cnt ?? 0);
