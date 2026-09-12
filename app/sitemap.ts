@@ -29,18 +29,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const urlWithPath = (path: string) => toAbsoluteUrl(siteUrl, path);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: siteUrl, lastModified: lastUpdated, changeFrequency: "daily", priority: 1.0 },
-    { url: urlWithPath("/weekend"), lastModified: lastUpdated, changeFrequency: "daily", priority: 0.9 },
-    { url: urlWithPath("/blog"), lastModified: lastUpdated, changeFrequency: "daily", priority: 0.8 },
-    { url: urlWithPath("/plan"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.5 },
-    { url: urlWithPath("/regions"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
-    { url: urlWithPath("/themes"), lastModified: lastUpdated, changeFrequency: "weekly", priority: 0.8 },
-    { url: urlWithPath("/about"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
-    { url: urlWithPath("/about/curator"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.5 },
-    { url: urlWithPath("/contact"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
-    { url: urlWithPath("/data-policy"), lastModified: lastUpdated, changeFrequency: "monthly", priority: 0.4 },
-    { url: urlWithPath("/privacy"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
-    { url: urlWithPath("/terms"), lastModified: lastUpdated, changeFrequency: "yearly", priority: 0.3 },
+    {
+      url: siteUrl,
+      lastModified: lastUpdated,
+      changeFrequency: "daily",
+      priority: 1.0,
+    },
+    {
+      url: urlWithPath("/weekend"),
+      lastModified: lastUpdated,
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: urlWithPath("/blog"),
+      lastModified: lastUpdated,
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: urlWithPath("/regions"),
+      lastModified: lastUpdated,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: urlWithPath("/themes"),
+      lastModified: lastUpdated,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    // 아래 정적 정보 페이지들은 festivals 데이터와 무관하게 거의 바뀌지 않으므로
+    // lastUpdated(최신 축제 갱신 시각)를 붙이지 않는다 — 실제로 이 페이지가
+    // 바뀐 시각이 아닌 값을 lastmod로 내보내는 것은 허위 신선도 신호가 된다.
+    { url: urlWithPath("/about"), changeFrequency: "monthly", priority: 0.5 },
+    {
+      url: urlWithPath("/about/curator"),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    { url: urlWithPath("/contact"), changeFrequency: "monthly", priority: 0.4 },
+    {
+      url: urlWithPath("/data-policy"),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    { url: urlWithPath("/privacy"), changeFrequency: "yearly", priority: 0.3 },
+    { url: urlWithPath("/terms"), changeFrequency: "yearly", priority: 0.3 },
   ];
 
   let areaPages: MetadataRoute.Sitemap = [];

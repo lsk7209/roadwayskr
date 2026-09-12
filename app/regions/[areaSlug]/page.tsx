@@ -8,6 +8,7 @@ import { AREAS, findAreaBySlug } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
 import { currentFestivalCondition } from "@/lib/current-festivals";
+import { formatCollectionCountLabel } from "@/lib/collection-count-label";
 import {
   JsonLd,
   buildCollectionPageLd,
@@ -20,7 +21,9 @@ interface Params {
   params: Promise<{ areaSlug: string }>;
 }
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 const MIN_ITEMS_FOR_INDEX = 3;
 
 export async function generateStaticParams() {
@@ -58,17 +61,15 @@ export default async function AreaHub({ params }: Params) {
   const area = findAreaBySlug(decoded);
   if (!area) return notFound();
 
-  const items = await db
-    .select()
-    .from(festivals)
-    .where(
-      and(
-        eq(festivals.areaCode, area.code),
-        currentFestivalCondition(),
-      ),
-    )
-    .orderBy(festivals.startDate)
-    .limit(60);
+  const [items, totalCount] = await Promise.all([
+    db
+      .select()
+      .from(festivals)
+      .where(and(eq(festivals.areaCode, area.code), currentFestivalCondition()))
+      .orderBy(festivals.startDate)
+      .limit(60),
+    getCount(area.code),
+  ]);
 
   const pageUrl = `${SITE_URL}/regions/${area.slug}`;
   const collectionLd = buildCollectionPageLd({
@@ -105,7 +106,8 @@ export default async function AreaHub({ params }: Params) {
         {area.name} 축제·행사
       </h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        {area.name} 진행 중·예정 행사 {items.length}건
+        {area.name} 진행 중·예정 행사{" "}
+        {formatCollectionCountLabel(totalCount, items.length)}
       </p>
 
       {items.length < MIN_ITEMS_FOR_INDEX ? (
@@ -135,12 +137,7 @@ async function getCount(areaCode: string): Promise<number> {
   const rows = await db
     .select({ cnt: sql<number>`count(*)` })
     .from(festivals)
-    .where(
-      and(
-        eq(festivals.areaCode, areaCode),
-        currentFestivalCondition(),
-      ),
-    );
+    .where(and(eq(festivals.areaCode, areaCode), currentFestivalCondition()));
   return Number(rows[0]?.cnt ?? 0);
 }
 
