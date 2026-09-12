@@ -1,5 +1,21 @@
 # 수동 작업 / 계정 권한 필요 항목
 
+## Vercel 계정 설정 필요 (2026-09-12, PR #1 확인 중 발견)
+
+`roadways-audit-fixes` 브랜치의 Vercel Preview 배포가 빌드 실패했다. 원인은
+코드가 아니라 **Preview 환경에 `TURSO_DATABASE_URL`이 설정돼 있지 않은 것**이다.
+`vercel build` 로그: `Compiled successfully` → 타입체크 통과 → `Collecting page
+data` 단계에서 `/sitemap.xml`이 DB 클라이언트를 초기화하다 `TURSO_DATABASE_URL is
+not set`로 실패. `docs/HANDOFF.md`(2026-09-07)에도 동일한 제약이 이미 기록돼
+있어 이번 코드 변경과 무관한 기존 환경 설정 갭으로 판단된다.
+
+조치(Vercel 프로젝트 설정 접근 권한 필요, 계정 소유자만 가능):
+- Vercel 대시보드 → 프로젝트 → Settings → Environment Variables에서
+  `TURSO_DATABASE_URL`(및 필요한 인증 토큰)을 **Preview** 환경에도 적용
+- 또는 Production에만 필요한 값이라면, `app/sitemap.ts`처럼 DB 접근이 필요한
+  라우트가 preview 빌드에서 실패하지 않도록 별도 처리가 필요한지 검토(이번
+  작업 범위 밖 — 코드 변경으로 임의 처리하지 않았다)
+
 ## 승인 후 실행 필요 (2026-09-12 추가)
 
 - **테마 재분류 백필**: `lib/tourapi/normalizer.ts`의 과일축제("배"·"감" 제거)/음식축제("맛" 제거)/눈축제("눈"→"눈꽃" 등 복합어) 키워드 수정은 코드에만 적용됐다. 실제 프로덕션 DB의 기존 `festivals.themesCsv`는 재동기화 전까지 옛 분류를 유지한다. `pnpm sync:tourapi:full` 실행은 운영 데이터를 갱신하는 작업이라 사용자 승인 후 진행한다. 실행 전 실제 영향받는 행 수(예: 과일축제로 잘못 태깅된 행) 조회로 dry-run 성격의 사전 확인을 권장한다.
