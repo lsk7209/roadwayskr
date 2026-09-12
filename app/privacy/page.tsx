@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
 export const metadata: Metadata = {
   title: "개인정보 처리방침",
-  description: "Roadways의 개인정보 처리 범위와 보관, 보안, 문의 절차를 안내합니다.",
+  description:
+    "Roadways의 개인정보 처리 범위와 보관, 보안, 문의 절차를 안내합니다.",
   alternates: { canonical: `${SITE_URL}/privacy` },
   robots: { index: true, follow: true },
 };
 
-const LAST_UPDATED = "2026-05-10";
+const LAST_UPDATED = "2026-09-13";
 
 export default function PrivacyPage() {
   return (
     <article className="prose-body prose-ko max-w-3xl">
       <h1 className="text-3xl font-bold tracking-tight">개인정보 처리방침</h1>
-      <p className="mt-2 text-[var(--color-ink-muted)]">최종 갱신: {LAST_UPDATED}</p>
+      <p className="mt-2 text-[var(--color-ink-muted)]">
+        최종 갱신: {LAST_UPDATED}
+      </p>
 
       <h2>1. 수집 항목</h2>
       <ul className="list-disc pl-5 space-y-1">
@@ -33,8 +38,8 @@ export default function PrivacyPage() {
 
       <h2>3. 보관 기간</h2>
       <p>
-        관련 법령 및 내부 정책을 준수하며, 분석 데이터는 24개월 이내 또는 법정 보관기간에 맞추어
-        처리 후 삭제합니다.
+        관련 법령 및 내부 정책을 준수하며, 분석 데이터는 24개월 이내 또는 법정
+        보관기간에 맞추어 처리 후 삭제합니다.
       </p>
 
       <h2>4. 제3자 제공</h2>
@@ -43,11 +48,25 @@ export default function PrivacyPage() {
         <li>Google AdSense: 광고 품질 및 과금 연동</li>
         <li>클라우드 인프라 제공자: 서비스 운영 용도</li>
       </ul>
+      <p>
+        Google을 비롯한 제3자 공급업체는 쿠키(예: DoubleClick DART 쿠키)를
+        사용해 사용자의 이전 방문 기록을 기반으로 광고를 게재할 수 있습니다.
+        사용자는 브라우저 설정에서 쿠키를 차단하거나{" "}
+        <a
+          className="underline"
+          href="https://adssettings.google.com/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Google 광고 설정
+        </a>
+        에서 맞춤 광고를 비활성화할 수 있습니다.
+      </p>
 
       <h2>5. 사용권한 철회</h2>
       <p>
-        사용자는 언제든 개인정보 삭제·정정·이용 중단을 요청할 수 있습니다. 문의 채널을 통해 요청해
-        주세요.
+        사용자는 언제든 개인정보 삭제·정정·이용 중단을 요청할 수 있습니다. 문의
+        채널을 통해 요청해 주세요.
       </p>
 
       <h2>6. 문의</h2>

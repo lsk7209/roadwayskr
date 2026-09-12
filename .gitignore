@@ -16,3 +16,4 @@ next-env.d.ts
 .vercel
 .omx
 tsconfig.tsbuildinfo
+.omc/
