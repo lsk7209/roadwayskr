@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
 export const metadata: Metadata = {
   title: "문의",
@@ -31,10 +33,7 @@ export default function ContactPage() {
       </ul>
 
       <h2>회신 안내</h2>
-      <p>
-        접수 후 2~3영업일 내 확인 메일을 드립니다. 운영 공지사항은 홈페이지 상단 공지나
-        /plan 페이지에서 공개됩니다.
-      </p>
+      <p>접수 후 2~3영업일 내 확인 메일을 드립니다.</p>
     </article>
   );
 }

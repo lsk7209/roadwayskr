@@ -1,8 +1,4 @@
-import type {
-  FestivalRaw,
-  FestivalIntroRaw,
-  FestivalCommonRaw,
-} from "./types";
+import type { FestivalRaw, FestivalIntroRaw, FestivalCommonRaw } from "./types";
 import type { NewFestival } from "@/db/schema";
 
 /**
@@ -39,19 +35,22 @@ const LDONG_TO_AREA_CODE: Record<string, string> = {
   "50": "39",
 };
 
+// 1글자 키워드는 "동선 배치", "눈치", "재미와 맛" 처럼 무관한 단어의 일부로 자주
+// 등장해 오분류를 일으킨다(예: "배"만으로 과일축제 판정). 모든 키워드는 2글자
+// 이상으로 유지하고, 원래 1글자였던 항목은 실제 축제명에 쓰이는 복합어로 대체한다.
 const THEME_KEYWORD_MAP: Record<string, string[]> = {
   벚꽃축제: ["벚꽃", "벚나무", "사쿠라"],
   단풍축제: ["단풍"],
   도자기축제: ["도자기", "도자", "공예", "도예"],
   불꽃축제: ["불꽃", "불꽃놀이", "폭죽"],
   야시장: ["야시장", "야간장"],
-  음식축제: ["음식", "맛", "푸드", "먹거리"],
+  음식축제: ["음식", "푸드", "먹거리"],
   음악축제: ["음악", "콘서트", "재즈", "록 페스티벌"],
   꽃축제: ["꽃", "튤립", "장미", "유채", "수국"],
-  눈축제: ["눈", "얼음", "빙어", "송어"],
+  눈축제: ["눈꽃", "눈사람", "눈축제", "함박눈", "얼음", "빙어", "송어"],
   바다축제: ["바다", "해변", "갯벌", "어촌", "어시장"],
   전통축제: ["전통", "민속", "한복", "탈춤"],
-  과일축제: ["과일", "사과", "배", "포도", "감", "토마토", "딸기", "수박"],
+  과일축제: ["과일", "사과", "포도", "토마토", "딸기", "수박"],
 };
 
 export function normalizeFestival(args: {
@@ -188,9 +187,7 @@ function computeFamilyFriendly(args: {
 
 function computeFeeFree(fee: string | null): boolean | null {
   if (!fee) return null;
-  return FREE_KEYWORDS.some((k) =>
-    fee.toLowerCase().includes(k.toLowerCase()),
-  );
+  return FREE_KEYWORDS.some((k) => fee.toLowerCase().includes(k.toLowerCase()));
 }
 
 function getAreaCode(

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
 export const metadata: Metadata = {
   title: "서비스 소개",
@@ -23,7 +25,6 @@ export default function AboutPage() {
         <li>주말 집중 축제 목록과 지역별 정렬</li>
         <li>테마 기반 추천 리스트</li>
         <li>월별 지역 조합 페이지로 탐색 경로 단축</li>
-        <li>운영 상태 점검을 위한 /plan 페이지</li>
       </ul>
 
       <h2>콘텐츠 신뢰 기준</h2>

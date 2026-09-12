@@ -16,12 +16,25 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.roadways.kr" }],
+        destination: "https://roadways.kr/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
         source: "/sitemap.xml",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600" },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, s-maxage=3600",
+          },
         ],
       },
       {
@@ -29,7 +42,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+            value:
+              "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
           },
         ],
       },

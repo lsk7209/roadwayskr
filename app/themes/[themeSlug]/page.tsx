@@ -12,6 +12,7 @@ import {
   buildBreadcrumbListLd,
 } from "@/components/seo/JsonLd";
 import { currentFestivalCondition } from "@/lib/current-festivals";
+import { formatCollectionCountLabel } from "@/lib/collection-count-label";
 
 export const revalidate = 3600;
 
@@ -19,7 +20,9 @@ interface Params {
   params: Promise<{ themeSlug: string }>;
 }
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 const MIN_ITEMS_FOR_INDEX = 3;
 
 export async function generateStaticParams() {
@@ -50,17 +53,20 @@ export default async function ThemePage({ params }: Params) {
   if (!parsed) return notFound();
 
   const { theme } = parsed;
-  const items = await db
-    .select()
-    .from(festivals)
-    .where(
-      and(
-        currentFestivalCondition(),
-        sql`${festivals.themesCsv} LIKE ${`%,${theme.name},%`}`,
-      ),
-    )
-    .orderBy(festivals.startDate)
-    .limit(80);
+  const [items, totalCount] = await Promise.all([
+    db
+      .select()
+      .from(festivals)
+      .where(
+        and(
+          currentFestivalCondition(),
+          sql`${festivals.themesCsv} LIKE ${`%,${theme.name},%`}`,
+        ),
+      )
+      .orderBy(festivals.startDate)
+      .limit(80),
+    getCount(theme.name),
+  ]);
 
   const pageUrl = `${SITE_URL}/themes/${theme.slug}`;
   const collectionLd = buildCollectionPageLd({
@@ -95,7 +101,8 @@ export default async function ThemePage({ params }: Params) {
 
       <h1 className="text-3xl font-bold tracking-tight">{theme.name} 일정</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        {theme.description}. 진행 중·예정 행사 {items.length}건
+        {theme.description}. 진행 중·예정 행사{" "}
+        {formatCollectionCountLabel(totalCount, items.length)}
       </p>
 
       {items.length < MIN_ITEMS_FOR_INDEX ? (

@@ -2,16 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db, festivals } from "@/db";
 import { and, gte, lte } from "drizzle-orm";
-import { currentFestivalCondition } from "@/lib/current-festivals";
+import {
+  currentFestivalCondition,
+  getWeekendRange,
+} from "@/lib/current-festivals";
 import { findAreaByCode } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
 export const revalidate = 86400;
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { satIso, sunIso } = getThisWeekend();
+  const { satIso, sunIso } = getWeekendRange();
 
   return {
     title: `Roadways weekend festivals (${satIso} ~ ${sunIso})`,
@@ -21,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ThisWeekendPage() {
-  const { satIso, sunIso } = getThisWeekend();
+  const { satIso, sunIso } = getWeekendRange();
   const items = await db
     .select()
     .from(festivals)
@@ -46,13 +51,14 @@ export default async function ThisWeekendPage() {
     <article className="prose-body prose-ko">
       <h1 className="text-3xl font-bold tracking-tight">주말 축제 모아보기</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        {satIso} ~ {sunIso} 기간에 열리는 진행 중·예정 축제 {items.length}건을 지역별로
-        묶어 보여드립니다.
+        {satIso} ~ {sunIso} 기간에 열리는 진행 중·예정 축제 {items.length}건을
+        지역별로 묶어 보여드립니다.
       </p>
 
       {items.length === 0 ? (
         <p className="mt-6 text-[var(--color-ink-muted)]">
-          이번 주말에 맞는 축제가 아직 등록되지 않았습니다. 데이터 동기화 후 다시 확인해 주세요.
+          이번 주말에 맞는 축제가 아직 등록되지 않았습니다. 데이터 동기화 후
+          다시 확인해 주세요.
         </p>
       ) : (
         <div className="not-prose mt-8 space-y-10">
@@ -96,13 +102,12 @@ export default async function ThisWeekendPage() {
         <h2 className="text-2xl font-semibold">Weekend planning checklist</h2>
         <div className="mt-4 space-y-4 leading-8 text-[var(--color-ink-muted)]">
           <p>
-            This weekend page is a planning index for festivals that overlap
-            the selected Saturday and Sunday. It groups events by region so
-            readers can compare nearby options, then move into the individual
-            event page for dates, venue information, and source context. The
-            list is useful for discovery, but it should not be treated as the
-            final authority for attendance, tickets, parking, weather, or safety
-            notices.
+            This weekend page is a planning index for festivals that overlap the
+            selected Saturday and Sunday. It groups events by region so readers
+            can compare nearby options, then move into the individual event page
+            for dates, venue information, and source context. The list is useful
+            for discovery, but it should not be treated as the final authority
+            for attendance, tickets, parking, weather, or safety notices.
           </p>
           <p>
             Before leaving home, check the organizer page or local government
@@ -137,18 +142,4 @@ export default async function ThisWeekendPage() {
       </p>
     </article>
   );
-}
-
-function getThisWeekend() {
-  const today = new Date();
-  const day = today.getUTCDay();
-  const offset = day === 6 ? 0 : (6 - day + 7) % 7;
-  const sat = new Date(today);
-  sat.setUTCDate(today.getUTCDate() + offset);
-
-  const sun = new Date(sat);
-  sun.setUTCDate(sat.getUTCDate() + 1);
-
-  const fmt = (date: Date) => date.toISOString().slice(0, 10);
-  return { satIso: fmt(sat), sunIso: fmt(sun) };
 }

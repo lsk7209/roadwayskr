@@ -4,9 +4,14 @@ import { and, desc, gte, lte } from "drizzle-orm";
 import Link from "next/link";
 
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
-import { currentFestivalCondition } from "@/lib/current-festivals";
+import {
+  currentFestivalCondition,
+  getWeekendRange,
+} from "@/lib/current-festivals";
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
 const quickFilters = [
   { href: "/weekend", label: "주말 축제", value: "주말 기준 실시간 정렬" },
@@ -17,7 +22,7 @@ const quickFilters = [
 const trustItems = [
   "주요 페이지에 메타·정규 URL·스키마를 기본값으로 반영해 검색 노출을 안정화했습니다.",
   "sitemap, robots, feed를 분리 관리하여 수집 경로를 명확하게 유지합니다.",
-  "광고는 콘텐츠 흐름을 깨지 않게 배치하고, 자동노출 가이드를 준수해 검수 리스크를 낮춥니다.",
+  "광고는 콘텐츠 흐름을 방해하지 않는 위치에만 배치합니다.",
 ] as const;
 
 const planCards = [
@@ -32,10 +37,9 @@ const planCards = [
     href: "/regions",
   },
   {
-    title: "지금 확인",
-    description:
-      "업데이트 상태와 운영 점검 내역을 /plan에서 한 번에 확인하세요.",
-    href: "/plan",
+    title: "궁금한 점 문의",
+    description: "정보가 다르거나 빠진 부분은 문의 페이지로 알려주세요.",
+    href: "/contact",
   },
 ];
 
@@ -49,21 +53,14 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 async function getThisWeekend() {
-  const today = new Date();
-  const day = today.getUTCDay();
-  const sat = new Date(today);
-  sat.setUTCDate(today.getUTCDate() + ((6 - day + 7) % 7));
-  const sun = new Date(sat);
-  sun.setUTCDate(sat.getUTCDate() + 1);
-
-  const fmt = (date: Date) => date.toISOString().slice(0, 10);
+  const { satIso, sunIso } = getWeekendRange();
   return db
     .select()
     .from(festivals)
     .where(
       and(
-        lte(festivals.startDate, fmt(sun)),
-        gte(festivals.endDate, fmt(sat)),
+        lte(festivals.startDate, sunIso),
+        gte(festivals.endDate, satIso),
         currentFestivalCondition(),
       ),
     )
@@ -175,59 +172,31 @@ export default async function Home() {
 
       <section className="rounded-2xl border border-[var(--color-line-soft)] bg-white p-6">
         <h2 className="text-[24px] font-semibold leading-tight">
-          Roadways review and visitor guidance
+          여행고고 이용 안내
         </h2>
         <div className="prose-body mt-4 space-y-4 leading-8 text-[var(--color-ink-muted)]">
           <p>
-            Roadways is a public festival and local event guide for people who
-            need to compare weekend plans quickly. The site organizes event
-            dates, regions, themes, venue hints, and update timing so visitors
-            can decide whether an event is worth checking further before they
-            travel. It is designed as an editorial discovery layer, not as an
-            official organizer, ticket seller, emergency notice channel, or
-            transport authority.
+            여행고고는 주말 계획을 빠르게 세우려는 방문자를 위한 축제·행사
+            큐레이션 서비스입니다. 일정, 지역, 테마, 장소 정보를 정리해 방문 전
+            더 알아볼 가치가 있는 행사인지 판단할 수 있도록 돕습니다. 공식 주최
+            기관, 티켓 판매처, 긴급 공지 채널, 교통 안내 기관이 아닌 편집
+            큐레이션 서비스입니다.
           </p>
           <p>
-            Before visiting any festival, readers should confirm the latest
-            schedule, weather, parking, admission rules, cancellation notices,
-            accessibility information, and public transit options through the
-            organizer or local government page. Outdoor events can change
-            quickly because of rain, crowd control, safety inspections, or
-            venue conditions. Roadways helps narrow the list, but final travel
-            decisions should be based on current official information.
+            방문 전에는 최신 일정, 날씨, 주차, 입장 조건, 취소 공지, 접근성
+            정보, 대중교통 이용 방법을 주최 측이나 지자체 공식 채널에서 다시
+            확인해 주세요. 야외 행사는 우천, 인원 통제, 안전 점검, 현장 상황에
+            따라 갑자기 바뀔 수 있습니다. 여행고고는 후보를 좁히는 데 도움을 줄
+            뿐, 최종 방문 결정은 항상 최신 공식 정보를 기준으로 해 주세요.
           </p>
           <p>
-            The home page keeps trust pages, sitemap, robots, feed, data policy,
-            regional links, theme links, and weekend links visible so search
-            crawlers and AdSense reviewers can understand the site structure
-            without relying only on dynamic festival cards. Advertising may
-            appear through Google AdSense Auto Ads, but manual ad slots are not
-            inserted into this guidance section and advertising does not affect
-            event ordering or editorial notes.
+            표시된 정보가 실제와 다르거나 중요한 내용이 빠져 있다면 문의
+            페이지로 알려주세요. 확인 후 정정하겠습니다.
           </p>
           <p>
-            Data quality is handled conservatively. Festival pages are indexable
-            only when the data has enough useful fields for a reader, and
-            sitemap entries are generated from pages that are suitable for
-            search. If a listing is outdated or missing important visitor
-            context, readers can use the contact page to request a correction.
-            This keeps the site useful for real users while reducing thin-page
-            and low-value-content risk during AdSense review.
-          </p>
-          <p>
-            Readers can start from the weekend page when they have a fixed date,
-            from the region page when travel distance matters, or from the theme
-            page when they want flower, food, music, family, night market, or
-            cultural events. Each path links back into individual festival pages
-            so the user journey remains clear for both people and crawlers.
-          </p>
-          <p>
-            The site avoids doorway pages and empty category shells by keeping
-            explanatory text, navigation, correction guidance, and policy links
-            available even when a specific data slice is small. This approach
-            supports search indexing, improves AdSense review evidence, and
-            gives visitors a practical checklist before they rely on any event
-            listing.
+            원하는 조건에 따라 주말 페이지에서 날짜 기준으로, 지역 페이지에서
+            이동 거리 기준으로, 테마 페이지에서 꽃·음식·공연·가족·야시장 등
+            관심사 기준으로 탐색을 시작할 수 있습니다.
           </p>
         </div>
       </section>
@@ -266,14 +235,15 @@ export default async function Home() {
               최신 업데이트
             </h2>
             <p className="prose-body mt-2 text-[var(--color-ink-muted)]">
-              진행 중·예정 축제 중 새로 반영된 항목을 확인합니다. 방문 전 공식 일정도 확인해 주세요.
+              진행 중·예정 축제 중 새로 반영된 항목을 확인합니다. 방문 전 공식
+              일정도 확인해 주세요.
             </p>
           </div>
           <Link
-            href="/plan"
+            href="/blog"
             className="text-sm font-semibold text-[var(--color-brand)] hover:underline"
           >
-            운영 상태 보기
+            축제 가이드 보기
           </Link>
         </div>
 
