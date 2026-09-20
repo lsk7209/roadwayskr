@@ -183,15 +183,46 @@ export async function fetchFestivals(opts: {
 }
 
 /**
- * 행사 상세 정보 (3개 엔드포인트 병렬 호출)
+ * 행사 상세 정보 (공통·소개 엔드포인트 병렬 호출)
  */
 export async function fetchFestivalDetail(contentId: string | number) {
   const [common, intro] = await Promise.all([
     callTourApi<FestivalCommonRaw>("detailCommon2", { contentId }),
     callTourApi<FestivalIntroRaw>("detailIntro2", { contentId, contentTypeId: 15 }),
   ]);
+  const commonDetail = FestivalCommonRaw.safeParse(common.items[0]);
+  const introDetail = FestivalIntroRaw.safeParse(intro.items[0]);
+  if (!commonDetail.success || !introDetail.success) {
+    throw new TourApiError("Incomplete festival detail response");
+  }
+  const expectedId = String(contentId);
+  if (
+    commonDetail.data.contentid !== expectedId ||
+    introDetail.data.contentid !== expectedId ||
+    introDetail.data.contenttypeid !== "15" ||
+    (commonDetail.data.contenttypeid !== undefined &&
+      commonDetail.data.contenttypeid !== "15")
+  ) {
+    throw new TourApiError("Festival detail identity or type mismatch");
+  }
+  // The API may report success with only identifiers. Such a response must not
+  // replace a previously populated record with normalized null fields. Check
+  // declared fields only; unknown passthrough metadata is not detail content.
+  const hasDetail = (record: Record<string, unknown>, fields: string[]) =>
+    fields.some(
+      (field) =>
+        !["contentid", "contenttypeid"].includes(field) &&
+        typeof record[field] === "string" &&
+        record[field].trim().length > 0,
+    );
+  if (
+    !hasDetail(commonDetail.data, Object.keys(FestivalCommonRaw.shape)) ||
+    !hasDetail(introDetail.data, Object.keys(FestivalIntroRaw.shape))
+  ) {
+    throw new TourApiError("Empty festival detail fields");
+  }
   return {
-    common: common.items[0],
-    intro: intro.items[0],
+    common: commonDetail.data,
+    intro: introDetail.data,
   };
 }

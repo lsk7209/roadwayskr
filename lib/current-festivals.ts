@@ -1,14 +1,10 @@
 import { and, eq, gte, inArray } from "drizzle-orm";
 import { festivals } from "../db/schema";
+import { seoulDate } from "./festival-dates";
 
 /** Calendar dates in the Korean event directory must not follow server UTC. */
 function getSeoulTodayIso(now: Date): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
+  return seoulDate(now);
 }
 
 export function currentFestivalCondition(now = new Date()) {
@@ -33,7 +29,7 @@ export function getWeekendRange(now = new Date()) {
   // Seoul 캘린더 날짜를 순수 날짜 연산용으로만 쓰는 UTC 앵커(실제 시각이 아님).
   const anchor = new Date(Date.UTC(year, month - 1, date));
   const dayOfWeek = anchor.getUTCDay(); // 0=일 ... 6=토
-  const offsetToSaturday = (6 - dayOfWeek + 7) % 7;
+  const offsetToSaturday = dayOfWeek === 0 ? -1 : (6 - dayOfWeek + 7) % 7;
 
   const sat = new Date(anchor);
   sat.setUTCDate(anchor.getUTCDate() + offsetToSaturday);

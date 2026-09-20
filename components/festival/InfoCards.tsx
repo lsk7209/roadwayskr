@@ -8,6 +8,19 @@
 
 import type { Festival } from "@/db";
 import { cleanTourText } from "@/lib/content";
+import {
+  festivalPeriod,
+  explicitFree,
+  operatingTime,
+} from "@/lib/festival-facts";
+import {
+  formatPeriod,
+  periodState,
+  PERIOD_LABELS,
+  scheduleOnDate,
+  seoulDate,
+} from "@/lib/festival-dates";
+import { eventSourceNote } from "@/lib/event-source-notes";
 
 interface Props {
   festival: Festival;
@@ -15,8 +28,13 @@ interface Props {
 
 export function InfoCards({ festival }: Props) {
   const fee = cleanTourText(festival.fee);
-  const playTime = cleanTourText(festival.playTime);
-  const useTime = cleanTourText(festival.useTime);
+  const period = festivalPeriod(festival);
+  const note = eventSourceNote({ ...festival, ...period });
+  const state = periodState(period.startDate, period.endDate, festival.status);
+  const todaySchedule = scheduleOnDate(
+    { ...period, status: festival.status, recurrence: note?.recurrence },
+    seoulDate(),
+  );
   const cards: Array<{
     label: string;
     value: string;
@@ -25,21 +43,27 @@ export function InfoCards({ festival }: Props) {
   }> = [
     {
       label: "기간",
-      value:
-        festival.startDate && festival.endDate
-          ? `${festival.startDate} ~ ${festival.endDate}`
-          : "확인 필요",
-      hint: festival.status === "ongoing" ? "진행 중" : undefined,
-      accent: festival.status === "ongoing",
+      value: formatPeriod(period.startDate, period.endDate),
+      hint: PERIOD_LABELS[state],
     },
     {
       label: "운영 시간",
-      value: playTime ?? useTime ?? "공식 발표 기준",
+      value: note?.programs
+        ? "프로그램별 시간 참조"
+        : (operatingTime(festival) ?? "운영 시간 미확인"),
+      hint:
+        todaySchedule === "CONFIRMED_SCHEDULE_ON_DATE"
+          ? "오늘 일정 있음 · 당일 공지 확인"
+          : todaySchedule === "NO_SCHEDULE_ON_DATE"
+            ? "오늘은 운영 일정 없음"
+            : todaySchedule === "CANCELLED_OCCURRENCE"
+              ? "취소 안내 확인"
+              : "개별 운영일 확인 필요",
     },
     {
       label: "입장료",
-      value: festival.feeIsFree ? "무료" : (fee ?? "공식 발표 기준"),
-      accent: festival.feeIsFree === true,
+      value: fee ?? "요금 미확인",
+      accent: explicitFree(fee),
     },
     {
       label: "어린이 동반",

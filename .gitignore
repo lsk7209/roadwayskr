@@ -5,6 +5,7 @@ dist
 .env
 .env.local
 .env.production
+.env.*.local
 .DS_Store
 *.log
 *.db
@@ -17,3 +18,6 @@ next-env.d.ts
 .omx
 tsconfig.tsbuildinfo
 .omc/
+.playwright-cli/
+output/playwright/
+.goal-harness/private/

@@ -2,7 +2,8 @@ import { ImageResponse } from "next/og";
 import { db, festivals } from "@/db";
 import { eq } from "drizzle-orm";
 
-export const runtime = "edge";
+// Shares the Node/libSQL data layer with the detail page (also supports local QA).
+export const runtime = "nodejs";
 export const alt = "축제 정보 - 여행고고";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

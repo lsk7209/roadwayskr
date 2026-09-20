@@ -11,6 +11,9 @@ import {
   buildCollectionPageLd,
   buildBreadcrumbListLd,
 } from "@/components/seo/JsonLd";
+import { PageAds } from "@/components/ads/PageAds";
+import { ListNavigation } from "@/components/festival/ListNavigation";
+import { parseListSearch, type SearchValues } from "@/lib/festival-list";
 import { currentFestivalCondition } from "@/lib/current-festivals";
 import { formatCollectionCountLabel } from "@/lib/collection-count-label";
 
@@ -18,6 +21,7 @@ export const revalidate = 3600;
 
 interface Params {
   params: Promise<{ themeSlug: string }>;
+  searchParams: Promise<SearchValues>;
 }
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
@@ -29,12 +33,17 @@ export async function generateStaticParams() {
   return THEMES.map((theme) => ({ themeSlug: theme.slug }));
 }
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Params): Promise<Metadata> {
   const parsed = await parseParams(params);
   if (!parsed) return {};
 
   const count = await getCount(parsed.theme.name);
-  const indexable = count >= MIN_ITEMS_FOR_INDEX;
+  const search = parseListSearch(await searchParams);
+  const indexable =
+    count >= MIN_ITEMS_FOR_INDEX && search?.page === 1 && !search.range;
 
   return {
     title: `${parsed.theme.name} 일정`,
@@ -48,11 +57,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function ThemePage({ params }: Params) {
+export default async function ThemePage({ params, searchParams }: Params) {
   const parsed = await parseParams(params);
   if (!parsed) return notFound();
 
   const { theme } = parsed;
+  const search = parseListSearch(await searchParams);
+  if (!search || search.range) return notFound();
   const [items, totalCount] = await Promise.all([
     db
       .select()
@@ -63,11 +74,14 @@ export default async function ThemePage({ params }: Params) {
           sql`${festivals.themesCsv} LIKE ${`%,${theme.name},%`}`,
         ),
       )
-      .orderBy(festivals.startDate)
-      .limit(80),
+      .orderBy(festivals.startDate, festivals.contentId)
+      .limit(24)
+      .offset((search.page - 1) * 24),
     getCount(theme.name),
   ]);
 
+  const pages = Math.max(1, Math.ceil(totalCount / 24));
+  if (search.page > pages) return notFound();
   const pageUrl = `${SITE_URL}/themes/${theme.slug}`;
   const collectionLd = buildCollectionPageLd({
     name: `${theme.name} 일정`,
@@ -105,10 +119,10 @@ export default async function ThemePage({ params }: Params) {
         {formatCollectionCountLabel(totalCount, items.length)}
       </p>
 
-      {items.length < MIN_ITEMS_FOR_INDEX ? (
+      {items.length === 0 ? (
         <p className="mt-6 rounded border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-ink-muted)]">
-          이 테마는 현재 행사 수가 적어 검색 색인은 보류합니다. 더 넓은 지역별
-          페이지나 이번 주말 페이지에서 행사를 확인해 주세요.
+          이 테마에 등록된 진행 중·예정 행사가 없습니다. 지역별 페이지나 이번
+          주말 페이지에서 행사를 확인해 주세요.
         </p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
@@ -122,6 +136,12 @@ export default async function ThemePage({ params }: Params) {
           ))}
         </ul>
       )}
+      <ListNavigation
+        path={`/themes/${theme.slug}`}
+        page={search.page}
+        pages={pages}
+      />
+      <PageAds eligible={items.length > 0} />
     </article>
   );
 }

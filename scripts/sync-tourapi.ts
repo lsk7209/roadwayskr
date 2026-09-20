@@ -23,6 +23,7 @@ import {
   TourApiError,
 } from "../lib/tourapi";
 import { notifySearchEngines } from "../lib/search-indexing";
+import { prepareFestivalUpdate } from "../lib/tourapi/merge";
 
 type SyncMode = "incremental" | "full";
 
@@ -59,7 +60,10 @@ async function main() {
 
     console.log(`[sync-tourapi] candidates=${items.length}`);
 
-    const itemLimit = Math.min(options.limit ?? MAX_ITEMS_PER_RUN, MAX_ITEMS_PER_RUN);
+    const itemLimit = Math.min(
+      options.limit ?? MAX_ITEMS_PER_RUN,
+      MAX_ITEMS_PER_RUN,
+    );
     const limited = items.slice(0, itemLimit);
     if (limited.length < items.length) {
       console.warn(
@@ -79,13 +83,13 @@ async function main() {
         });
 
         const result = await upsertFestival(normalized);
-        if (result === "inserted" || result === "updated") {
+        if (result.status === "inserted" || result.status === "updated") {
           changedUrls.add(
-            `${process.env.SITE_URL ?? "https://roadways.kr"}/festivals/${base.contentid}/${normalized.slug}`,
+            `${process.env.SITE_URL ?? "https://roadways.kr"}/festivals/${normalized.contentId}/${encodeURIComponent(result.slug)}`,
           );
         }
-        if (result === "inserted") inserted++;
-        else if (result === "updated") updated++;
+        if (result.status === "inserted") inserted++;
+        else if (result.status === "updated") updated++;
         else skipped++;
       } catch (err) {
         errors++;
@@ -163,11 +167,14 @@ async function collectIncremental() {
 async function collectFullYear(from?: string, to?: string) {
   // ?�늘 ~ 12개월 ???�사 (?�체 ?�도)
   const today = new Date();
-  const start = normalizeYmd(from) ?? today.toISOString().slice(0, 10).replace(/-/g, "");
-  const end = normalizeYmd(to) ?? new Date(today.getTime() + DEFAULT_FULL_RANGE_DAYS * 86_400_000)
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, "");
+  const start =
+    normalizeYmd(from) ?? today.toISOString().slice(0, 10).replace(/-/g, "");
+  const end =
+    normalizeYmd(to) ??
+    new Date(today.getTime() + DEFAULT_FULL_RANGE_DAYS * 86_400_000)
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, "");
 
   const all: Awaited<ReturnType<typeof fetchFestivals>>["items"] = [];
   let pageNo = 1;
@@ -235,24 +242,25 @@ async function upsertFestival(row: typeof festivals.$inferInsert) {
   }
 
   const existing = await db
-    .select({ id: festivals.contentId })
+    .select()
     .from(festivals)
     .where(eq(festivals.contentId, contentId))
     .limit(1);
 
   if (existing.length === 0) {
     await db.insert(festivals).values(row);
-    return "inserted" as const;
+    return { status: "inserted" as const, slug: row.slug };
   }
 
+  const update = prepareFestivalUpdate(existing[0], row);
   await db
     .update(festivals)
-    .set({
-      ...row,
-      updatedAt: new Date(),
-    })
+    .set(update.row)
     .where(eq(festivals.contentId, contentId));
-  return "updated" as const;
+  return {
+    status: update.changed ? ("updated" as const) : ("skipped" as const),
+    slug: existing[0].slug,
+  };
 }
 
 function sleep(ms: number) {
@@ -269,4 +277,3 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-

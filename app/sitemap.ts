@@ -5,6 +5,8 @@ import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
 import { currentFestivalCondition } from "@/lib/current-festivals";
 
+import { seoulDate, relativeMonth } from "@/lib/festival-dates";
+
 const MIN_MONTHLY_ITEMS = 3;
 const MAX_MONTHLY_MONTHS = 18;
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
@@ -24,7 +26,7 @@ export const revalidate = 3600;
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const lastUpdated = await getLatestFestivalUpdatedAt().catch(() => now);
+  const lastUpdated = await getLatestFestivalUpdatedAt();
   const siteUrl = SITE_URL;
   const urlWithPath = (path: string) => toAbsoluteUrl(siteUrl, path);
 
@@ -131,7 +133,7 @@ async function getLatestFestivalUpdatedAt() {
     .orderBy(desc(festivals.updatedAt))
     .limit(1);
 
-  return rows[0]?.updatedAt ?? new Date();
+  return rows[0]?.updatedAt;
 }
 
 type SitemapFestivalRow = {
@@ -147,7 +149,7 @@ function buildAreaPages(
   now: Date,
   siteUrl: string,
 ): MetadataRoute.Sitemap {
-  const today = now.toISOString().slice(0, 10);
+  const today = seoulDate(now);
   const pages: MetadataRoute.Sitemap = [];
 
   for (const area of AREAS) {
@@ -176,7 +178,7 @@ function buildThemePages(
   now: Date,
   siteUrl: string,
 ): MetadataRoute.Sitemap {
-  const today = now.toISOString().slice(0, 10);
+  const today = seoulDate(now);
   const pages: MetadataRoute.Sitemap = [];
 
   for (const theme of THEMES) {
@@ -249,7 +251,7 @@ function isMonthlyAreaMatch(
 function getLatestUpdatedAt(rows: SitemapFestivalRow[]) {
   return rows.reduce(
     (latest, row) => (row.updatedAt > latest ? row.updatedAt : latest),
-    rows[0]?.updatedAt ?? new Date(),
+    rows[0]!.updatedAt,
   );
 }
 
@@ -264,8 +266,9 @@ function getMonthRange(year: number, month: number) {
 
 function getStaticMonths(start: Date, count: number) {
   const months: Array<{ year: number; month: number }> = [];
-  const baseYear = start.getUTCFullYear();
-  const baseMonth = start.getUTCMonth();
+  const current = relativeMonth(0, start);
+  const baseYear = current.year;
+  const baseMonth = current.month - 1;
 
   for (let offset = 0; offset < count; offset++) {
     const date = new Date(Date.UTC(baseYear, baseMonth + offset, 1));

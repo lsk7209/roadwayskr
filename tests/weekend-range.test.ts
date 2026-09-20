@@ -18,11 +18,11 @@ test("mid-week instants resolve to the upcoming Saturday/Sunday", () => {
   assert.equal(sunIso, "2026-09-13");
 });
 
-test("Sunday instants roll forward to next weekend, matching prior behavior", () => {
+test("Sunday stays in this weekend so Saturday-only records remain discoverable", () => {
   // 2026-09-13 is a Sunday in Seoul.
   const { satIso, sunIso } = getWeekendRange(new Date("2026-09-13T04:00:00Z"));
-  assert.equal(satIso, "2026-09-19");
-  assert.equal(sunIso, "2026-09-20");
+  assert.equal(satIso, "2026-09-12");
+  assert.equal(sunIso, "2026-09-13");
 });
 
 test("Saturday itself resolves to today/tomorrow", () => {

@@ -44,6 +44,7 @@ export default function CoupangAffiliateBanner() {
             borderRadius: 8,
             color: "#111827",
             display: "flex",
+            flexWrap: "wrap",
             gap: 12,
             justifyContent: "center",
             minHeight: 92,

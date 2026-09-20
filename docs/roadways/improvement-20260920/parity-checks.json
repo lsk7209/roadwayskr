@@ -1,0 +1,135 @@
+{
+  "observedAt": "2026-09-20T01:31:04.301Z",
+  "origin": "http://127.0.0.1:3020",
+  "dataset": "864 production rows; 3 reviewed LOCAL repairs; no production writes",
+  "checks": [
+    {
+      "name": "same-data status/canonical/robots /monthly/2026/10/제주",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /monthly/2026/10/제주",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /monthly/2026/9/서울",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /monthly/2026/9/서울",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /festivals/3359644/3359644-석계역-달빛야시장",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /festivals/3359644/3359644-석계역-달빛야시장",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /monthly/2026/9/경기도",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /monthly/2026/9/경기도",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /monthly/2026/9/강원도",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /monthly/2026/9/강원도",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /festivals/229054/229054-지상군페스티벌",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /festivals/229054/229054-지상군페스티벌",
+      "pass": true
+    },
+    {
+      "name": "same-data status/canonical/robots /monthly/2026/11/서울",
+      "pass": true
+    },
+    {
+      "name": "repaired canonical /monthly/2026/11/서울",
+      "pass": true
+    },
+    {
+      "name": "Seoul current page 1 ordered IDs",
+      "pass": true
+    },
+    {
+      "name": "Seoul current page 2 ordered IDs",
+      "pass": true
+    },
+    {
+      "name": "Seoul current no missing/duplicate cards",
+      "pass": true
+    },
+    {
+      "name": "Seoul weekend page 1 ordered IDs",
+      "pass": true
+    },
+    {
+      "name": "Seoul weekend page 2 ordered IDs",
+      "pass": true
+    },
+    {
+      "name": "Seoul weekend no missing/duplicate cards",
+      "pass": true
+    },
+    {
+      "name": "229054 schema date range",
+      "pass": true
+    },
+    {
+      "name": "229054 official venue present",
+      "pass": true
+    },
+    {
+      "name": "3000221 schema date range",
+      "pass": true
+    },
+    {
+      "name": "3000221 official venue present",
+      "pass": true
+    },
+    {
+      "name": "3000221 unknown fee omitted",
+      "pass": true
+    },
+    {
+      "name": "obsolete Eunpyeong coordinate removed",
+      "pass": true
+    },
+    {
+      "name": "Eunpyeong ended detail is noindex",
+      "pass": true
+    },
+    {
+      "name": "3337617 schema date range",
+      "pass": true
+    },
+    {
+      "name": "3337617 official venue present",
+      "pass": true
+    },
+    {
+      "name": "3337617 unknown fee omitted",
+      "pass": true
+    }
+  ]
+}

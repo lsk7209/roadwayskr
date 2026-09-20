@@ -1,0 +1,66 @@
+{
+  "state": "REVIEW_ONLY_LOCAL_SIMULATION",
+  "verifiedOn": "2026-09-20",
+  "snapshotSha256": "c5360dbcc292b35a64d3ecd9c1cf061770a5ab33f1b35c15306436058adadc63",
+  "preserve": ["content_id", "title", "slug", "curator_note", "is_indexable", "raw_json", "created_at", "synced_at"],
+  "productionApply": "NOT_AUTHORIZED_NOT_IMPLEMENTED",
+  "changes": [
+    {
+      "contentId": 229054,
+      "source": "https://www.mcst.go.kr/site/s_culture/festival/festivalView.jsp?pRo=21&pSeq=12690",
+      "set": {
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-05",
+        "event_place": "충남 계룡대 활주로",
+        "play_time": "09:00~17:00",
+        "fee": "무료",
+        "fee_is_free": 1,
+        "organizer": "지상군페스티벌기획단",
+        "description": "2026년 지상군페스티벌은 10월 1일부터 5일까지 계룡대 활주로에서 열립니다. 군 장비 전시와 체험, 군악·의장대 공연 등을 만날 수 있습니다.",
+        "overview": "2026년 지상군페스티벌은 10월 1일부터 5일까지 계룡대 활주로에서 열립니다. 군 장비 전시와 체험, 군악·의장대 공연 등을 만날 수 있습니다. 문화체육관광부 안내에 따르면 운영 시간은 09:00~17:00이며 입장료는 무료입니다.",
+        "source_url": "https://www.mcst.go.kr/site/s_culture/festival/festivalView.jsp?pRo=21&pSeq=12690"
+      },
+      "notes": "Existing TourAPI address/coordinates retained; no newly verified entrance coordinate. Recompute status from the execution date."
+    },
+    {
+      "contentId": 3000221,
+      "source": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=650",
+      "set": {
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-19",
+        "event_place": "구파발 폭포 만남의 광장 (구파발역 1·2번 출구 앞)",
+        "address": "서울특별시 은평구 구파발 폭포 만남의 광장",
+        "address_detail": null,
+        "lat": null,
+        "lng": null,
+        "play_time": "13:00~18:00",
+        "tel": "02-351-6876",
+        "description": "2026년 은평청년축제는 9월 19일 구파발역 앞 광장에서 열리는 청년의 날 행사입니다. 청년 부스와 공연, 토크 프로그램을 진행합니다.",
+        "overview": "2026년 은평청년축제는 9월 19일 구파발역 앞 광장에서 열리는 청년의 날 행사입니다. 청년 부스와 공연, 토크 프로그램을 진행합니다. 서울시 축제 안내에 공개된 운영 시간은 13:00~18:00입니다.",
+        "source_url": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=650"
+      },
+      "notes": "Official venue differs from the stored Nokbeon-dong address. Remove obsolete coordinates; no guessed map pin. Fee remains unknown."
+    },
+    {
+      "contentId": 3337617,
+      "source": "https://www.hscity.go.kr/www/user/bbs/BD_selectBbs.do?q_bbsCode=1051&q_bbscttSn=20260914085216256",
+      "set": {
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "event_place": "동탄 여울공원 음악분수 일원",
+        "description": "2026년 화성시 도농 어울림 축제는 9월 19일부터 20일까지 동탄 여울공원에서 열립니다. 농업 체험과 지역 음식 소개를 통해 도시와 농촌의 교류를 돕는 행사입니다.",
+        "overview": "2026년 화성시 도농 어울림 축제는 9월 19일부터 20일까지 동탄 여울공원에서 열립니다. 농업 체험과 지역 음식 소개를 통해 도시와 농촌의 교류를 돕는 행사입니다. 화성시 보도자료는 음악분수 주변을 행사 장소로 안내합니다.",
+        "source_url": "https://www.hscity.go.kr/www/user/bbs/BD_selectBbs.do?q_bbsCode=1051&q_bbscttSn=20260914085216256"
+      },
+      "notes": "September 14 municipal notice explicitly schedules two days. Daily hours and fee remain unknown. Existing TourAPI coordinates are not newly verified."
+    }
+  ],
+  "applyRequirements": [
+    "Explicit authorization for exactly these three production records; a separate production-capable tool is required.",
+    "Fresh SELECT and exact before-row comparison; abort if any record changed, has a curator conflict, or is cancelled.",
+    "Save before rows in an ignored rollback file; update all three in a transaction with conditional preconditions and validate affected counts.",
+    "Preserve URLs, editorial/index flags and original raw/source sync timestamps; do not fabricate TourAPI intro/common data.",
+    "Compute status at execution in Asia/Seoul and updated_at at actual write time; do not reuse simulation timestamps.",
+    "Verify source, detail/list/schema consistency after commit; public cache refresh and application deployment remain separate actions."
+  ]
+}

@@ -2,15 +2,18 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
-import { AutoAds } from "@/components/ads/AutoAds";
-import CoupangAffiliateBanner from "@/components/affiliate/CoupangAffiliateBanner";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { Suspense } from "react";
+import { AdDocumentGuard } from "@/components/ads/AdDocumentGuard";
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 const NAVER_VERIFICATION =
   process.env.NAVER_VERIFICATION ?? "ce71e583d5763935ec467df1eba2d290d9552ae0";
 const GOOGLE_SITE_VERIFICATION =
-  process.env.GOOGLE_SITE_VERIFICATION ?? "nS4LR8kOtTWrOVd6mtEwxiSyF457vBKjcVeMuGRua3Y";
+  process.env.GOOGLE_SITE_VERIFICATION ??
+  "nS4LR8kOtTWrOVd6mtEwxiSyF457vBKjcVeMuGRua3Y";
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 const ADSENSE_PUBLISHER_ID =
   process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID ??
@@ -27,7 +30,14 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ["축제", "행사", "이번주말", "가족 나들이", "주말 여행", "지역 축제"],
+  keywords: [
+    "축제",
+    "행사",
+    "이번주말",
+    "가족 나들이",
+    "주말 여행",
+    "지역 축제",
+  ],
   applicationName: SITE_NAME,
   authors: [{ name: "고고지기", url: `${SITE_URL}/about/curator` }],
   alternates: { canonical: SITE_URL },
@@ -37,7 +47,8 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: SITE_NAME,
     title: `${SITE_NAME} - 전국 축제·행사 큐레이션`,
-    description: "이번 주말, 우리 동네 축제와 행사를 빠르고 정확하게 확인하세요.",
+    description:
+      "이번 주말, 우리 동네 축제와 행사를 빠르고 정확하게 확인하세요.",
   },
   twitter: {
     card: "summary_large_image",
@@ -76,11 +87,6 @@ export default function RootLayout({
     "@type": "WebSite",
     name: SITE_NAME,
     url: SITE_URL,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
   };
 
   return (
@@ -93,6 +99,9 @@ export default function RootLayout({
         ) : null}
       </head>
       <body>
+        <Suspense fallback={null}>
+          <AdDocumentGuard />
+        </Suspense>
         {GA_MEASUREMENT_ID ? (
           <>
             <Script
@@ -110,13 +119,15 @@ export default function RootLayout({
             </Script>
           </>
         ) : null}
-        <AutoAds publisherId={ADSENSE_PUBLISHER_ID} />
         <header className="border-b border-[var(--color-line)] bg-[var(--color-card)]">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
             <Link href="/" className="text-lg font-bold tracking-tight">
               여행<span className="text-[var(--color-brand)]">고고</span>
             </Link>
-            <nav className="flex items-center gap-4 text-sm text-[var(--color-ink-muted)]">
+            <nav
+              aria-label="주 메뉴"
+              className="flex items-center gap-3 text-xs sm:text-sm text-[var(--color-ink-muted)]"
+            >
               <Link href="/weekend" className="hover:text-[var(--color-ink)]">
                 이번 주말
               </Link>
@@ -127,29 +138,31 @@ export default function RootLayout({
                 테마별
               </Link>
               <Link href="/blog" className="hover:text-[var(--color-ink)]">
-                Blog
+                최근 소식
               </Link>
             </nav>
           </div>
         </header>
 
         <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-        <CoupangAffiliateBanner />
 
         <footer className="mt-16 border-t border-[var(--color-line)] bg-[var(--color-card)] py-8">
           <div className="mx-auto max-w-6xl space-y-2 px-4 text-sm text-[var(--color-ink-muted)]">
             <p>
               <strong className="text-[var(--color-ink)]">여행고고</strong> ·
               큐레이터{" "}
-              <Link href="/about/curator" className="underline underline-offset-2">
+              <Link
+                href="/about/curator"
+                className="underline underline-offset-2"
+              >
                 고고지기
               </Link>
             </p>
             <p>
-              데이터 출처: 한국관광공사 TourAPI. 변경·취소 정보는 수집 주기에 따라
-              반영됩니다.
+              데이터 출처: 한국관광공사 TourAPI. 변경·취소 정보는 수집 주기에
+              따라 반영됩니다.
             </p>
-            <div className="flex gap-4 pt-2">
+            <div className="flex flex-wrap gap-4 pt-2">
               <Link href="/about" className="hover:underline">
                 소개
               </Link>

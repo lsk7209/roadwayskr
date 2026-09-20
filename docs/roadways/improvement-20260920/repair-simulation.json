@@ -1,0 +1,102 @@
+{
+  "observedAt": "2026-09-20T01:23:09.202136+00:00",
+  "mode": "LOCAL_ONLY",
+  "checks": [
+    "Exactly 3 of 864 rows changed; 861 rows identical",
+    "URLs/editorial/index/raw/sync fields preserved",
+    "Source snapshot and parity.db read-only",
+    "Unknown fees/hours not invented"
+  ],
+  "changes": [
+    {
+      "contentId": 229054,
+      "before": {
+        "start_date": null,
+        "end_date": null,
+        "event_place": null,
+        "play_time": null,
+        "fee": null,
+        "fee_is_free": null,
+        "organizer": null,
+        "description": null,
+        "overview": null,
+        "source_url": null,
+        "status": "upcoming",
+        "updated_at": 1789766917095
+      },
+      "after": {
+        "start_date": "2026-10-01",
+        "end_date": "2026-10-05",
+        "event_place": "충남 계룡대 활주로",
+        "play_time": "09:00~17:00",
+        "fee": "무료",
+        "fee_is_free": 1,
+        "organizer": "지상군페스티벌기획단",
+        "description": "2026년 지상군페스티벌은 10월 1일부터 5일까지 계룡대 활주로에서 열립니다. 군 장비 전시와 체험, 군악·의장대 공연 등을 만날 수 있습니다.",
+        "overview": "2026년 지상군페스티벌은 10월 1일부터 5일까지 계룡대 활주로에서 열립니다. 군 장비 전시와 체험, 군악·의장대 공연 등을 만날 수 있습니다. 문화체육관광부 안내에 따르면 운영 시간은 09:00~17:00이며 입장료는 무료입니다.",
+        "source_url": "https://www.mcst.go.kr/site/s_culture/festival/festivalView.jsp?pRo=21&pSeq=12690",
+        "status": "upcoming",
+        "updated_at": 1789867389202
+      }
+    },
+    {
+      "contentId": 3000221,
+      "before": {
+        "start_date": null,
+        "end_date": null,
+        "event_place": null,
+        "address": "서울특별시 은평구 은평로 195 (녹번동)",
+        "address_detail": null,
+        "lat": 37.6022297707,
+        "lng": 126.929352269,
+        "play_time": null,
+        "tel": "010-9771-2090",
+        "description": null,
+        "overview": null,
+        "source_url": null,
+        "status": "upcoming",
+        "updated_at": 1789162471000
+      },
+      "after": {
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-19",
+        "event_place": "구파발 폭포 만남의 광장 (구파발역 1·2번 출구 앞)",
+        "address": "서울특별시 은평구 구파발 폭포 만남의 광장",
+        "address_detail": null,
+        "lat": null,
+        "lng": null,
+        "play_time": "13:00~18:00",
+        "tel": "02-351-6876",
+        "description": "2026년 은평청년축제는 9월 19일 구파발역 앞 광장에서 열리는 청년의 날 행사입니다. 청년 부스와 공연, 토크 프로그램을 진행합니다.",
+        "overview": "2026년 은평청년축제는 9월 19일 구파발역 앞 광장에서 열리는 청년의 날 행사입니다. 청년 부스와 공연, 토크 프로그램을 진행합니다. 서울시 축제 안내에 공개된 운영 시간은 13:00~18:00입니다.",
+        "source_url": "https://festival.seoul.go.kr/festival/main/festivalView.do?festacode=650",
+        "status": "ended",
+        "updated_at": 1789867389202
+      }
+    },
+    {
+      "contentId": 3337617,
+      "before": {
+        "start_date": null,
+        "end_date": null,
+        "event_place": null,
+        "description": null,
+        "overview": null,
+        "source_url": null,
+        "status": "upcoming",
+        "updated_at": 1789162467000
+      },
+      "after": {
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "event_place": "동탄 여울공원 음악분수 일원",
+        "description": "2026년 화성시 도농 어울림 축제는 9월 19일부터 20일까지 동탄 여울공원에서 열립니다. 농업 체험과 지역 음식 소개를 통해 도시와 농촌의 교류를 돕는 행사입니다.",
+        "overview": "2026년 화성시 도농 어울림 축제는 9월 19일부터 20일까지 동탄 여울공원에서 열립니다. 농업 체험과 지역 음식 소개를 통해 도시와 농촌의 교류를 돕는 행사입니다. 화성시 보도자료는 음악분수 주변을 행사 장소로 안내합니다.",
+        "source_url": "https://www.hscity.go.kr/www/user/bbs/BD_selectBbs.do?q_bbsCode=1051&q_bbscttSn=20260914085216256",
+        "status": "ongoing",
+        "updated_at": 1789867389202
+      }
+    }
+  ],
+  "remainingUndated": 283
+}

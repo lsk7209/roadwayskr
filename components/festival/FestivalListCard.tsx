@@ -1,6 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
+import { FestivalLink as Link } from "./FestivalLink";
 import type { Festival } from "@/db";
+import { festivalPeriod } from "@/lib/festival-facts";
+import { formatPeriod, PERIOD_LABELS, periodState } from "@/lib/festival-dates";
+import { eventSourceNote } from "@/lib/event-source-notes";
 
 interface FestivalListCardProps {
   festival: Pick<
@@ -12,7 +15,8 @@ interface FestivalListCardProps {
     | "endDate"
     | "address"
     | "imageUrl"
-  >;
+  > &
+    Partial<Pick<Festival, "status" | "rawJson" | "playTime">>;
   href: string;
   titleLevel?: "h2" | "h3";
   priority?: boolean;
@@ -28,6 +32,8 @@ export function FestivalListCard({
   priority = false,
 }: FestivalListCardProps) {
   const TitleTag = titleLevel === "h3" ? "h3" : "h2";
+  const period = festivalPeriod(festival);
+  const note = eventSourceNote({ ...festival, ...period });
 
   return (
     <li className="h-full min-w-0">
@@ -49,20 +55,25 @@ export function FestivalListCard({
             </div>
           )}
           <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[var(--color-ink)] shadow-[var(--shadow-float)]">
-            주말 추천
-          </span>
-          <span
-            aria-hidden="true"
-            className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-[var(--color-ink)] shadow-[var(--shadow-float)]"
-          >
-            ♡
+            {
+              PERIOD_LABELS[
+                periodState(period.startDate, period.endDate, festival.status)
+              ]
+            }
           </span>
         </div>
 
         <div className="min-w-0 pt-3">
           <TitleTag className={TITLE_CLASS}>{festival.title}</TitleTag>
           <p className="mt-1 text-sm leading-5 text-[var(--color-muted)]">
-            {festival.startDate} ~ {festival.endDate}
+            {formatPeriod(period.startDate, period.endDate)}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+            {note?.recurrence
+              ? "금·토 운영 · 당일 변경 공지 확인"
+              : note?.programs
+                ? "여러 장소 · 프로그램별 일정 확인"
+                : "개별 운영일·시간 확인 필요"}
           </p>
           {festival.address && (
             <p className="mt-1 line-clamp-1 text-sm leading-5 text-[var(--color-muted)]">

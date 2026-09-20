@@ -5,13 +5,13 @@
   font-weight: 45 920;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2")
+  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/variable/woff2/PretendardVariable.woff2")
     format("woff2-variations");
 }
 
 @theme {
-  --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
-    sans-serif;
+  --font-sans:
+    "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-display: "Pretendard", system-ui, sans-serif;
 
   --color-paper: #ffffff;
@@ -30,8 +30,8 @@
   --color-success: #2f9e6c;
   --color-warn: #d97a3a;
 
-  --shadow-float: rgba(0, 0, 0, 0.02) 0 0 0 1px,
-    rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+  --shadow-float:
+    rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0,
     rgba(0, 0, 0, 0.1) 0 4px 8px 0;
 }
 

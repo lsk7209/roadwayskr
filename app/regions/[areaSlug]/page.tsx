@@ -1,150 +1,135 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { and, eq, sql } from "drizzle-orm";
-
-import { db, festivals } from "@/db";
-import { AREAS, findAreaBySlug } from "@/lib/regions";
-import { FestivalListCard } from "@/components/festival/FestivalListCard";
-import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
-import { currentFestivalCondition } from "@/lib/current-festivals";
-import { formatCollectionCountLabel } from "@/lib/collection-count-label";
+import { notFound, permanentRedirect } from "next/navigation";
+import { db } from "@/db";
+import { findAreaBySlug } from "@/lib/regions";
 import {
-  JsonLd,
-  buildCollectionPageLd,
-  buildBreadcrumbListLd,
-} from "@/components/seo/JsonLd";
+  festivalPage,
+  parseListSearch,
+  type SearchValues,
+} from "@/lib/festival-list";
+import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import {
+  ListNavigation,
+  MonthLinks,
+} from "@/components/festival/ListNavigation";
+import { PageAds } from "@/components/ads/PageAds";
+import { JsonLd, buildCollectionPageLd } from "@/components/seo/JsonLd";
 
-export const revalidate = 3600;
-
-interface Params {
+interface Props {
   params: Promise<{ areaSlug: string }>;
+  searchParams: Promise<SearchValues>;
 }
-
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
-  .trim()
-  .replace(/\/+$/, "");
-const MIN_ITEMS_FOR_INDEX = 3;
-
-export async function generateStaticParams() {
-  return AREAS.map((a) => ({ areaSlug: a.slug }));
-}
-
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+async function context({ params, searchParams }: Props) {
   const { areaSlug } = await params;
-  const decoded = safeDecode(areaSlug);
-  if (!decoded) return {};
-  const area = findAreaBySlug(decoded);
-  if (!area) return {};
-
-  const url = `${SITE_URL}/regions/${area.slug}`;
-
-  // 가치 평가: 진행 중 + 예정 합쳐 최소 N건 이상이어야 색인
-  const ongoing = await getCount(area.code);
-  const indexable = ongoing >= MIN_ITEMS_FOR_INDEX;
-
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(areaSlug);
+  } catch {
+    return null;
+  }
+  const area =
+    decoded === "미분류"
+      ? {
+          code: "unknown",
+          slug: "미분류",
+          name: "지역 확인 필요",
+          shortName: "미분류",
+        }
+      : findAreaBySlug(decoded);
+  const search = parseListSearch(await searchParams);
+  if (!area || !search) return null;
+  return { area, search, decoded };
+}
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const ctx = await context(props);
+  if (!ctx) return {};
+  const { total } = await festivalPage(db, {
+    ...ctx.search,
+    areaCode: ctx.area.code,
+    pageSize: 1,
+  });
   return {
-    title: `${area.name} 축제·행사`,
-    description: `${area.name}의 진행 중·예정 축제와 행사 ${ongoing}건을 큐레이션했어요. 거리·운영시간·입장료·어린이 동반 정보까지 한눈에.`,
-    alternates: { canonical: url },
-    robots: indexable
-      ? { index: true, follow: true }
-      : { index: false, follow: true },
+    title: `${ctx.area.name} 축제·행사`,
+    description: `${ctx.area.name} 행사 ${total}건. 날짜와 장소를 확인하세요.`,
+    alternates: { canonical: `https://roadways.kr/regions/${ctx.area.slug}` },
+    robots: {
+      index:
+        total >= 3 &&
+        !ctx.search.range &&
+        ctx.search.page === 1 &&
+        ctx.area.code !== "unknown",
+      follow: true,
+    },
   };
 }
-
-export default async function AreaHub({ params }: Params) {
-  const { areaSlug } = await params;
-  const decoded = safeDecode(areaSlug);
-  if (!decoded) return notFound();
-
-  const area = findAreaBySlug(decoded);
-  if (!area) return notFound();
-
-  const [items, totalCount] = await Promise.all([
-    db
-      .select()
-      .from(festivals)
-      .where(and(eq(festivals.areaCode, area.code), currentFestivalCondition()))
-      .orderBy(festivals.startDate)
-      .limit(60),
-    getCount(area.code),
-  ]);
-
-  const pageUrl = `${SITE_URL}/regions/${area.slug}`;
-  const collectionLd = buildCollectionPageLd({
-    name: `${area.name} 축제·행사`,
-    description: `${area.name}의 진행 중·예정 축제와 행사 목록`,
-    url: pageUrl,
-    items: items.map((f) => ({
-      name: f.title,
-      url: `${SITE_URL}/festivals/${f.contentId}/${f.slug}`,
-    })),
-  });
-  const breadcrumbLd = buildBreadcrumbListLd([
-    { name: "홈", url: SITE_URL },
-    { name: "지역별", url: `${SITE_URL}/regions` },
-    { name: area.name, url: pageUrl },
-  ]);
-
+export default async function AreaHub(props: Props) {
+  const ctx = await context(props);
+  if (!ctx) notFound();
+  const { area, search, decoded } = ctx;
+  const path = `/regions/${area.slug}`;
+  if (decoded !== area.slug) {
+    const { listHref } = await import("@/lib/festival-list");
+    permanentRedirect(listHref(encodeURI(path), search.range, search.page));
+  }
+  const result = await festivalPage(db, { ...search, areaCode: area.code });
+  if (search.page > result.pages) notFound();
   return (
     <article className="prose-body prose-ko">
-      <JsonLd id="ld-collection" data={collectionLd} />
-      <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
-      <nav className="text-xs text-[var(--color-ink-muted)] mb-2">
-        <Link href="/" className="hover:underline">
-          홈
-        </Link>{" "}
-        ›{" "}
-        <Link href="/regions" className="hover:underline">
+      <JsonLd
+        id="ld-collection"
+        data={buildCollectionPageLd({
+          name: `${area.name} 축제·행사`,
+          description: "선택한 지역과 기간의 행사",
+          url: `https://roadways.kr${path}`,
+          items: result.items.map((f) => ({
+            name: f.title,
+            url: `https://roadways.kr/festivals/${f.contentId}/${encodeURIComponent(f.slug)}`,
+          })),
+        })}
+      />
+      <nav className="mb-2 text-xs">
+        <Link href="/regions" className="underline">
           지역별
         </Link>{" "}
-        › <span>{area.name}</span>
+        › {area.name}
       </nav>
-
-      <h1 className="text-3xl font-bold tracking-tight">
-        {area.name} 축제·행사
-      </h1>
-      <p className="mt-2 text-[var(--color-ink-muted)]">
-        {area.name} 진행 중·예정 행사{" "}
-        {formatCollectionCountLabel(totalCount, items.length)}
+      <h1 className="text-3xl font-bold">{area.name} 축제·행사</h1>
+      <p className="mt-2">
+        {search.range
+          ? `${search.range.from} ~ ${search.range.to}`
+          : "진행 중·예정"}{" "}
+        행사 전체 {result.total}건 · 현재 표시 {result.items.length}건
       </p>
-
-      {items.length < MIN_ITEMS_FOR_INDEX ? (
-        <p className="mt-6 rounded border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-ink-muted)]">
-          현재 등록된 진행·예정 행사가 적습니다. 데이터 동기화 직후이거나
-          비수기일 수 있어요. 인근 지역 페이지를 둘러보세요.
+      {search.range && (
+        <p className="mt-2 text-sm">
+          <Link href={path} className="underline">
+            {area.name} 진행 중·예정 전체 기간 행사 보기
+          </Link>
         </p>
+      )}
+      {area.code !== "unknown" && <MonthLinks areaSlug={area.slug} />}
+      {result.total === 0 ? (
+        <p className="my-8">선택한 조건에 등록된 행사가 없습니다.</p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
-          {items.map((f, i) => (
+          {result.items.map((festival, i) => (
             <FestivalListCard
-              key={f.contentId}
-              href={`/festivals/${f.contentId}/${f.slug}`}
-              festival={f}
+              key={festival.contentId}
+              festival={festival}
+              href={`/festivals/${festival.contentId}/${festival.slug}`}
               priority={i === 0}
             />
           ))}
         </ul>
       )}
-
-      <HubSourceGuide title={`${area.name} 행사`} scope={`${area.name} 지역`} />
+      <ListNavigation
+        path={path}
+        range={search.range}
+        page={search.page}
+        pages={result.pages}
+      />
+      <PageAds eligible={result.items.length > 0} />
     </article>
   );
-}
-
-async function getCount(areaCode: string): Promise<number> {
-  const rows = await db
-    .select({ cnt: sql<number>`count(*)` })
-    .from(festivals)
-    .where(and(eq(festivals.areaCode, areaCode), currentFestivalCondition()));
-  return Number(rows[0]?.cnt ?? 0);
-}
-
-function safeDecode(value: string) {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return null;
-  }
 }

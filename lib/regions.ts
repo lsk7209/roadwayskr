@@ -35,6 +35,10 @@ export const AREAS: AreaInfo[] = [
 
 const BY_SLUG = new Map(AREAS.map((a) => [a.slug, a]));
 const BY_CODE = new Map(AREAS.map((a) => [a.code, a]));
+for (const area of AREAS) {
+  BY_SLUG.set(area.name, area);
+  BY_SLUG.set(area.shortName, area);
+}
 
 export const findAreaBySlug = (slug: string) => BY_SLUG.get(slug);
 export const findAreaByCode = (code: string) => BY_CODE.get(code);

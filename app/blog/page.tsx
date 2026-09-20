@@ -5,18 +5,20 @@ import { desc, sql } from "drizzle-orm";
 import { db, festivals } from "@/db";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 
+import { PageAds } from "@/components/ads/PageAds";
+
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
   .trim()
   .replace(/\/+$/, "");
 
 export const metadata: Metadata = {
-  title: "여행고고 축제 가이드",
+  title: "최근 업데이트된 축제·행사",
   description:
     "최근 업데이트된 전국 축제·행사 목록을 지역, 테마, 공식 정보 확인 방법과 함께 정리했습니다.",
   alternates: { canonical: `${SITE_URL}/blog` },
 };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 async function getLatestFestivalGuides() {
   return db
@@ -28,13 +30,13 @@ async function getLatestFestivalGuides() {
 }
 
 export default async function BlogPage() {
-  const latest = await getLatestFestivalGuides().catch(() => []);
+  const latest = await getLatestFestivalGuides();
 
   return (
     <div className="space-y-10">
       <section className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-semibold tracking-[0.12em] text-[var(--color-brand)]">
-          여행고고 축제 가이드
+          최근 업데이트된 축제·행사
         </p>
         <h1 className="mt-3 text-[32px] font-bold leading-tight text-[var(--color-ink)] sm:text-[38px]">
           최근 업데이트된 축제·행사 목록
@@ -92,6 +94,7 @@ export default async function BlogPage() {
           </ul>
         </section>
       )}
+      <PageAds eligible={latest.length > 0} />
     </div>
   );
 }

@@ -43,7 +43,7 @@ test("genuine festivals in each fixed keyword category still classify correctly"
   const snowFlower = normalizeFestival({
     base: fakeBase({ contentid: "2002", title: "태백산 눈꽃축제" }),
   });
-  // "눈꽃"은 눈축제이면서 꽃 이미지도 포함하므로 꽃축제가 함께 매칭되는 것은 정상이다.
+  // 눈꽃은 눈축제이며 식물 꽃축제로 분류하지 않는다.
   assert.ok(snowFlower.themesJson?.includes("눈축제"));
 
   const food = normalizeFestival({
@@ -62,4 +62,16 @@ test("themesCsv is comma-wrapped for LIKE search and null when no theme matches"
     base: fakeBase({ contentid: "3002", title: "지역 주민 화합 한마당" }),
   });
   assert.equal(none.themesCsv, null);
+});
+
+test("fireworks and snow flowers do not imply botanical flower festivals", () => {
+  for (const title of ["서울 불꽃축제", "태백산 눈꽃축제"]) {
+    const event = normalizeFestival({ base: fakeBase({ title }) });
+    assert.ok(!event.themesJson?.includes('"꽃축제"'));
+  }
+  assert.ok(
+    normalizeFestival({
+      base: fakeBase({ title: "봄꽃 축제" }),
+    }).themesJson?.includes('"꽃축제"'),
+  );
 });

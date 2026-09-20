@@ -2,13 +2,18 @@
 import Link from "next/link";
 import { db, festivals } from "@/db";
 import { sql } from "drizzle-orm";
-import { AREAS } from "@/lib/regions";
+import { AREAS, findAreaByCode } from "@/lib/regions";
 import { currentFestivalCondition } from "@/lib/current-festivals";
 import { HubSourceGuide } from "@/components/festival/HubSourceGuide";
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+import { MonthLinks } from "@/components/festival/ListNavigation";
+import { PageAds } from "@/components/ads/PageAds";
 
-export const revalidate = 3600;
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "지역별 축제·행사",
@@ -33,10 +38,11 @@ async function getCountsByArea() {
 }
 
 export default async function RegionsIndex() {
-  const counts: Record<string, number> = await getCountsByArea().catch(
-    () => ({}),
-  );
+  const counts: Record<string, number> = await getCountsByArea();
 
+  const unknownCount = Object.entries(counts)
+    .filter(([code]) => !findAreaByCode(code))
+    .reduce((sum, [, count]) => sum + count, 0);
   return (
     <article className="prose-body prose-ko">
       <h1 className="text-3xl font-bold tracking-tight">지역별 축제·행사</h1>
@@ -60,16 +66,21 @@ export default async function RegionsIndex() {
                   진행·예정 {cnt}건
                 </div>
               </Link>
+              <MonthLinks areaSlug={a.slug} />
             </li>
           );
         })}
       </ul>
 
-      <HubSourceGuide
-        title="지역별"
-        scope="선택한 시도 코드"
-      />
+      {unknownCount > 0 && (
+        <p className="mt-4">
+          <Link href="/regions/미분류" className="underline">
+            지역 확인 필요 {unknownCount}건 보기
+          </Link>
+        </p>
+      )}
+      <PageAds eligible={Object.values(counts).some((count) => count > 0)} />
+      <HubSourceGuide title="지역별" scope="선택한 시도 코드" />
     </article>
   );
 }
-

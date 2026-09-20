@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { isAdExcludedPath } from "@/lib/ad-eligibility";
+import { useEffect } from "react";
 
 interface AutoAdsProps {
   publisherId?: string;
@@ -11,8 +12,59 @@ interface AutoAdsProps {
 export function AutoAds({ publisherId }: AutoAdsProps) {
   const pathname = usePathname() ?? "/";
   const trimmedPublisherId = publisherId?.trim() ?? "";
+  const enabled =
+    /^ca-pub-\d{16}$/.test(trimmedPublisherId) && !isAdExcludedPath(pathname);
+  useEffect(() => {
+    if (!enabled) return;
+    document.documentElement.dataset.autoAdsLocation =
+      location.pathname + location.search;
+    // Auto Ads has no unload API. Dispose the whole document on internal
+    // navigation, including routes which become empty or not-found after fetch.
+    const navigate = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
+      const anchor = (event.target as Element)?.closest?.("a");
+      if (
+        !anchor ||
+        anchor.target === "_blank" ||
+        anchor.hasAttribute("download")
+      )
+        return;
+      const url = new URL(anchor.href, location.href);
+      if (
+        url.origin !== location.origin ||
+        (url.pathname === location.pathname && url.search === location.search)
+      )
+        return;
+      if (
+        url.pathname.startsWith("/festivals/") &&
+        !location.pathname.startsWith("/festivals/")
+      ) {
+        try {
+          sessionStorage.setItem(
+            "festival-list-return",
+            location.pathname + location.search,
+          );
+        } catch {
+          /* optional */
+        }
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      location.assign(url.href);
+    };
+    document.addEventListener("click", navigate, true);
+    return () => document.removeEventListener("click", navigate, true);
+  }, [enabled]);
 
-  if (!/^ca-pub-\d{16}$/.test(trimmedPublisherId)) {
+  if (!enabled) {
     return null;
   }
 

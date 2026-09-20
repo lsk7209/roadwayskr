@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const LAST_UPDATED = "2026-09-13";
+const LAST_UPDATED = "2026-09-20";
 
 export default function PrivacyPage() {
   return (
@@ -24,9 +24,17 @@ export default function PrivacyPage() {
 
       <h2>1. 수집 항목</h2>
       <ul className="list-disc pl-5 space-y-1">
-        <li>필수: 접속 IP, 브라우저 UA(서비스 보안 목적)</li>
-        <li>선택: 문의 페이지 입력 데이터(이메일, 메시지)</li>
-        <li>자동 수집: 성능 분석을 위한 집계 데이터</li>
+        <li>
+          접속 과정에서 IP·브라우저 정보가 호스팅 및 광고 서비스에 전달될 수
+          있습니다.
+        </li>
+        <li>
+          문의는 이메일 링크를 통해 접수하며, 보낸 이메일 주소와 문의 내용을
+          처리합니다. 사이트 내 입력 폼은 없습니다.
+        </li>
+        <li>
+          방문 분석이 활성화된 경우 페이지 조회와 기능 사용 정보를 처리합니다.
+        </li>
       </ul>
 
       <h2>2. 이용 목적</h2>
@@ -38,20 +46,27 @@ export default function PrivacyPage() {
 
       <h2>3. 보관 기간</h2>
       <p>
-        관련 법령 및 내부 정책을 준수하며, 분석 데이터는 24개월 이내 또는 법정
-        보관기간에 맞추어 처리 후 삭제합니다.
+        문의·분석 정보의 구체적인 보관기간과 삭제 절차는 운영자 확인이
+        필요합니다. 개인정보 문의 채널로 현재 처리 기준을 요청할 수 있습니다.
       </p>
 
       <h2>4. 제3자 제공</h2>
       <ul className="list-disc pl-5 space-y-1">
-        <li>Google Analytics: 방문 분석</li>
+        <li>
+          Google Analytics: 설정된 경우 방문 분석 및 지도·안내 링크 이용 집계
+        </li>
         <li>Google AdSense: 광고 품질 및 과금 연동</li>
-        <li>클라우드 인프라 제공자: 서비스 운영 용도</li>
+        <li>호스팅 서비스: 페이지 제공 및 접속 처리</li>
+        <li>
+          쿠팡 파트너스 및 배너 제공 서비스: 제휴 배너 표시와 클릭 연결. 배너를
+          불러올 때 페이지 주소와 접속 정보가 전달될 수 있습니다.
+        </li>
       </ul>
       <p>
         Google을 비롯한 제3자 공급업체는 쿠키(예: DoubleClick DART 쿠키)를
-        사용해 사용자의 이전 방문 기록을 기반으로 광고를 게재할 수 있습니다.
-        사용자는 브라우저 설정에서 쿠키를 차단하거나{" "}
+        사용하며, Google과 파트너는 이 사이트 및 다른 사이트의 이전 방문 기록을
+        기반으로 맞춤 광고를 게재할 수 있습니다. 사용자는 브라우저 설정에서
+        쿠키를 차단하거나{" "}
         <a
           className="underline"
           href="https://adssettings.google.com/"

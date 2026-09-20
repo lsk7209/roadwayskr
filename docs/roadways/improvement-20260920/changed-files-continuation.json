@@ -1,0 +1,238 @@
+{
+  "observedAt": "2026-09-20T01:34:55.540762+00:00",
+  "baseCommit": "f2c717b6201a2671d420ffee101aab7feb29be86",
+  "purpose": "Review inventory only; no staging or deployment authorization",
+  "count": 55,
+  "userStatusPreserved": true,
+  "excluded": [
+    "STATUS.md",
+    "ddd/",
+    ".env*",
+    ".goal-harness/private/",
+    "*.db",
+    "output/playwright/",
+    ".goal-harness/preexisting.patch"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "97e9270a31504d6000a3b6403c1f7b704789a94b40cbe853f53600a06f5dc3d2"
+    },
+    {
+      "path": "app/blog/page.tsx",
+      "sha256": "4ff469eceb7c4fbc0a743316c0680b09546d450a9d8b87641e2e4872104c0e0f"
+    },
+    {
+      "path": "app/contact/page.tsx",
+      "sha256": "38b56cac3b5871a294e32262413a9ab0e8fd0c8f50cc24e9f790386a084384f9"
+    },
+    {
+      "path": "app/festivals/[contentId]/[slug]/opengraph-image.tsx",
+      "sha256": "6280574a18c1b5fa399c673f5c2cfaf001fd789e6f10b7d9fc97fdbf7d869baa"
+    },
+    {
+      "path": "app/festivals/[contentId]/[slug]/page.tsx",
+      "sha256": "8d9638e38f0cebad6b176537628be3a7e9fdff18e59ccf1e31b7bf2afe29368b"
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "c2ce85d424f841b2003328d6a7d8dfa2ec8c9c1db7f3394ffc0598e3926c9b96"
+    },
+    {
+      "path": "app/layout.tsx",
+      "sha256": "e8999a1222564c2b5d2d26dc89dc46ee29e555047f044cfec84f41632e745a6b"
+    },
+    {
+      "path": "app/monthly/[year]/[month]/[areaSlug]/page.tsx",
+      "sha256": "8c51050ae1a07c6f35313fd6cd17ebd813e8700a340a88afa4e6f2eb392bff3c"
+    },
+    {
+      "path": "app/page.tsx",
+      "sha256": "eac3f1de5eb32f2bb9bd76b0caf49d10d7cc1aec2374b0ef739927e36cc97441"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "sha256": "6b39626b4e1a22bdf33f684f5f55060cd3228b70babd493d6cd5ca6e337a2f32"
+    },
+    {
+      "path": "app/regions/[areaSlug]/page.tsx",
+      "sha256": "0c296d8599c07f2d582e04331d78590f4c726f3dc3785805e57b467c00ed548a"
+    },
+    {
+      "path": "app/regions/page.tsx",
+      "sha256": "054536323fa7cf98bd72786111acf74d0a1c523415b6045502d45479a05c9197"
+    },
+    {
+      "path": "app/sitemap.ts",
+      "sha256": "ba47ccd264c5d88f8eea7dbb6ddee485b4e6efb727194a704695af8706f37899"
+    },
+    {
+      "path": "app/themes/[themeSlug]/page.tsx",
+      "sha256": "bcea4c3725141aea15f60123a275a27348d90999ba0377316cd549d2762d31f8"
+    },
+    {
+      "path": "app/weekend/page.tsx",
+      "sha256": "c47fdd0f510c11fe8efa088fc34586dde62c2abb88d0084bcfc715bdb8cc2f83"
+    },
+    {
+      "path": "components/ads/AdDocumentGuard.tsx",
+      "sha256": "f6d427ef8c706d4a801bb861a9f9d6f0a42e2dbc6f7000b41de14553603323c3"
+    },
+    {
+      "path": "components/ads/AutoAds.tsx",
+      "sha256": "da926d322d683418159a1a1e30ba3ba278fcfb5849eeb378354f62e1a003c4ff"
+    },
+    {
+      "path": "components/ads/PageAds.tsx",
+      "sha256": "bf434695d4026fc69699f1b781ad8efb99e1d3d311dc185c8b1b65016608d080"
+    },
+    {
+      "path": "components/affiliate/CoupangAffiliateBanner.tsx",
+      "sha256": "e582ec64a9ed35f3bb6ca366630bcf6d8b910c30b444047edf122dff3ec71240"
+    },
+    {
+      "path": "components/analytics/TrackedLink.tsx",
+      "sha256": "7ed1a487f6f35655ee645ba5a2654256426ef424fbd3812411e5b0099d6c921a"
+    },
+    {
+      "path": "components/festival/BackToList.tsx",
+      "sha256": "637d5d2929360ac326957e82bf47fdb24b26a556209cbd498a62dada7550369a"
+    },
+    {
+      "path": "components/festival/EventSchema.tsx",
+      "sha256": "7f24d2ecbf0a015df5e6ebb96afef0c39651b38ec8667aa8aff861c1abf6cc25"
+    },
+    {
+      "path": "components/festival/FestivalLink.tsx",
+      "sha256": "1e770fab8f5be719c5febf7b70fe0152da705621352edbae29c7ecff4a812cc2"
+    },
+    {
+      "path": "components/festival/FestivalListCard.tsx",
+      "sha256": "4db22621e8b767cad4aacb54a184cb31e55d42a3452ef81a87e5688643c60802"
+    },
+    {
+      "path": "components/festival/InfoCards.tsx",
+      "sha256": "e14251dd2ebf2749b27119f0360541127d4080652ce8cf74939aff91d84d860f"
+    },
+    {
+      "path": "components/festival/ListNavigation.tsx",
+      "sha256": "a96f932bfda7f9319ae801e89523f7537ec5981e152753c83408c9ba457bb694"
+    },
+    {
+      "path": "components/seo/JsonLd.tsx",
+      "sha256": "9dc5ec02cb3c473efb722f55e3d61b2aff84604552c769ed2bb65ba6f4c2ba37"
+    },
+    {
+      "path": "docs/HANDOFF.md",
+      "sha256": "f8db082ecc8aa0d0ff7585c377be920a264269f3b2b00d64de3d749cdb8b481b"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "e524f9b838344b8699a281da4dd6eb5a17fdae6992b233f7c72ea2e2dea83f60"
+    },
+    {
+      "path": "lib/analytics.ts",
+      "sha256": "543530c86c1d8179d2275c677fcc36dcdae904b0910a7a127fabe9a09b6240a3"
+    },
+    {
+      "path": "lib/current-festivals.ts",
+      "sha256": "5f4c9d3f59801e598051277a0a71d2de55abf4c5ff7a3b525fad4a6fc7584f17"
+    },
+    {
+      "path": "lib/event-source-notes.ts",
+      "sha256": "41ff556393c611f79ed598b62f40ade38a3fc8baad3986ce523d8ba3396e76c8"
+    },
+    {
+      "path": "lib/festival-dates.ts",
+      "sha256": "45e43577011fee9c178dd4b1eb28a1e4bb19c09186d9df3a7db6dc0abf1016d8"
+    },
+    {
+      "path": "lib/festival-facts.ts",
+      "sha256": "857057238e9abd6a06fd28320051d32e3be0a08adb2861136fd2d1f65e9f117d"
+    },
+    {
+      "path": "lib/festival-list.ts",
+      "sha256": "f142b16b057d5e28687054f7b52b2cfd7bca9bd548988a1d6dcfd7f4c31026be"
+    },
+    {
+      "path": "lib/regions.ts",
+      "sha256": "45c0da2fcf7ef73fffb24f04fb96491167ebb928b92e124839a70997e4d8ca62"
+    },
+    {
+      "path": "lib/tourapi/client.ts",
+      "sha256": "0a08cf26ff5254a54bd94de9f828edba947d1f759cba6f05acc44781348bef00"
+    },
+    {
+      "path": "lib/tourapi/merge.ts",
+      "sha256": "4283f99c7c646b548addd28955011b198355ed7457922b5f8dc7eb1e7ca2049b"
+    },
+    {
+      "path": "lib/tourapi/normalizer.ts",
+      "sha256": "1d54ccbf36120aa2a41a4a97b0b69ba2c6faeddb77b20ba396ea92ba757fa8b7"
+    },
+    {
+      "path": "scripts/roadways-detail-read.ts",
+      "sha256": "39a8554f77fbfc5ce3c90211090e7e3e948071212363920867a9cbec44649751"
+    },
+    {
+      "path": "scripts/roadways-fixture.py",
+      "sha256": "c283057a9c1d9b0f917bc81131c2c97c725938ca88413eabbe2a10f284bb06d0"
+    },
+    {
+      "path": "scripts/roadways-local.mjs",
+      "sha256": "e6245b47223200fe0546e2c986b70a610f900155905423c145516adb0ebc5767"
+    },
+    {
+      "path": "scripts/roadways-parity-check.mjs",
+      "sha256": "c74e2fa165b4498f842d697a352b1fcde4ea681ffb0d33b58bbb49ca8dd5d807"
+    },
+    {
+      "path": "scripts/roadways-parity.py",
+      "sha256": "b6b13328384d809a635236f875a71fb565db0a1990d1e9a92cd4731160d921ae"
+    },
+    {
+      "path": "scripts/roadways-public-check.mjs",
+      "sha256": "bc30780ee8ddcbd47981efc5a546b22d555f19a713f0fec88238f3c68f7e1bea"
+    },
+    {
+      "path": "scripts/roadways-repair-simulation.py",
+      "sha256": "764b13d8a014e3f6d9bf2c7c8ba1e00dc7d8e6426332698e7bfea87140dcd2dd"
+    },
+    {
+      "path": "scripts/roadways-route-check.mjs",
+      "sha256": "cc62b3df21fe4d3c387d84adf11772b98a99334208b124b7869cef620f4dccfb"
+    },
+    {
+      "path": "scripts/roadways-snapshot.mjs",
+      "sha256": "4edd367a70b56092e08f65e3a872c28518c93228a316880330a62fb681217eae"
+    },
+    {
+      "path": "scripts/sync-tourapi.ts",
+      "sha256": "381f11a9685b936df57a1eae65fd9e007205da7fd5570cc1dad7988a140f5606"
+    },
+    {
+      "path": "tests/current-festivals.test.ts",
+      "sha256": "322ba8f7ebf6effae3f06aeddebf2fc9367a8945448dd564abb3f649dc6fc319"
+    },
+    {
+      "path": "tests/festival-facts.test.ts",
+      "sha256": "a7168c6d864a8ef17e3009a233d4e8a3f69d7e91318610392b24ffe339178465"
+    },
+    {
+      "path": "tests/roadways-acceptance.test.ts",
+      "sha256": "68cbec6fd918b0d0a8553b40f9748a8ca510e2fe9988c88fdf23b641c37c53b0"
+    },
+    {
+      "path": "tests/theme-classification.test.ts",
+      "sha256": "94539564fa7f91db40ee5c7552a27483abacb608afc720b0121cc989539551d7"
+    },
+    {
+      "path": "tests/tourapi-detail.test.ts",
+      "sha256": "ed05c045c7f51f1631131f50e1d8e07cb72213ec8c2abab5c27daf94177b89c0"
+    },
+    {
+      "path": "tests/weekend-range.test.ts",
+      "sha256": "bee432e1bd7cf7307546f94f3bf8523c22b10efa7e44fde93dd833732bc026da"
+    }
+  ]
+}

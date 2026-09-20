@@ -1,5 +1,7 @@
 import type { FestivalRaw, FestivalIntroRaw, FestivalCommonRaw } from "./types";
 import type { NewFestival } from "@/db/schema";
+import { validDate, periodState } from "../festival-dates";
+import { explicitFree } from "../festival-facts";
 
 /**
  * TourAPI 원본 → DB 스키마 정규화
@@ -13,7 +15,6 @@ import type { NewFestival } from "@/db/schema";
  * - 테마 추출 (cat1/2/3 + 제목 키워드 매칭)
  */
 
-const FREE_KEYWORDS = ["무료", "free", "입장료 없음", "입장 무료"];
 const FAMILY_BLOCK_KEYWORDS = ["19세 이상", "성인 전용", "청소년 관람불가"];
 const LDONG_TO_AREA_CODE: Record<string, string> = {
   "11": "1",
@@ -64,9 +65,14 @@ export function normalizeFestival(args: {
   const overview = clean(common?.overview);
   const description = overview ? truncate(overview, 200) : null;
 
-  const startDate = toIsoDate(base.eventstartdate ?? intro?.eventstartdate);
-  const endDate = toIsoDate(base.eventenddate ?? intro?.eventenddate);
-  const status = computeStatus(startDate, endDate);
+  let startDate =
+    validDate(intro?.eventstartdate) ?? validDate(base.eventstartdate);
+  let endDate = validDate(intro?.eventenddate) ?? validDate(base.eventenddate);
+  if (startDate && endDate && endDate < startDate) {
+    startDate = null;
+    endDate = null;
+  }
+  const status = periodState(startDate, endDate);
 
   const eventPlace = clean(intro?.eventplace);
   const program = clean(intro?.program);
@@ -119,7 +125,7 @@ export function normalizeFestival(args: {
     sponsor: clean(intro?.sponsor2),
     eventPlace,
     playTime: clean(intro?.playtime),
-    useTime: clean(intro?.usetimefestival),
+    useTime: null, // usetimefestival is a fee field, not opening hours.
     homepage: clean(common?.homepage),
     tel: clean(base.tel ?? common?.tel),
 
@@ -142,14 +148,6 @@ function clean(v: string | undefined | null): string | null {
   return t === "" ? null : t;
 }
 
-function toIsoDate(v: string | undefined): string | null {
-  const c = clean(v);
-  if (!c) return null;
-  // 'YYYYMMDD' 형식만 처리. 잘못된 형식은 null.
-  if (!/^\d{8}$/.test(c)) return null;
-  return `${c.slice(0, 4)}-${c.slice(4, 6)}-${c.slice(6, 8)}`;
-}
-
 function toNumber(v: string | undefined): number | null {
   const c = clean(v);
   if (!c) return null;
@@ -160,17 +158,6 @@ function toNumber(v: string | undefined): number | null {
 function truncate(s: string, n: number): string {
   if (s.length <= n) return s;
   return s.slice(0, n - 1).trimEnd() + "…";
-}
-
-function computeStatus(
-  start: string | null,
-  end: string | null,
-): "upcoming" | "ongoing" | "ended" {
-  if (!start || !end) return "upcoming";
-  const today = new Date().toISOString().slice(0, 10);
-  if (today < start) return "upcoming";
-  if (today > end) return "ended";
-  return "ongoing";
 }
 
 function computeFamilyFriendly(args: {
@@ -187,7 +174,7 @@ function computeFamilyFriendly(args: {
 
 function computeFeeFree(fee: string | null): boolean | null {
   if (!fee) return null;
-  return FREE_KEYWORDS.some((k) => fee.toLowerCase().includes(k.toLowerCase()));
+  return explicitFree(fee);
 }
 
 function getAreaCode(
@@ -212,7 +199,9 @@ function extractThemes(args: {
     .join(" ");
   const found = new Set<string>();
   for (const [theme, keywords] of Object.entries(THEME_KEYWORD_MAP)) {
-    if (keywords.some((k) => blob.includes(k))) found.add(theme);
+    const candidate =
+      theme === "꽃축제" ? blob.replace(/불꽃|눈꽃/g, "") : blob;
+    if (keywords.some((k) => candidate.includes(k))) found.add(theme);
   }
   return [...found];
 }

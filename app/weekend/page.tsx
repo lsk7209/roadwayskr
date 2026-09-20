@@ -1,145 +1,98 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { db, festivals } from "@/db";
-import { and, gte, lte } from "drizzle-orm";
+import { notFound } from "next/navigation";
+import { db } from "@/db";
+import { getWeekendRange } from "@/lib/current-festivals";
 import {
-  currentFestivalCondition,
-  getWeekendRange,
-} from "@/lib/current-festivals";
+  festivalGroups,
+  festivalPage,
+  listHref,
+  parseListSearch,
+  type SearchValues,
+} from "@/lib/festival-list";
 import { findAreaByCode } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { PageAds } from "@/components/ads/PageAds";
 
-export const revalidate = 86400;
-
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
-  .trim()
-  .replace(/\/+$/, "");
-
-export async function generateMetadata(): Promise<Metadata> {
+interface Props {
+  searchParams: Promise<SearchValues>;
+}
+async function selectedRange(search: Props["searchParams"]) {
+  const parsed = parseListSearch(await search);
+  if (!parsed) return null;
   const { satIso, sunIso } = getWeekendRange();
-
+  return parsed.range ?? { from: satIso, to: sunIso };
+}
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const range = await selectedRange(searchParams);
+  if (!range) return {};
   return {
-    title: `Roadways weekend festivals (${satIso} ~ ${sunIso})`,
-    description: `Roadways weekend festival index for ${satIso} ~ ${sunIso}, grouped by region with schedule, venue, source-check, and visitor planning context.`,
-    alternates: { canonical: `${SITE_URL}/weekend` },
+    title: `주말 축제·행사 (${range.from} ~ ${range.to})`,
+    description: "선택한 기간의 지역별 행사와 실제 운영일을 확인하세요.",
+    alternates: { canonical: "https://roadways.kr/weekend" },
   };
 }
-
-export default async function ThisWeekendPage() {
-  const { satIso, sunIso } = getWeekendRange();
-  const items = await db
-    .select()
-    .from(festivals)
-    .where(
-      and(
-        lte(festivals.startDate, sunIso),
-        gte(festivals.endDate, satIso),
-        currentFestivalCondition(),
-      ),
-    )
-    .orderBy(festivals.startDate)
-    .limit(60);
-
-  const byArea = new Map<string, typeof items>();
-  for (const festival of items) {
-    const code = festival.areaCode ?? "unknown";
-    if (!byArea.has(code)) byArea.set(code, []);
-    byArea.get(code)!.push(festival);
-  }
-
+export default async function WeekendPage({ searchParams }: Props) {
+  const range = await selectedRange(searchParams);
+  if (!range) notFound();
+  const groups = await festivalGroups(db, { range });
+  const total = groups.reduce((sum, group) => sum + group.count, 0);
+  const previews = await Promise.all(
+    groups.map(async (group) => ({
+      ...group,
+      ...(await festivalPage(db, { range, areaCode: group.code, pageSize: 6 })),
+    })),
+  );
   return (
     <article className="prose-body prose-ko">
       <h1 className="text-3xl font-bold tracking-tight">주말 축제 모아보기</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        {satIso} ~ {sunIso} 기간에 열리는 진행 중·예정 축제 {items.length}건을
-        지역별로 묶어 보여드립니다.
+        {range.from} ~ {range.to} 기간과 겹치는 행사 전체 {total}건
       </p>
-
-      {items.length === 0 ? (
-        <p className="mt-6 text-[var(--color-ink-muted)]">
-          이번 주말에 맞는 축제가 아직 등록되지 않았습니다. 데이터 동기화 후
-          다시 확인해 주세요.
-        </p>
-      ) : (
-        <div className="not-prose mt-8 space-y-10">
-          {[...byArea.entries()].map(([code, list]) => {
-            const area = findAreaByCode(code);
-            if (!area) return null;
-
-            return (
-              <section key={code}>
-                <div className="mb-4 flex items-end justify-between border-b border-[var(--color-line)] pb-2">
-                  <h2 className="text-xl font-bold">
-                    {area.name}{" "}
-                    <span className="text-sm text-[var(--color-ink-muted)]">
-                      {list.length}건
-                    </span>
-                  </h2>
-                  <Link
-                    href={`/regions/${area.slug}`}
-                    className="text-sm text-[var(--color-brand)] hover:underline"
-                  >
-                    전체 보기
-                  </Link>
-                </div>
-                <ul className="grid gap-4 sm:grid-cols-2">
-                  {list.slice(0, 6).map((festival) => (
-                    <FestivalListCard
-                      key={festival.contentId}
-                      href={`/festivals/${festival.contentId}/${festival.slug}`}
-                      festival={festival}
-                      titleLevel="h3"
-                    />
-                  ))}
-                </ul>
-              </section>
-            );
-          })}
-        </div>
+      <p className="mt-2 text-sm">
+        토요일에 끝난 행사도 이 주말 목록에 포함됩니다. 실제 운영 요일·당일 취소
+        여부는 상세 안내를 확인해 주세요.
+      </p>
+      {total === 0 && (
+        <p className="my-8">선택한 기간에 등록된 행사가 없습니다.</p>
       )}
-
-      <section className="mt-12 rounded-2xl border border-[var(--color-line-soft)] bg-white p-6">
-        <h2 className="text-2xl font-semibold">Weekend planning checklist</h2>
-        <div className="mt-4 space-y-4 leading-8 text-[var(--color-ink-muted)]">
-          <p>
-            This weekend page is a planning index for festivals that overlap the
-            selected Saturday and Sunday. It groups events by region so readers
-            can compare nearby options, then move into the individual event page
-            for dates, venue information, and source context. The list is useful
-            for discovery, but it should not be treated as the final authority
-            for attendance, tickets, parking, weather, or safety notices.
-          </p>
-          <p>
-            Before leaving home, check the organizer page or local government
-            announcement for the most recent status. Festival schedules can
-            change because of rain, heat warnings, crowd control, construction,
-            road restrictions, or venue maintenance. Families should also verify
-            stroller access, restrooms, nursing rooms, pet rules, food
-            availability, and nearby transit before committing to a route.
-          </p>
-          <p>
-            Roadways keeps this page crawlable with a clear heading hierarchy,
-            canonical URL, internal links to region pages, sitemap and robots
-            support, and visible policy links in the site footer. The purpose is
-            to help visitors and search crawlers understand why the page exists
-            even when the number of current weekend events is small. When no
-            current data is available, the page still explains the update method
-            and directs readers to broader regional and theme indexes.
-          </p>
-          <p>
-            Advertising may be served through Google AdSense Auto Ads only. Ads
-            do not decide which events appear, and no manual ad placement is
-            added inside the event cards. If a listing looks wrong, duplicated,
-            or outdated, use the contact page with the event name and URL so the
-            data can be reviewed. This correction path is part of the site
-            quality process.
-          </p>
-        </div>
-      </section>
-
-      <p className="mt-12 text-xs text-[var(--color-ink-muted)]">
-        주말 축제 데이터는 공개 API와 운영 DB 동기화를 통해 수시로 갱신됩니다.
-      </p>
+      <div className="not-prose mt-8 space-y-10">
+        {previews.map((group) => {
+          const area = findAreaByCode(group.code);
+          const name = area?.name ?? "지역 확인 필요";
+          return (
+            <section key={group.code}>
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-[var(--color-line)] pb-2">
+                <h2 className="text-xl font-bold">
+                  {name}{" "}
+                  <span className="text-sm">
+                    전체 {group.count}건 · 미리보기 {group.items.length}건
+                  </span>
+                </h2>
+                <Link
+                  className="text-sm underline"
+                  href={listHref(`/regions/${area?.slug ?? "미분류"}`, range)}
+                >
+                  {name} 선택 기간 전체 보기
+                </Link>
+              </div>
+              <ul className="grid gap-4 sm:grid-cols-2">
+                {group.items.map((festival) => (
+                  <FestivalListCard
+                    key={festival.contentId}
+                    festival={festival}
+                    href={`/festivals/${festival.contentId}/${festival.slug}`}
+                    titleLevel="h3"
+                  />
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+      <PageAds eligible={total > 0} />
     </article>
   );
 }

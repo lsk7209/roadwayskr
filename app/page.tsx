@@ -1,6 +1,6 @@
 import { db, festivals } from "@/db";
 import type { Metadata } from "next";
-import { and, desc, gte, lte } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import Link from "next/link";
 
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
@@ -9,26 +9,30 @@ import {
   getWeekendRange,
 } from "@/lib/current-festivals";
 
+import { festivalPage } from "@/lib/festival-list";
+import { relativeMonth } from "@/lib/festival-dates";
+import { PageAds } from "@/components/ads/PageAds";
+
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
   .trim()
   .replace(/\/+$/, "");
 
 const quickFilters = [
-  { href: "/weekend", label: "주말 축제", value: "주말 기준 실시간 정렬" },
-  { href: "/regions", label: "지역", value: "전국 지역별 추천 축제" },
-  { href: "/themes", label: "테마", value: "아이들과,데이트,가족,공연" },
+  { href: "/weekend", label: "주말 축제", value: "토·일과 기간이 겹치는 행사" },
+  { href: "/regions", label: "지역", value: "전국 지역별 행사" },
+  { href: "/themes", label: "테마", value: "꽃·음악·전통·야시장" },
 ] as const;
 
 const trustItems = [
-  "주요 페이지에 메타·정규 URL·스키마를 기본값으로 반영해 검색 노출을 안정화했습니다.",
-  "sitemap, robots, feed를 분리 관리하여 수집 경로를 명확하게 유지합니다.",
-  "광고는 콘텐츠 흐름을 방해하지 않는 위치에만 배치합니다.",
+  "행사 기간과 실제 운영 요일은 다를 수 있습니다.",
+  "장소가 여러 곳인 행사는 프로그램별 안내를 확인하세요.",
+  "수집 시각과 공식 자료 대조일을 구분해 안내합니다.",
 ] as const;
 
 const planCards = [
   {
     title: "가볍게 보기",
-    description: "카드 한 번에 4개 이하만 먼저 노출해 렌더링 부담을 낮춥니다.",
+    description: "주말 기간의 지역별 행사와 개별 운영일을 확인합니다.",
     href: "/weekend",
   },
   {
@@ -44,27 +48,21 @@ const planCards = [
 ];
 
 export const metadata: Metadata = {
-  title: "Roadways - weekend festival guide",
+  title: "여행고고 - 전국 축제·행사",
   description:
-    "Roadways helps visitors compare Korean weekend festivals by date, region, theme, venue context, update status, and official source checks.",
+    "전국 축제와 행사를 날짜·지역·테마로 찾아보고 장소와 공식 안내를 확인하세요.",
   alternates: { canonical: SITE_URL },
 };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 async function getThisWeekend() {
   const { satIso, sunIso } = getWeekendRange();
-  return db
-    .select()
-    .from(festivals)
-    .where(
-      and(
-        lte(festivals.startDate, sunIso),
-        gte(festivals.endDate, satIso),
-        currentFestivalCondition(),
-      ),
-    )
-    .limit(12);
+  const result = await festivalPage(db, {
+    range: { from: satIso, to: sunIso },
+    pageSize: 12,
+  });
+  return result.items;
 }
 
 async function getLatestEvents() {
@@ -77,8 +75,10 @@ async function getLatestEvents() {
 }
 
 export default async function Home() {
-  const weekend = await getThisWeekend().catch(() => []);
-  const latest = await getLatestEvents().catch(() => []);
+  const weekend = await getThisWeekend();
+  const latest = await getLatestEvents();
+  const currentMonth = relativeMonth();
+  const nextMonth = relativeMonth(1);
 
   return (
     <div className="space-y-14">
@@ -91,8 +91,7 @@ export default async function Home() {
         </h1>
         <p className="prose-body mt-4 text-[1.04rem] leading-8 text-[var(--color-ink-muted)]">
           전국 축제 정보를 한 페이지에서 찾고, 지역과 테마로 나누어 빠르게
-          비교하세요. 새로고침 없이 핵심 항목을 파악할 수 있는 구성으로 가독성을
-          우선 반영했습니다.
+          살펴보세요. 행사 기간, 운영 요일과 장소를 함께 확인해 보세요.
         </p>
 
         <div className="mt-8 grid gap-3 md:grid-cols-3">
@@ -117,10 +116,11 @@ export default async function Home() {
         <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-[24px] font-semibold leading-tight">
-              이번 주말 추천
+              이번 주말 행사
             </h2>
             <p className="mt-2 prose-body text-[var(--color-ink-muted)]">
-              기간 기준으로 필터링한 실제 진행 축제를 우선 표시합니다.
+              토·일과 기간이 겹치는 행사입니다. 실제 운영 요일은 상세에서 확인해
+              주세요.
             </p>
           </div>
           <Link
@@ -133,7 +133,7 @@ export default async function Home() {
 
         {weekend.length === 0 ? (
           <p className="rounded-2xl bg-[var(--color-surface-soft)] p-5 text-sm leading-7 text-[var(--color-muted)]">
-            데이터가 아직 적재되지 않았습니다. 잠시 후 다시 확인해 주세요.
+            이번 주말에 등록된 행사가 없습니다. 지역별 목록도 확인해 주세요.
           </p>
         ) : (
           <ul className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -150,6 +150,32 @@ export default async function Home() {
         )}
       </section>
 
+      <section>
+        <h2 className="text-2xl font-semibold">월별 행사 찾기</h2>
+        <div className="mt-4 flex flex-wrap gap-4">
+          {["서울", "경기도", "제주"].map((area) => (
+            <div key={area}>
+              <strong>{area}</strong>{" "}
+              <Link
+                className="underline"
+                href={`/monthly/${currentMonth.year}/${currentMonth.month}/${area}`}
+              >
+                이번 달
+              </Link>{" "}
+              ·{" "}
+              <Link
+                className="underline"
+                href={`/monthly/${nextMonth.year}/${nextMonth.month}/${area}`}
+              >
+                다음 달
+              </Link>
+            </div>
+          ))}
+        </div>
+        <Link href="/regions" className="mt-3 inline-block underline">
+          다른 지역 월별 행사
+        </Link>
+      </section>
       <section className="grid gap-4 md:grid-cols-3">
         {planCards.map((card) => (
           <article
@@ -195,8 +221,8 @@ export default async function Home() {
           </p>
           <p>
             원하는 조건에 따라 주말 페이지에서 날짜 기준으로, 지역 페이지에서
-            이동 거리 기준으로, 테마 페이지에서 꽃·음식·공연·가족·야시장 등
-            관심사 기준으로 탐색을 시작할 수 있습니다.
+            시도 기준으로, 테마 페이지에서 꽃·음식·공연·가족·야시장 등 관심사
+            기준으로 탐색을 시작할 수 있습니다.
           </p>
         </div>
       </section>
@@ -204,10 +230,10 @@ export default async function Home() {
       <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <div>
           <h2 className="text-[24px] font-semibold leading-tight">
-            신뢰 운영 기준
+            방문 전 확인
           </h2>
           <p className="prose-body mt-2 text-[var(--color-ink-muted)]">
-            검색·광고·분석에 불필요한 리스크를 줄이는 기준입니다.
+            일정과 장소를 확인할 때 참고해 주세요.
           </p>
         </div>
         <ul className="grid gap-3 sm:grid-cols-3">
@@ -243,7 +269,7 @@ export default async function Home() {
             href="/blog"
             className="text-sm font-semibold text-[var(--color-brand)] hover:underline"
           >
-            축제 가이드 보기
+            최근 소식 보기
           </Link>
         </div>
 
@@ -264,6 +290,7 @@ export default async function Home() {
           </ul>
         )}
       </section>
+      <PageAds eligible={weekend.length > 0 || latest.length > 0} />
     </div>
   );
 }

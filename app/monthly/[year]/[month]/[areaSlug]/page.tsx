@@ -1,209 +1,179 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { and, eq, gte, lte, sql } from "drizzle-orm";
-
-import { db, festivals } from "@/db";
-import { AREAS, findAreaBySlug } from "@/lib/regions";
+import { notFound, permanentRedirect } from "next/navigation";
+import { db } from "@/db";
+import { findAreaBySlug } from "@/lib/regions";
+import {
+  festivalPage,
+  parseListSearch,
+  listHref,
+  type SearchValues,
+} from "@/lib/festival-list";
+import { monthRange, monthCategory } from "@/lib/festival-dates";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 import {
-  JsonLd,
-  buildCollectionPageLd,
-  buildBreadcrumbListLd,
-} from "@/components/seo/JsonLd";
-import { currentFestivalCondition } from "@/lib/current-festivals";
-
-export const revalidate = 3600;
-
-interface Params {
+  ListNavigation,
+  MonthLinks,
+} from "@/components/festival/ListNavigation";
+import { PageAds } from "@/components/ads/PageAds";
+import { JsonLd, buildCollectionPageLd } from "@/components/seo/JsonLd";
+interface Props {
   params: Promise<{ year: string; month: string; areaSlug: string }>;
+  searchParams: Promise<SearchValues>;
 }
-
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
-const MIN_ITEMS_FOR_INDEX = 3;
-const MAX_STATIC_MONTHS = 18;
-
-export async function generateStaticParams() {
-  const months = getStaticMonths(new Date(), MAX_STATIC_MONTHS);
-
-  return AREAS.flatMap((area) =>
-    months.map(({ year, month }) => ({
-      year: String(year),
-      month: String(month),
-      areaSlug: area.slug,
-    })),
-  );
-}
-
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const parsed = await parseParams(params);
-  if (!parsed) return {};
-
-  const { year, month, area } = parsed;
-  const { startIso, endIso } = getMonthRange(year, month);
-  const count = await getCount(area.code, startIso, endIso);
-  const indexable = count >= MIN_ITEMS_FOR_INDEX;
-
+async function context(props: Props) {
+  const raw = await props.params;
+  let area;
+  try {
+    area = findAreaBySlug(decodeURIComponent(raw.areaSlug));
+  } catch {
+    return null;
+  }
+  const year = Number(raw.year),
+    month = Number(raw.month);
+  const search = parseListSearch(await props.searchParams);
+  if (
+    !area ||
+    !/^\d{4}$/.test(raw.year) ||
+    !/^\d{1,2}$/.test(raw.month) ||
+    year < 2020 ||
+    year > 2035 ||
+    month < 1 ||
+    month > 12 ||
+    !search ||
+    search.range
+  )
+    return null;
+  const { startIso, endIso } = monthRange(year, month);
   return {
-    title: `${year}년 ${month}월 ${area.name} 축제·행사`,
-    description: `${year}년 ${month}월 ${area.name}에서 열리는 축제와 행사 ${count}건을 정리했습니다. 일정·장소·입장료를 한눈에 확인하세요.`,
-    alternates: {
-      canonical: `${SITE_URL}/monthly/${year}/${month}/${area.slug}`,
-    },
-    robots: indexable
-      ? { index: true, follow: true }
-      : { index: false, follow: true },
+    raw,
+    area,
+    year,
+    month,
+    search,
+    range: { from: startIso, to: endIso },
+    path: `/monthly/${year}/${month}/${area.slug}`,
   };
 }
-
-export default async function MonthlyAreaPage({ params }: Params) {
-  const parsed = await parseParams(params);
-  if (!parsed) return notFound();
-
-  const { year, month, area } = parsed;
-  const { startIso, endIso } = getMonthRange(year, month);
-  const items = await db
-    .select()
-    .from(festivals)
-    .where(
-      and(
-        eq(festivals.areaCode, area.code),
-        lte(festivals.startDate, endIso),
-        gte(festivals.endDate, startIso),
-        currentFestivalCondition(),
-      ),
-    )
-    .orderBy(festivals.startDate)
-    .limit(80);
-
-  const pageUrl = `${SITE_URL}/monthly/${year}/${month}/${area.slug}`;
-  const collectionLd = buildCollectionPageLd({
-    name: `${year}년 ${month}월 ${area.name} 축제·행사`,
-    description: `${year}년 ${month}월 ${area.name}에서 열리는 축제와 행사 목록`,
-    url: pageUrl,
-    items: items.map((f) => ({
-      name: f.title,
-      url: `${SITE_URL}/festivals/${f.contentId}/${f.slug}`,
-    })),
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const ctx = await context(props);
+  if (!ctx) return {};
+  const { total } = await festivalPage(db, {
+    areaCode: ctx.area.code,
+    range: ctx.range,
+    pageSize: 1,
   });
-  const breadcrumbLd = buildBreadcrumbListLd([
-    { name: "홈", url: SITE_URL },
-    { name: "지역별", url: `${SITE_URL}/regions` },
-    { name: area.name, url: `${SITE_URL}/regions/${area.slug}` },
-    { name: `${year}년 ${month}월`, url: pageUrl },
-  ]);
-
+  return {
+    title: `${ctx.year}년 ${ctx.month}월 ${ctx.area.name} 축제·행사`,
+    description: `해당 월과 기간이 겹치는 행사 ${total}건. 월별 시작·종료와 운영일을 확인하세요.`,
+    alternates: { canonical: `https://roadways.kr${ctx.path}` },
+    robots: { index: total >= 3 && ctx.search.page === 1, follow: true },
+  };
+}
+export default async function MonthlyAreaPage(props: Props) {
+  const ctx = await context(props);
+  if (!ctx) notFound();
+  const { area, year, month, search, range, path, raw } = ctx;
+  if (
+    raw.month !== String(month) ||
+    decodeURIComponent(raw.areaSlug) !== area.slug
+  )
+    permanentRedirect(listHref(encodeURI(path), undefined, search.page));
+  const result = await festivalPage(db, {
+    range,
+    areaCode: area.code,
+    page: search.page,
+  });
+  if (search.page > result.pages) notFound();
+  const neighbors = await Promise.all(
+    [-1, 1].map(async (offset) => {
+      const d = new Date(Date.UTC(year, month - 1 + offset, 1));
+      const y = d.getUTCFullYear(),
+        m = d.getUTCMonth() + 1;
+      if (y < 2020 || y > 2035) return null;
+      const dates = monthRange(y, m);
+      const count = await festivalPage(db, {
+        areaCode: area.code,
+        range: { from: dates.startIso, to: dates.endIso },
+        pageSize: 1,
+      });
+      return count.total
+        ? {
+            href: `/monthly/${y}/${m}/${area.slug}`,
+            label: `${offset < 0 ? "이전" : "다음"} 달 (${y}년 ${m}월)`,
+          }
+        : null;
+    }),
+  );
   return (
     <article className="prose-body prose-ko">
-      <JsonLd id="ld-collection" data={collectionLd} />
-      <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
-      <nav className="text-xs text-[var(--color-ink-muted)] mb-2">
-        <Link href="/" className="hover:underline">
-          홈
-        </Link>{" "}
-        ›{" "}
-        <Link href="/regions" className="hover:underline">
-          지역별
-        </Link>{" "}
-        ›{" "}
-        <Link href={`/regions/${area.slug}`} className="hover:underline">
+      <JsonLd
+        id="ld-collection"
+        data={buildCollectionPageLd({
+          name: `${year}년 ${month}월 ${area.name} 축제·행사`,
+          description: "해당 월 행사 기록",
+          url: `https://roadways.kr${path}`,
+          items: result.items.map((f) => ({
+            name: f.title,
+            url: `https://roadways.kr/festivals/${f.contentId}/${encodeURIComponent(f.slug)}`,
+          })),
+        })}
+      />
+      <nav className="mb-2 text-xs">
+        <Link href={`/regions/${area.slug}`} className="underline">
           {area.name}
         </Link>{" "}
-        ›{" "}
-        <span>
-          {year}년 {month}월
-        </span>
+        › {year}년 {month}월
       </nav>
-
-      <h1 className="text-3xl font-bold tracking-tight">
+      <h1 className="text-3xl font-bold">
         {year}년 {month}월 {area.name} 축제·행사
       </h1>
-      <p className="mt-2 text-[var(--color-ink-muted)]">
-        {startIso} ~ {endIso} 기간에 겹치는 {area.name} 행사 {items.length}건
+      <p className="mt-2">
+        {range.from} ~ {range.to} 기간과 겹치는 행사 전체 {result.total}건 ·
+        현재 표시 {result.items.length}건
       </p>
-
-      {items.length < MIN_ITEMS_FOR_INDEX ? (
-        <p className="mt-6 rounded border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-ink-muted)]">
-          이 월별 지역 조합은 현재 행사 수가 적어 검색 색인은 보류합니다. 더
-          넓은 지역 페이지에서 진행 중·예정 행사를 확인해 주세요.
-        </p>
+      <p className="mt-2 text-sm">
+        이달 한정·이달 시작·이달 종료·여러 달에 걸친 행사는 서로 겹치지 않는
+        기간 구분입니다. 실제 운영 요일은 별도 확인이 필요하며, 종료된 행사는 이
+        월의 기록으로 남습니다.
+      </p>
+      <MonthLinks areaSlug={area.slug} />
+      <nav aria-label="인접 월" className="flex flex-wrap gap-4 text-sm">
+        {neighbors.map(
+          (link) =>
+            link && (
+              <Link key={link.href} href={link.href} className="underline">
+                {link.label}
+              </Link>
+            ),
+        )}
+      </nav>
+      {result.total === 0 ? (
+        <p className="my-8">이달에 등록된 행사가 없습니다.</p>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
-          {items.map((festival, i) => (
-            <FestivalListCard
-              key={festival.contentId}
-              href={`/festivals/${festival.contentId}/${festival.slug}`}
-              festival={festival}
-              priority={i === 0}
-            />
+          {result.items.map((festival) => (
+            <li key={festival.contentId} className="min-w-0">
+              <p className="mb-2 text-sm font-semibold">
+                {monthCategory(
+                  festival.startDate,
+                  festival.endDate,
+                  range.from,
+                  range.to,
+                )}
+              </p>
+              <ul>
+                <FestivalListCard
+                  festival={festival}
+                  href={`/festivals/${festival.contentId}/${festival.slug}`}
+                />
+              </ul>
+            </li>
           ))}
         </ul>
       )}
+      <ListNavigation path={path} page={search.page} pages={result.pages} />
+      <PageAds eligible={result.items.length > 0} />
     </article>
   );
-}
-
-async function parseParams(params: Params["params"]) {
-  const { year, month, areaSlug } = await params;
-  const parsedYear = Number(year);
-  const parsedMonth = Number(month);
-  const area = findAreaBySlug(decodeURIComponent(areaSlug));
-
-  if (
-    !area ||
-    !Number.isInteger(parsedYear) ||
-    !Number.isInteger(parsedMonth) ||
-    parsedYear < 2020 ||
-    parsedYear > 2035 ||
-    parsedMonth < 1 ||
-    parsedMonth > 12
-  ) {
-    return null;
-  }
-
-  return { year: parsedYear, month: parsedMonth, area };
-}
-
-async function getCount(
-  areaCode: string,
-  startIso: string,
-  endIso: string,
-): Promise<number> {
-  const rows = await db
-    .select({ cnt: sql<number>`count(*)` })
-    .from(festivals)
-    .where(
-      and(
-        eq(festivals.areaCode, areaCode),
-        lte(festivals.startDate, endIso),
-        gte(festivals.endDate, startIso),
-        currentFestivalCondition(),
-      ),
-    );
-
-  return Number(rows[0]?.cnt ?? 0);
-}
-
-function getMonthRange(year: number, month: number) {
-  const startIso = `${year}-${String(month).padStart(2, "0")}-01`;
-  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  const endIso = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
-
-  return { startIso, endIso };
-}
-
-function getStaticMonths(start: Date, count: number) {
-  const months: Array<{ year: number; month: number }> = [];
-  const baseYear = start.getUTCFullYear();
-  const baseMonth = start.getUTCMonth();
-
-  for (let offset = 0; offset < count; offset++) {
-    const date = new Date(Date.UTC(baseYear, baseMonth + offset, 1));
-    months.push({
-      year: date.getUTCFullYear(),
-      month: date.getUTCMonth() + 1,
-    });
-  }
-
-  return months;
 }

@@ -1,5 +1,8 @@
 import type { Festival } from "@/db";
 import { cleanTourText } from "@/lib/content";
+import { festivalPeriod, explicitFree } from "@/lib/festival-facts";
+import { eventSourceNote } from "@/lib/event-source-notes";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 interface Props {
   festival: Festival;
@@ -16,6 +19,15 @@ export function EventSchema({ festival, url }: Props) {
   const description = cleanTourText(festival.description ?? festival.overview);
   const address = cleanTourText(festival.address);
   const eventPlace = cleanTourText(festival.eventPlace);
+  const period = festivalPeriod(festival);
+  // A multi-program venue guide is not one precisely scheduled Event.
+  if (
+    !period.startDate ||
+    !address ||
+    !eventPlace ||
+    eventSourceNote({ ...festival, ...period })?.programs
+  )
+    return null;
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -23,8 +35,8 @@ export function EventSchema({ festival, url }: Props) {
     name: festival.title,
     url,
     description: description ?? undefined,
-    startDate: festival.startDate ?? undefined,
-    endDate: festival.endDate ?? undefined,
+    startDate: period.startDate,
+    endDate: period.endDate ?? undefined,
     eventStatus:
       festival.status === "cancelled"
         ? "https://schema.org/EventCancelled"
@@ -60,22 +72,16 @@ export function EventSchema({ festival, url }: Props) {
     schema.image = [festival.imageUrl];
   }
 
-  if (festival.feeIsFree) {
+  if (explicitFree(festival.fee)) {
     schema.offers = {
       "@type": "Offer",
       price: "0",
       priceCurrency: "KRW",
-      availability: "https://schema.org/InStock",
     };
   }
 
   // undefined 키 정리
   const clean = JSON.parse(JSON.stringify(schema));
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(clean) }}
-    />
-  );
+  return <JsonLd id="ld-event" data={clean} />;
 }

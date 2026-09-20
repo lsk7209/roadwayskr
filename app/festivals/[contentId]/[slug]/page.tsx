@@ -1,7 +1,7 @@
 ﻿import { db, festivals } from "@/db";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 
@@ -16,11 +16,23 @@ import {
   toParagraphs,
 } from "@/lib/content";
 
+import { cache } from "react";
+import { festivalPeriod, operatingTime } from "@/lib/festival-facts";
+import { formatPeriod } from "@/lib/festival-dates";
+import { eventSourceNote } from "@/lib/event-source-notes";
+import { BackToList } from "@/components/festival/BackToList";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
+import { PageAds } from "@/components/ads/PageAds";
+
+export const dynamic = "force-dynamic";
+
 interface Params {
   params: Promise<{ contentId: string; slug: string }>;
 }
 
-const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 const encodePathSegment = (value: string | number) =>
   encodeURIComponent(String(value));
 const BODY_PARAGRAPH_CLASS =
@@ -29,22 +41,6 @@ const BODY_GAP_CLASS = "mt-3 flex flex-col gap-4";
 const SECTION_TITLE_CLASS = "text-lg font-semibold";
 const ROUTE_ACTION_CLASS =
   "inline-flex items-center gap-2 rounded-lg border border-[var(--color-line)] px-3 py-2.5 text-sm font-medium text-[var(--color-brand)] transition hover:bg-[var(--color-surface-muted)]";
-
-// ─────────────────────────────────────────────────────────────
-// SSG 대상 contentId 사전 추출 (단, 가치 미달 페이지는 제외)
-// ─────────────────────────────────────────────────────────────
-export async function generateStaticParams() {
-  const rows = await db
-    .select({ contentId: festivals.contentId, slug: festivals.slug })
-    .from(festivals)
-    .where(eq(festivals.isIndexable, true))
-    .limit(5_000); // 빌드 시간 한도 고려, 점진 확장
-
-  return rows.map((r) => ({
-    contentId: String(r.contentId),
-    slug: r.slug,
-  }));
-}
 
 // ─────────────────────────────────────────────────────────────
 // 메타데이터 (검색 결과·OG·canonical)
@@ -57,7 +53,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const canonical = `${SITE_URL}/festivals/${encodePathSegment(contentId)}/${encodePathSegment(festival.slug)}`;
   const period =
     festival.startDate && festival.endDate
-      ? ` (${festival.startDate} ~ ${festival.endDate})`
+      ? ` (${formatPeriod(festival.startDate, festival.endDate)})`
       : "";
 
   const title = `${festival.title}${period}`;
@@ -93,11 +89,25 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 // 페이지 본문
 // ─────────────────────────────────────────────────────────────
 export default async function FestivalPage({ params }: Params) {
-  const { contentId } = await params;
+  const { contentId, slug } = await params;
   const festival = await getFestival(Number(contentId));
   if (!festival) return notFound();
 
-  // 슬러그 불일치 시 canonical 보호 - 정식 슬러그로 안내 (Next 15 redirect는 별도 처리 권장)
+  let decodedSlug = slug;
+  try {
+    decodedSlug = decodeURIComponent(slug);
+  } catch {
+    // Literal percent titles remain valid; malformed aliases redirect below.
+  }
+  if (
+    (slug !== festival.slug && decodedSlug !== festival.slug) ||
+    contentId !== String(festival.contentId)
+  ) {
+    permanentRedirect(
+      `/festivals/${festival.contentId}/${encodeURIComponent(festival.slug)}`,
+    );
+  }
+  const sourceNote = eventSourceNote(festival);
   const canonical = `${SITE_URL}/festivals/${encodePathSegment(contentId)}/${encodePathSegment(festival.slug)}`;
   const updatedAt = new Date(festival.updatedAt).toISOString();
   const overviewParagraphs = toParagraphs(festival.overview);
@@ -105,8 +115,7 @@ export default async function FestivalPage({ params }: Params) {
     extractTourIntroProgram(festival.rawJson),
   );
   const homepageUrl = extractFirstUrl(festival.homepage ?? festival.sourceUrl);
-  const useTime = cleanTourText(festival.useTime);
-  const playTime = cleanTourText(festival.playTime);
+  const playTime = operatingTime(festival);
   const address = cleanTourText(festival.address);
 
   const breadcrumbLd = buildBreadcrumbListLd([
@@ -117,6 +126,7 @@ export default async function FestivalPage({ params }: Params) {
 
   return (
     <article className="prose-ko">
+      <BackToList />
       <EventSchema festival={festival} url={canonical} />
       <JsonLd id="ld-breadcrumb" data={breadcrumbLd} />
 
@@ -189,84 +199,123 @@ export default async function FestivalPage({ params }: Params) {
         </section>
       )}
 
-      {(useTime || playTime) && (
+      {(playTime || sourceNote?.scheduleText) && (
         <section>
           <h2 className={SECTION_TITLE_CLASS}>일정·운영 시간</h2>
           <div className={BODY_GAP_CLASS}>
-            {useTime && <p className={BODY_PARAGRAPH_CLASS}>{useTime}</p>}
-            {playTime && playTime !== useTime && (
+            {sourceNote?.scheduleText && (
+              <p className={BODY_PARAGRAPH_CLASS}>{sourceNote.scheduleText}</p>
+            )}
+            {playTime && !sourceNote?.programs && (
               <p className={BODY_PARAGRAPH_CLASS}>{playTime}</p>
             )}
           </div>
         </section>
       )}
 
-      <section>
-        <h2 className={SECTION_TITLE_CLASS}>가는 방법</h2>
-        <p className="text-sm text-[var(--color-ink-muted)]">
-          {address ?? "주소는 공식 발표 기준으로 확인해 주세요."}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {festival.lat && festival.lng && (
-            <a
-              href={`https://map.kakao.com/link/map/${encodeURIComponent(festival.title)},${festival.lat},${festival.lng}`}
-              className={ROUTE_ACTION_CLASS}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M12 2C8.13 2 5 5.13 5 9c0 4.55 6.5 12 7 12s7-7.45 7-12c0-3.87-3.13-7-7-7Z"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  fill="none"
-                />
-                <path
-                  d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
-                  fill="currentColor"
-                />
-              </svg>
-              카카오맵 보기
-            </a>
-          )}
-          {festival.tel && (
-            <a href={`tel:${festival.tel}`} className={ROUTE_ACTION_CLASS}>
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M3 5.5A2 2 0 0 1 5 3h2.38a1.5 1.5 0 0 1 1.5 1.25l.45 2.55a1.5 1.5 0 0 1-.84 1.58L6.8 8.9a12.01 12.01 0 0 0 8.3 8.3l.52-1.23a1.5 1.5 0 0 1 1.58-.84L19.75 17a1.5 1.5 0 0 1 1.25 1.5V21a2 2 0 0 1-2 2h-1C10.5 23 1 13.5 1 2h-.5A2 2 0 0 1 3 0h3.5a1.5 1.5 0 0 1 1.5 1.25l.55 2.5a1.5 1.5 0 0 1-.84 1.73L6.8 6.1A18.3 18.3 0 0 1 17.9 17.2l.82-1.13a1.5 1.5 0 0 1 1.73-.84L23.95 16a1.5 1.5 0 0 1 1.25 1.5V21a2 2 0 0 1-2 2H21z"
-                  fill="currentColor"
-                />
-              </svg>
-              문의하기
-            </a>
-          )}
-        </div>
-      </section>
-
-      {homepageUrl && (
+      {sourceNote?.programs && (
         <section>
-          <h2>공식 홈페이지</h2>
+          <h2 className={SECTION_TITLE_CLASS}>프로그램별 장소·시간</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {sourceNote.programs.map((program) => (
+              <div
+                key={program.name}
+                className="rounded-lg border border-[var(--color-line)] p-4"
+              >
+                <h3 className="font-semibold">{program.name}</h3>
+                <p>{program.venue}</p>
+                <p>{program.address || "상세 주소 확인 필요"}</p>
+                <p>{program.time}</p>
+                <p className="mt-2 text-sm">{program.notice}</p>
+                {program.address && (
+                  <TrackedLink
+                    eventName="map_open"
+                    contentId={festival.contentId}
+                    href={`https://map.kakao.com/link/search/${encodeURIComponent(program.venue + " " + program.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    {program.venue} 지도 검색
+                  </TrackedLink>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {!sourceNote?.programs && (
+        <section>
+          <h2 className={SECTION_TITLE_CLASS}>가는 방법</h2>
+          <p className="text-sm text-[var(--color-ink-muted)]">
+            {address ?? "주소는 공식 발표 기준으로 확인해 주세요."}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {festival.lat && festival.lng && (
+              <TrackedLink
+                eventName="map_open"
+                contentId={festival.contentId}
+                href={`https://map.kakao.com/link/map/${encodeURIComponent(festival.title)},${festival.lat},${festival.lng}`}
+                className={ROUTE_ACTION_CLASS}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 4.55 6.5 12 7 12s7-7.45 7-12c0-3.87-3.13-7-7-7Z"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    fill="none"
+                  />
+                  <path
+                    d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                카카오맵 보기
+              </TrackedLink>
+            )}
+            {festival.tel && (
+              <a href={`tel:${festival.tel}`} className={ROUTE_ACTION_CLASS}>
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M3 5.5A2 2 0 0 1 5 3h2.38a1.5 1.5 0 0 1 1.5 1.25l.45 2.55a1.5 1.5 0 0 1-.84 1.58L6.8 8.9a12.01 12.01 0 0 0 8.3 8.3l.52-1.23a1.5 1.5 0 0 1 1.58-.84L19.75 17a1.5 1.5 0 0 1 1.25 1.5V21a2 2 0 0 1-2 2h-1C10.5 23 1 13.5 1 2h-.5A2 2 0 0 1 3 0h3.5a1.5 1.5 0 0 1 1.5 1.25l.55 2.5a1.5 1.5 0 0 1-.84 1.73L6.8 6.1A18.3 18.3 0 0 1 17.9 17.2l.82-1.13a1.5 1.5 0 0 1 1.73-.84L23.95 16a1.5 1.5 0 0 1 1.25 1.5V21a2 2 0 0 1-2 2H21z"
+                    fill="currentColor"
+                  />
+                </svg>
+                문의하기
+              </a>
+            )}
+          </div>
+        </section>
+      )}
+
+      {(sourceNote?.sourceUrl || homepageUrl) && (
+        <section>
+          <h2>{sourceNote?.label ?? "공식 안내·원자료"}</h2>
           <p className="text-sm break-all">
-            <a
-              href={homepageUrl}
+            <TrackedLink
+              eventName="official_link_open"
+              contentId={festival.contentId}
+              href={sourceNote?.sourceUrl ?? homepageUrl ?? undefined}
               className="text-[var(--color-brand)] hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              공식 사이트에서 최신 공지 확인하기
-            </a>
+              {sourceNote?.label ?? "안내 자료 확인하기"}
+            </TrackedLink>
           </p>
         </section>
       )}
@@ -275,25 +324,47 @@ export default async function FestivalPage({ params }: Params) {
 
       <footer className="text-xs text-[var(--color-ink-muted)] space-y-1">
         <p>
-          <strong>데이터 출처</strong>: 한국관광공사 TourAPI ·{" "}
-          <strong>마지막 업데이트</strong>:{" "}
+          <strong>기본 데이터 출처</strong>: 한국관광공사 TourAPI ·{" "}
+          <strong>데이터 변경 기록</strong>:{" "}
           <time dateTime={updatedAt}>{updatedAt.slice(0, 10)}</time>
         </p>
+        {festival.syncedAt && (
+          <p>
+            최근 수집:{" "}
+            <time dateTime={festival.syncedAt.toISOString()}>
+              {festival.syncedAt.toISOString().slice(0, 10)}
+            </time>{" "}
+            · 자동 수집은 사람의 검수를 뜻하지 않습니다.
+          </p>
+        )}
+        {sourceNote && (
+          <p>
+            공식 자료 대조일: {sourceNote.checkedAt} · 대상:{" "}
+            {sourceNote.checkedFields}. 현장 운영 확인은 아닙니다.
+          </p>
+        )}
         <p>
           행사 정보는 변경·취소될 수 있어요. 방문 전에 공식 홈페이지나 주최 측
           연락처로 다시 한번 확인하시면 좋습니다.
         </p>
       </footer>
+      <PageAds
+        eligible={Boolean(
+          festival.overview ||
+          festival.description ||
+          (festival.startDate && festival.address),
+        )}
+      />
     </article>
   );
 }
 
-async function getFestival(contentId: number) {
-  if (!Number.isFinite(contentId)) return null;
+const getFestival = cache(async (contentId: number) => {
+  if (!Number.isSafeInteger(contentId) || contentId <= 0) return null;
   const rows = await db
     .select()
     .from(festivals)
     .where(eq(festivals.contentId, contentId))
     .limit(1);
-  return rows[0] ?? null;
-}
+  return rows[0] ? { ...rows[0], ...festivalPeriod(rows[0]) } : null;
+});

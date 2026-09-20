@@ -1,0 +1,59 @@
+{
+  "checks": [
+    {
+      "name": "Seoul current page 2 has 15 cards after next-page click",
+      "pass": true
+    },
+    {
+      "name": "229054 visible official date and venue",
+      "pass": true
+    },
+    {
+      "name": "229054 no overflow at 360",
+      "pass": true
+    },
+    {
+      "name": "229054 no overflow at 390",
+      "pass": true
+    },
+    {
+      "name": "229054 no overflow at 1280",
+      "pass": true
+    },
+    {
+      "name": "3000221 visible official date and venue",
+      "pass": true
+    },
+    {
+      "name": "3000221 no overflow at 360",
+      "pass": true
+    },
+    {
+      "name": "3000221 no overflow at 390",
+      "pass": true
+    },
+    {
+      "name": "3000221 no overflow at 1280",
+      "pass": true
+    },
+    {
+      "name": "3337617 visible official date and venue",
+      "pass": true
+    },
+    {
+      "name": "3337617 no overflow at 360",
+      "pass": true
+    },
+    {
+      "name": "3337617 no overflow at 390",
+      "pass": true
+    },
+    {
+      "name": "3337617 no overflow at 1280",
+      "pass": true
+    }
+  ],
+  "externalRequests": "ALL blocked before navigation; no ad clicks/analytics sends",
+  "observedAt": "2026-09-20T01:28:44.175854+00:00",
+  "limitation": "Before final three source-label copy changes; final HTTP checks ran after them. External images/fonts blocked."
+}
