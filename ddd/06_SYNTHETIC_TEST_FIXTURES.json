@@ -1,0 +1,447 @@
+{
+  "schema_version": "1.0",
+  "document_kind": "SYNTHETIC_OFFLINE_ACCEPTANCE_FIXTURES",
+  "not_production_data": true,
+  "instructions": [
+    "모든 ID/행사/장소/운영일은 가상 데이터다. 실제 행사 사실로 사용하거나 발행하지 않는다.",
+    "필드명은 테스트 교환 형식이다. 운영 DB 스키마를 이 구조로 강제 변경하지 말고 기존 코드에 어댑터를 둔다.",
+    "날짜만 있는 기간은 시작/종료 날짜 포함, 시각 회차는 시작 포함/종료 제외로 테스트한다.",
+    "CONFIRMED_SCHEDULE_ON_DATE는 일정상 운영일이며 실시간 현장 운영을 보장하는 표현이 아니다.",
+    "현재 시각은 주입한다. 실제 라이브 행사의 상태를 고정된 2026-09-20으로 계산하지 않는다."
+  ],
+  "timezone": "Asia/Seoul",
+  "calendar_events": [
+    {
+      "id": "SYN-DAILY-SEP19",
+      "synthetic": true,
+      "start_date": "2026-09-19",
+      "end_date": "2026-09-19",
+      "recurrence": {
+        "mode": "daily",
+        "iso_weekdays": []
+      },
+      "cancelled_dates": [],
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "id": "SYN-FRI-SAT",
+      "synthetic": true,
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-31",
+      "recurrence": {
+        "mode": "iso_weekdays",
+        "iso_weekdays": [
+          5,
+          6
+        ]
+      },
+      "cancelled_dates": [],
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "id": "SYN-FRI-SAT-CANCELLED",
+      "synthetic": true,
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-31",
+      "recurrence": {
+        "mode": "iso_weekdays",
+        "iso_weekdays": [
+          5,
+          6
+        ]
+      },
+      "cancelled_dates": [
+        "2026-09-19"
+      ],
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "id": "SYN-UNKNOWN-DAYS",
+      "synthetic": true,
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-31",
+      "recurrence": {
+        "mode": "unknown",
+        "iso_weekdays": []
+      },
+      "cancelled_dates": [],
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "id": "SYN-NO-DATES",
+      "synthetic": true,
+      "start_date": null,
+      "end_date": null,
+      "recurrence": {
+        "mode": "unknown",
+        "iso_weekdays": []
+      },
+      "cancelled_dates": [],
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "id": "SYN-CROSS-MONTH",
+      "synthetic": true,
+      "start_date": "2026-09-30",
+      "end_date": "2026-10-01",
+      "recurrence": {
+        "mode": "daily",
+        "iso_weekdays": []
+      },
+      "cancelled_dates": [],
+      "timezone": "Asia/Seoul"
+    },
+    {
+      "id": "SYN-CROSS-YEAR",
+      "synthetic": true,
+      "start_date": "2026-12-31",
+      "end_date": "2027-01-01",
+      "recurrence": {
+        "mode": "daily",
+        "iso_weekdays": []
+      },
+      "cancelled_dates": [],
+      "timezone": "Asia/Seoul"
+    }
+  ],
+  "calendar_cases": [
+    {
+      "case_id": "CAL-01",
+      "event_id": "SYN-DAILY-SEP19",
+      "at_utc": "2026-09-19T14:59:59Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-02",
+      "event_id": "SYN-DAILY-SEP19",
+      "at_utc": "2026-09-19T15:00:00Z",
+      "expected_kst_date": "2026-09-20",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-03",
+      "event_id": "SYN-FRI-SAT",
+      "at_utc": "2026-09-19T03:00:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-04",
+      "event_id": "SYN-FRI-SAT",
+      "at_utc": "2026-09-20T03:00:00Z",
+      "expected_kst_date": "2026-09-20",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-05",
+      "event_id": "SYN-FRI-SAT-CANCELLED",
+      "at_utc": "2026-09-18T03:00:00Z",
+      "expected_kst_date": "2026-09-18",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-06",
+      "event_id": "SYN-FRI-SAT-CANCELLED",
+      "at_utc": "2026-09-19T03:00:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "CANCELLED_OCCURRENCE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-07",
+      "event_id": "SYN-UNKNOWN-DAYS",
+      "at_utc": "2026-09-20T03:00:00Z",
+      "expected_kst_date": "2026-09-20",
+      "expected_schedule_state": "UNVERIFIED_SCHEDULE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-08",
+      "event_id": "SYN-NO-DATES",
+      "at_utc": "2026-09-20T03:00:00Z",
+      "expected_kst_date": "2026-09-20",
+      "expected_schedule_state": "UNKNOWN_PERIOD",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-09",
+      "event_id": "SYN-CROSS-MONTH",
+      "at_utc": "2026-09-30T14:59:59Z",
+      "expected_kst_date": "2026-09-30",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-10",
+      "event_id": "SYN-CROSS-MONTH",
+      "at_utc": "2026-09-30T15:00:00Z",
+      "expected_kst_date": "2026-10-01",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-11",
+      "event_id": "SYN-CROSS-MONTH",
+      "at_utc": "2026-10-01T15:00:00Z",
+      "expected_kst_date": "2026-10-02",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-12",
+      "event_id": "SYN-CROSS-YEAR",
+      "at_utc": "2026-12-31T15:00:00Z",
+      "expected_kst_date": "2027-01-01",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "case_id": "CAL-13",
+      "event_id": "SYN-CROSS-YEAR",
+      "at_utc": "2027-01-01T15:00:00Z",
+      "expected_kst_date": "2027-01-02",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE",
+      "qa_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    }
+  ],
+  "weekend_cases": [
+    {
+      "case_id": "WEEKEND-01",
+      "event_id": "SYN-DAILY-SEP19",
+      "weekend_start": "2026-09-19",
+      "weekend_end": "2026-09-20",
+      "at_utc": "2026-09-20T03:00:00Z",
+      "expected_matches_weekend": true,
+      "expected_confirmed_schedule_today": false,
+      "qa_ids": [
+        "T08"
+      ]
+    },
+    {
+      "case_id": "WEEKEND-02",
+      "event_id": "SYN-FRI-SAT",
+      "weekend_start": "2026-09-19",
+      "weekend_end": "2026-09-20",
+      "at_utc": "2026-09-20T03:00:00Z",
+      "expected_matches_weekend": true,
+      "expected_confirmed_schedule_today": false,
+      "qa_ids": [
+        "T08"
+      ]
+    }
+  ],
+  "time_window_cases": {
+    "occurrence_id": "SYN-OCC-SEP19-09",
+    "starts_at": "2026-09-19T09:00:00+09:00",
+    "ends_at": "2026-09-19T10:00:00+09:00",
+    "cases": [
+      {
+        "case_id": "WINDOW-01",
+        "at_utc": "2026-09-18T23:59:59Z",
+        "expected_within_scheduled_time_window": false
+      },
+      {
+        "case_id": "WINDOW-02",
+        "at_utc": "2026-09-19T00:00:00Z",
+        "expected_within_scheduled_time_window": true
+      },
+      {
+        "case_id": "WINDOW-03",
+        "at_utc": "2026-09-19T01:00:00Z",
+        "expected_within_scheduled_time_window": false
+      }
+    ],
+    "qa_ids": [
+      "T07"
+    ]
+  },
+  "groups_fixture": {
+    "fixture_id": "groups-01",
+    "synthetic": true,
+    "model": "one_region_per_event",
+    "filter": {
+      "start_date": "2026-09-19",
+      "end_date": "2026-09-20",
+      "published_only": true
+    },
+    "items": [
+      {
+        "id": "SYN-G1",
+        "region": "서울",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-19",
+        "published": true
+      },
+      {
+        "id": "SYN-G2",
+        "region": "서울",
+        "start_date": "2026-09-20",
+        "end_date": "2026-09-20",
+        "published": true
+      },
+      {
+        "id": "SYN-G3",
+        "region": "경기도",
+        "start_date": "2026-09-18",
+        "end_date": "2026-09-22",
+        "published": true
+      },
+      {
+        "id": "SYN-G4",
+        "region": "제주",
+        "start_date": "2026-09-20",
+        "end_date": "2026-09-20",
+        "published": true
+      },
+      {
+        "id": "SYN-G5",
+        "region": null,
+        "raw_region_code": "SYN-UNMAPPED",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-19",
+        "published": true
+      },
+      {
+        "id": "SYN-G6",
+        "region": "서울",
+        "start_date": "2026-09-18",
+        "end_date": "2026-09-18",
+        "published": true
+      },
+      {
+        "id": "SYN-G7",
+        "region": "경기도",
+        "start_date": "2026-09-21",
+        "end_date": "2026-09-21",
+        "published": true
+      },
+      {
+        "id": "SYN-G8",
+        "region": "경기도",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-19",
+        "published": false
+      }
+    ],
+    "page_size": 2,
+    "group_preview_size": 1,
+    "expected": {
+      "distinct_total": 5,
+      "group_counts": {
+        "서울": 2,
+        "경기도": 1,
+        "제주": 1,
+        "UNMAPPED": 1
+      },
+      "eligible_ids": [
+        "SYN-G1",
+        "SYN-G2",
+        "SYN-G3",
+        "SYN-G4",
+        "SYN-G5"
+      ],
+      "excluded_ids": [
+        "SYN-G6",
+        "SYN-G7",
+        "SYN-G8"
+      ]
+    },
+    "qa_ids": [
+      "T04",
+      "T05"
+    ]
+  },
+  "multi_venue_fixture": {
+    "event_id": "SYN-MULTI-VENUE",
+    "synthetic": true,
+    "programs": [
+      {
+        "program_id": "SYN-P-A",
+        "venue_id": "SYN-V-A",
+        "venue_label": "가상 장소 A",
+        "date": "2026-09-19",
+        "starts_at": "09:00",
+        "ends_at": "12:00",
+        "map_reference": "SYNTHETIC_MAP_A",
+        "cancelled": false
+      },
+      {
+        "program_id": "SYN-P-B",
+        "venue_id": "SYN-V-B",
+        "venue_label": "가상 장소 B",
+        "date": "2026-09-20",
+        "starts_at": "14:00",
+        "ends_at": "16:00",
+        "map_reference": "SYNTHETIC_MAP_B",
+        "cancelled": true
+      }
+    ],
+    "expected": [
+      "프로그램 A의 지도는 A, 프로그램 B의 지도는 B를 가리킨다.",
+      "프로그램 B의 취소는 프로그램 A로 전파하지 않는다.",
+      "가상 지도 reference는 실제 외부 지도 링크로 발행하지 않는다."
+    ],
+    "qa_ids": [
+      "T09",
+      "T10"
+    ]
+  }
+}
