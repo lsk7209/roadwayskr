@@ -19,13 +19,15 @@ export function EventSchema({ festival, url }: Props) {
   const description = cleanTourText(festival.description ?? festival.overview);
   const address = cleanTourText(festival.address);
   const eventPlace = cleanTourText(festival.eventPlace);
-  const period = festivalPeriod(festival);
+  const basePeriod = festivalPeriod(festival);
+  const note = eventSourceNote({ ...festival, ...basePeriod });
+  const period = note?.officialOccurrence ?? basePeriod;
   // A multi-program venue guide is not one precisely scheduled Event.
   if (
     !period.startDate ||
     !address ||
     !eventPlace ||
-    eventSourceNote({ ...festival, ...period })?.programs
+    note?.programs
   )
     return null;
 

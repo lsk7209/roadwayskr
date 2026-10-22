@@ -42,3 +42,43 @@ for (const area of AREAS) {
 
 export const findAreaBySlug = (slug: string) => BY_SLUG.get(slug);
 export const findAreaByCode = (code: string) => BY_CODE.get(code);
+
+/**
+ * 공급자 코드가 없을 때 주소 첫 토큰으로 시도를 찾는다. 확인된 별칭만 사용하며
+ * 모르는 주소는 null(지역 확인 필요)로 남긴다. 원문 주소는 바꾸지 않는다.
+ */
+const SIDO_ALIASES: Record<string, string> = {
+  전북: "37",
+  전북특별자치도: "37",
+  전라북도: "37",
+  강원: "32",
+  강원특별자치도: "32",
+  강원도: "32",
+  제주: "39",
+  제주특별자치도: "39",
+  제주도: "39",
+  세종: "8",
+  세종시: "8",
+};
+
+/**
+ * 전남광주통합특별시 주소는 시·군이면 전남(38), 자치구(동·서·남·북·광산구)이면
+ * 광주(5)로만 대응한다. 둘 다 아니면 null.
+ */
+const GWANGJU_GU = new Set(["동구", "서구", "남구", "북구", "광산구"]);
+
+export function resolveAreaCodeFromAddress(
+  address: string | null | undefined,
+): string | null {
+  const parts = address?.trim().split(/\s+/);
+  if (!parts?.[0]) return null;
+  const first = parts[0];
+  const direct = BY_SLUG.get(first) ?? SIDO_ALIASES[first];
+  if (direct) return typeof direct === "string" ? direct : direct.code;
+  if (first === "전남광주통합특별시") {
+    const second = parts[1] ?? "";
+    if (GWANGJU_GU.has(second)) return "5";
+    if (/[시군]$/.test(second)) return "38";
+  }
+  return null;
+}

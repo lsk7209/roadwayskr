@@ -43,8 +43,12 @@ export default async function BlogPage() {
           최근 업데이트된 축제·행사 목록
         </h1>
         <p className="prose-body mt-4 text-[1.04rem] leading-8 text-[var(--color-ink-muted)]">
-          날짜, 지역, 테마별로 정리한 축제 목록입니다. 방문 전 공식 채널에서
-          최신 일정을 다시 확인해 주세요.
+          정보가 새로 확인되거나 바뀐 순서로 보여주는 업데이트 기록입니다. 여러
+          행사 중 무엇을 고를지 비교하려면{" "}
+          <Link href="/guides" className="underline">
+            편집 가이드
+          </Link>
+          를 이용하고, 방문 전 공식 채널에서 최신 일정을 다시 확인해 주세요.
         </p>
       </section>
 

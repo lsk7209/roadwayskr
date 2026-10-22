@@ -13,7 +13,7 @@ import type { LibSQLDatabase } from "drizzle-orm/libsql";
 import { festivals } from "../db/schema";
 import { currentFestivalCondition } from "./current-festivals";
 import { AREAS, findAreaByCode } from "./regions";
-import { validDate } from "./festival-dates";
+import { LONG_RUNNING_DAYS, validDate } from "./festival-dates";
 
 export type SearchValues = Record<string, string | string[] | undefined>;
 export type DateRange = { from: string; to: string };
@@ -29,6 +29,9 @@ export type ListFilter = {
    */
   knownTotal?: number;
 };
+
+/** Short-run events first so months-long programs do not crowd out the weekend picks. */
+const longRunningRank = sql`case when julianday(${festivals.endDate}) - julianday(${festivals.startDate}) > ${LONG_RUNNING_DAYS} then 1 else 0 end`;
 
 export function parseListSearch(search: SearchValues) {
   const { from, to, page } = search;
@@ -105,7 +108,7 @@ export async function festivalPage<T extends Record<string, unknown>>(
       .select()
       .from(festivals)
       .where(condition)
-      .orderBy(festivals.startDate, festivals.contentId)
+      .orderBy(longRunningRank, festivals.startDate, festivals.contentId)
       .limit(size)
       .offset((page - 1) * size);
     const total = filter.knownTotal;
@@ -117,7 +120,7 @@ export async function festivalPage<T extends Record<string, unknown>>(
       .select()
       .from(festivals)
       .where(condition)
-      .orderBy(festivals.startDate, festivals.contentId)
+      .orderBy(longRunningRank, festivals.startDate, festivals.contentId)
       .limit(size)
       .offset((page - 1) * size),
     db

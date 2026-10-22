@@ -11,6 +11,11 @@ type SourceNote = {
   scheduleText?: string;
   recurrence?: CalendarEvent["recurrence"];
   checkedFields: string;
+  /**
+   * 공식 공지로 확인한 개최일. 수집된 전체 기간(startDate~endDate)이 이보다 길 때
+   * 상세 표시와 Event 구조화 데이터는 이 값을 사용한다(전체 기간 매일 운영 오해 방지).
+   */
+  officialOccurrence?: { startDate: string; endDate: string };
   programs?: {
     name: string;
     venue: string;
@@ -20,6 +25,20 @@ type SourceNote = {
   }[];
 };
 export const EVENT_SOURCE_NOTES: SourceNote[] = [
+  {
+    // 기존 원자료 링크(no=182)는 2025년 제7회(2025-11-01) 공지였다. 원자료는 그대로 두고
+    // 2026년 제8회 공지로 게시 링크만 교체한다.
+    contentId: 2789700,
+    startDate: "2026-10-31",
+    endDate: "2026-12-31",
+    sourceUrl: "https://www.pajucf.or.kr/business/02_3_view.php?no=430&page=",
+    checkedAt: "2026-10-23",
+    label: "파주문화재단 2026년 제8회 운정호수공원 불꽃축제 공지",
+    checkedFields: "행사명·연도·회차·개최일·행사 운영 시간",
+    officialOccurrence: { startDate: "2026-10-31", endDate: "2026-10-31" },
+    scheduleText:
+      "공식 공지 기준 제8회 불꽃축제는 2026년 10월 31일(토) 14:00~22:00 운영입니다. 이 시간은 행사 전체 운영 시간이며 불꽃쇼 시작 시각이 아닙니다. 불꽃쇼 세부 시각과 불빛정원 운영 기간·시간은 공지에 아직 없어 확인 중이며, 10월 31일 이후 기간을 불꽃쇼 날짜로 안내하지 않습니다.",
+  },
   {
     contentId: 2434545,
     startDate: "2026-04-25",

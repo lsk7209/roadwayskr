@@ -1,8 +1,14 @@
-import Image from "next/image";
+import { SafeImage } from "./SafeImage";
 import { FestivalLink as Link } from "./FestivalLink";
 import type { Festival } from "@/db";
 import { festivalPeriod } from "@/lib/festival-facts";
-import { formatPeriod, PERIOD_LABELS, periodState, recurrenceLabel } from "@/lib/festival-dates";
+import {
+  formatPeriod,
+  isLongRunning,
+  PERIOD_LABELS,
+  periodState,
+  recurrenceLabel,
+} from "@/lib/festival-dates";
 import { eventSourceNote } from "@/lib/event-source-notes";
 
 interface FestivalListCardProps {
@@ -45,13 +51,15 @@ export function FestivalListCard({
   const TitleTag = titleLevel === "h3" ? "h3" : "h2";
   const period = festivalPeriod(festival);
   const note = eventSourceNote({ ...festival, ...period });
+  const shown = note?.officialOccurrence ?? period;
+  const longRunning = !note?.officialOccurrence && isLongRunning(period.startDate, period.endDate);
 
   return (
     <li className="h-full min-w-0">
       <Link href={href} className="group block h-full min-w-0">
         <div className="relative aspect-square overflow-hidden rounded-[14px] bg-[var(--color-surface-strong)]">
           {festival.imageUrl ? (
-            <Image
+            <SafeImage
               src={festival.imageUrl}
               alt={festival.title}
               fill
@@ -68,7 +76,7 @@ export function FestivalListCard({
           <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[var(--color-ink)] shadow-[var(--shadow-float)]">
             {
               PERIOD_LABELS[
-                periodState(period.startDate, period.endDate, festival.status)
+                periodState(shown.startDate, shown.endDate, festival.status)
               ]
             }
           </span>
@@ -77,7 +85,8 @@ export function FestivalListCard({
         <div className="min-w-0 pt-3">
           <TitleTag className={TITLE_CLASS}>{festival.title}</TitleTag>
           <p className="mt-1 text-sm leading-5 text-[var(--color-muted)]">
-            {formatPeriod(period.startDate, period.endDate)}
+            {formatPeriod(shown.startDate, shown.endDate)}
+            {longRunning && " · 장기·상설 행사"}
           </p>
           <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
             {note?.recurrence

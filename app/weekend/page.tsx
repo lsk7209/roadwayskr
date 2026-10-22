@@ -12,6 +12,7 @@ import {
 } from "@/lib/festival-list";
 import { findAreaByCode } from "@/lib/regions";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { shareMetadata } from "@/lib/page-meta";
 import { PageAds } from "@/components/ads/PageAds";
 
 interface Props {
@@ -28,10 +29,20 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const range = await selectedRange(searchParams);
   if (!range) return {};
+  const raw = await searchParams;
+  const custom = raw.from !== undefined || raw.to !== undefined;
+  const url = custom
+    ? listHref("https://roadways.kr/weekend", range)
+    : "https://roadways.kr/weekend";
+  const title = `주말 축제·행사 (${range.from} ~ ${range.to})`;
+  const description = "선택한 기간의 지역별 행사와 실제 운영일을 확인하세요.";
   return {
-    title: `주말 축제·행사 (${range.from} ~ ${range.to})`,
-    description: "선택한 기간의 지역별 행사와 실제 운영일을 확인하세요.",
-    alternates: { canonical: "https://roadways.kr/weekend" },
+    title,
+    description,
+    // 임의 날짜 조회는 기본 주말 목록의 복제본이 아니므로 자기 URL을 canonical로 두고 noindex.
+    alternates: { canonical: url },
+    robots: custom ? { index: false, follow: true } : undefined,
+    ...shareMetadata({ title, description, url }),
   };
 }
 export default async function WeekendPage({ searchParams }: Props) {
@@ -61,7 +72,8 @@ export default async function WeekendPage({ searchParams }: Props) {
       </p>
       <p className="mt-2 text-sm">
         토요일에 끝난 행사도 이 주말 목록에 포함됩니다. 실제 운영 요일·당일 취소
-        여부는 상세 안내를 확인해 주세요.
+        여부는 상세 안내를 확인해 주세요. 지역별 미리보기는 기간이 짧은 행사를
+        먼저, 31일을 넘는 장기·상설 행사를 뒤에 보여줍니다.
       </p>
       {total === 0 && (
         <p className="my-8">선택한 기간에 등록된 행사가 없습니다.</p>

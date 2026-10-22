@@ -99,12 +99,12 @@ export default async function Home() {
           살펴보세요. 행사 기간, 운영 요일과 장소를 함께 확인해 보세요.
         </p>
 
-        <div className="mt-8 grid gap-3 md:grid-cols-3">
+        <div className="mt-5 grid gap-2 md:mt-8 md:grid-cols-3 md:gap-3">
           {quickFilters.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-2xl border border-[var(--color-line)] bg-white p-4 text-left shadow-[var(--shadow-float)] transition hover:border-[var(--color-brand)]"
+              className="rounded-2xl border border-[var(--color-line)] bg-white p-3 text-left md:p-4 shadow-[var(--shadow-float)] transition hover:border-[var(--color-brand)]"
             >
               <p className="text-sm font-semibold text-[var(--color-ink)]">
                 {item.label}

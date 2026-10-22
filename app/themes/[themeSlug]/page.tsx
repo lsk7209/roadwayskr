@@ -11,6 +11,7 @@ import {
   buildCollectionPageLd,
   buildBreadcrumbListLd,
 } from "@/components/seo/JsonLd";
+import { pageCanonical, shareMetadata } from "@/lib/page-meta";
 import { PageAds } from "@/components/ads/PageAds";
 import { ListNavigation } from "@/components/festival/ListNavigation";
 import { parseListSearch, type SearchValues } from "@/lib/festival-list";
@@ -42,15 +43,19 @@ export async function generateMetadata({
 
   const count = await getCount(parsed.theme.name);
   const search = parseListSearch(await searchParams);
-  const indexable =
-    count >= MIN_ITEMS_FOR_INDEX && search?.page === 1 && !search.range;
+  const indexable = count >= MIN_ITEMS_FOR_INDEX && !!search && !search.range;
+  const title = `${parsed.theme.name} 일정`;
+  const description = `${parsed.theme.name}로 분류된 진행 중·예정 축제와 행사 ${count}건을 정리했습니다. 지역, 일정, 장소를 한눈에 확인하세요.`;
+  const canonical = pageCanonical(
+    `/themes/${parsed.theme.slug}`,
+    search?.page ?? 1,
+  );
 
   return {
-    title: `${parsed.theme.name} 일정`,
-    description: `${parsed.theme.name}로 분류된 진행 중·예정 축제와 행사 ${count}건을 정리했습니다. 지역, 일정, 장소를 한눈에 확인하세요.`,
-    alternates: {
-      canonical: `${SITE_URL}/themes/${parsed.theme.slug}`,
-    },
+    title,
+    description,
+    alternates: { canonical },
+    ...shareMetadata({ title, description, url: canonical }),
     robots: indexable
       ? { index: true, follow: true }
       : { index: false, follow: true },

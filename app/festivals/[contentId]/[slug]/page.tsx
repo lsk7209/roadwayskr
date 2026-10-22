@@ -55,9 +55,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!festival) return {};
 
   const canonical = `${SITE_URL}/festivals/${encodePathSegment(contentId)}/${encodePathSegment(festival.slug)}`;
+  const shown = eventSourceNote(festival)?.officialOccurrence ?? festival;
   const period =
-    festival.startDate && festival.endDate
-      ? ` (${formatPeriod(festival.startDate, festival.endDate)})`
+    shown.startDate && shown.endDate
+      ? ` (${formatPeriod(shown.startDate, shown.endDate)})`
       : "";
 
   const title = `${festival.title}${period}`;

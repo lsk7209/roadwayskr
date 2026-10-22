@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/db";
+import { pageCanonical, shareMetadata } from "@/lib/page-meta";
 import { findAreaBySlug } from "@/lib/regions";
 import {
   festivalPage,
@@ -63,11 +64,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     range: ctx.range,
     pageSize: 1,
   });
+  const title = `${ctx.year}년 ${ctx.month}월 ${ctx.area.name} 축제·행사`;
+  const description = `해당 월과 기간이 겹치는 행사 ${total}건. 월별 시작·종료와 운영일을 확인하세요.`;
+  const canonical = pageCanonical(ctx.path, ctx.search.page);
   return {
-    title: `${ctx.year}년 ${ctx.month}월 ${ctx.area.name} 축제·행사`,
-    description: `해당 월과 기간이 겹치는 행사 ${total}건. 월별 시작·종료와 운영일을 확인하세요.`,
-    alternates: { canonical: `https://roadways.kr${ctx.path}` },
-    robots: { index: total >= 3 && ctx.search.page === 1, follow: true },
+    title,
+    description,
+    alternates: { canonical },
+    ...shareMetadata({ title, description, url: canonical }),
+    robots: { index: total >= 3, follow: true },
   };
 }
 export default async function MonthlyAreaPage(props: Props) {

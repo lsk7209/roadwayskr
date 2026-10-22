@@ -144,3 +144,16 @@ export function monthCategory(
   if (end <= to) return "이달 종료";
   return "여러 달에 걸친 행사";
 }
+
+/** Events spanning more than this many days sort after short-run events. */
+export const LONG_RUNNING_DAYS = 31;
+
+export function isLongRunning(start: unknown, end: unknown): boolean {
+  const s = validDate(start),
+    e = validDate(end);
+  if (!s || !e || e < s) return false;
+  return (
+    (Date.parse(`${e}T00:00:00Z`) - Date.parse(`${s}T00:00:00Z`)) / 86400000 >
+    LONG_RUNNING_DAYS
+  );
+}

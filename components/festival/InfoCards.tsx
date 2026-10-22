@@ -30,9 +30,12 @@ export function InfoCards({ festival }: Props) {
   const fee = cleanTourText(festival.fee);
   const period = festivalPeriod(festival);
   const note = eventSourceNote({ ...festival, ...period });
-  const state = periodState(period.startDate, period.endDate, festival.status);
+  // 공식 공지로 확인한 개최일이 수집된 전체 기간보다 좁으면 그 개최일을 주 일정으로 쓴다.
+  const occurrence = note?.officialOccurrence;
+  const shown = occurrence ?? period;
+  const state = periodState(shown.startDate, shown.endDate, festival.status);
   const todaySchedule = scheduleOnDate(
-    { ...period, status: festival.status, recurrence: note?.recurrence },
+    { ...shown, status: festival.status, recurrence: note?.recurrence },
     seoulDate(),
   );
   const cards: Array<{
@@ -43,8 +46,10 @@ export function InfoCards({ festival }: Props) {
   }> = [
     {
       label: "기간",
-      value: formatPeriod(period.startDate, period.endDate),
-      hint: PERIOD_LABELS[state],
+      value: formatPeriod(shown.startDate, shown.endDate),
+      hint: occurrence
+        ? `${PERIOD_LABELS[state]} · 공식 확인 개최일 (수집된 전체 기간 ${formatPeriod(period.startDate, period.endDate)}은 매일 운영을 뜻하지 않음)`
+        : PERIOD_LABELS[state],
     },
     {
       label: "운영 시간",

@@ -2,6 +2,7 @@ import type { FestivalRaw, FestivalIntroRaw, FestivalCommonRaw } from "./types";
 import type { NewFestival } from "@/db/schema";
 import { validDate, periodState } from "../festival-dates";
 import { explicitFree } from "../festival-facts";
+import { resolveAreaCodeFromAddress } from "../regions";
 
 /**
  * TourAPI 원본 → DB 스키마 정규화
@@ -185,23 +186,46 @@ function getAreaCode(
   if (areaCode) return areaCode;
 
   const ldongRegnCd = clean(base.lDongRegnCd ?? common?.lDongRegnCd);
-  return ldongRegnCd ? (LDONG_TO_AREA_CODE[ldongRegnCd] ?? null) : null;
+  const byLdong = ldongRegnCd ? LDONG_TO_AREA_CODE[ldongRegnCd] : undefined;
+  if (byLdong) return byLdong;
+  return resolveAreaCodeFromAddress(clean(base.addr1 ?? common?.addr1));
 }
 
-function extractThemes(args: {
+/** 본문(소개·프로그램·장소)에서만 단서가 나온 경우 대표 테마로 보려면 필요한 최소 언급 수. */
+const BODY_MENTIONS_FOR_THEME = 3;
+
+function countMentions(text: string, keywords: string[]): number {
+  let n = 0;
+  for (const k of keywords) n += text.split(k).length - 1;
+  return n;
+}
+
+/**
+ * 대표 테마 판정: 제목에 단서가 있으면 포함. 제목에 없으면 본문 언급이
+ * 충분히 반복될 때만 포함한다(드론쇼·역사탐방·커피 행사 소개문의 곁가지
+ * "꽃" 한 단어로 꽃축제가 되는 것을 막는다). 애매한 경우는 테마 없음으로 두어
+ * 잘못된 테마 목록 노출 대신 검토 대상으로 남긴다.
+ */
+export function extractThemes(args: {
   title: string;
   overview: string | null;
   eventPlace: string | null;
   program: string | null;
 }): string[] {
-  const blob = [args.title, args.overview, args.eventPlace, args.program]
+  const body = [args.overview, args.eventPlace, args.program]
     .filter(Boolean)
     .join(" ");
   const found = new Set<string>();
   for (const [theme, keywords] of Object.entries(THEME_KEYWORD_MAP)) {
-    const candidate =
-      theme === "꽃축제" ? blob.replace(/불꽃|눈꽃/g, "") : blob;
-    if (keywords.some((k) => candidate.includes(k))) found.add(theme);
+    const strip = (t: string) =>
+      theme === "꽃축제" ? t.replace(/불꽃|눈꽃/g, "") : t;
+    if (keywords.some((k) => strip(args.title).includes(k))) {
+      found.add(theme);
+    } else if (
+      countMentions(strip(body), keywords) >= BODY_MENTIONS_FOR_THEME
+    ) {
+      found.add(theme);
+    }
   }
   return [...found];
 }

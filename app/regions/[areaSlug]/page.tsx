@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { findAreaBySlug } from "@/lib/regions";
 import {
   festivalPage,
+  listHref,
   parseListSearch,
   type SearchValues,
 } from "@/lib/festival-list";
@@ -13,6 +14,7 @@ import {
   ListNavigation,
   MonthLinks,
 } from "@/components/festival/ListNavigation";
+import { pageCanonical, shareMetadata } from "@/lib/page-meta";
 import { PageAds } from "@/components/ads/PageAds";
 import { JsonLd, buildCollectionPageLd } from "@/components/seo/JsonLd";
 
@@ -49,16 +51,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     areaCode: ctx.area.code,
     pageSize: 1,
   });
+  const title = `${ctx.area.name} 축제·행사`;
+  const description = `${ctx.area.name} 행사 ${total}건. 날짜와 장소를 확인하세요.`;
+  const path = `/regions/${ctx.area.slug}`;
+  // 범위 안의 정상 page=N은 자기 canonical. 임의 날짜 필터는 기본 목록으로 모으고 noindex.
+  const canonical = ctx.search.range
+    ? listHref(`https://roadways.kr${encodeURI(path)}`, ctx.search.range, ctx.search.page)
+    : pageCanonical(path, ctx.search.page);
   return {
-    title: `${ctx.area.name} 축제·행사`,
-    description: `${ctx.area.name} 행사 ${total}건. 날짜와 장소를 확인하세요.`,
-    alternates: { canonical: `https://roadways.kr/regions/${ctx.area.slug}` },
+    title,
+    description,
+    alternates: { canonical },
+    ...shareMetadata({ title, description, url: canonical }),
     robots: {
       index:
-        total >= 3 &&
-        !ctx.search.range &&
-        ctx.search.page === 1 &&
-        ctx.area.code !== "unknown",
+        total >= 3 && !ctx.search.range && ctx.area.code !== "unknown",
       follow: true,
     },
   };
@@ -69,7 +76,6 @@ export default async function AreaHub(props: Props) {
   const { area, search, decoded } = ctx;
   const path = `/regions/${area.slug}`;
   if (decoded !== area.slug) {
-    const { listHref } = await import("@/lib/festival-list");
     permanentRedirect(listHref(encodeURI(path), search.range, search.page));
   }
   const result = await festivalPage(db, { ...search, areaCode: area.code });

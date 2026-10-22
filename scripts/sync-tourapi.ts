@@ -12,7 +12,7 @@
  * - ?�일 ?�출 ?�도(1�? 보호: ??�?sync??최�? 2,500 ??��까�?
  */
 
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { db } from "../db";
 import { festivals, syncRuns } from "../db/schema";
 import {
@@ -27,6 +27,9 @@ import { prepareFestivalUpdate } from "../lib/tourapi/merge";
 
 type SyncMode = "incremental" | "full";
 
+/** 페이지 수집이 끝까지 가지 못했는지 기록한다(부분 수집이어도 기존 행사는 삭제·종료하지 않는다). */
+let collectionComplete = true;
+
 const MAX_ITEMS_PER_RUN = 2_500;
 const RPS_DELAY_MS = 200; // 초당 ~5�? ???�도 ?�전 ?�역.
 const DEFAULT_FULL_RANGE_DAYS = 365;
@@ -40,10 +43,35 @@ async function main() {
 
   validateEnvironment();
 
-  const [run] = await db
-    .insert(syncRuns)
-    .values({ source: "tourapi", mode: options.mode })
-    .returning();
+  // 겹친 실행 방지: 최근 60분 안에 시작해 끝나지 않은 실행이 있으면 새 실행은 시작하지 않는다.
+  // (오래전에 멈춘 실행은 잠금으로 보지 않는다.)
+  if (!options.dryRun) {
+    const active = await db
+      .select({ id: syncRuns.id })
+      .from(syncRuns)
+      .where(
+        and(
+          eq(syncRuns.source, "tourapi"),
+          isNull(syncRuns.finishedAt),
+          gt(syncRuns.ranAt, new Date(Date.now() - 60 * 60_000)),
+        ),
+      )
+      .orderBy(desc(syncRuns.id))
+      .limit(1);
+    if (active.length > 0) {
+      console.error(`[sync-tourapi] run ${active[0].id} still active - skip`);
+      process.exitCode = 2;
+      return;
+    }
+  }
+
+  // --dry-run: 변경 예정만 집계하고 DB 쓰기·IndexNow 전송은 하지 않는다.
+  const [run] = options.dryRun
+    ? [{ id: -1 }]
+    : await db
+        .insert(syncRuns)
+        .values({ source: "tourapi", mode: options.mode })
+        .returning();
 
   let inserted = 0;
   let updated = 0;
@@ -71,7 +99,21 @@ async function main() {
       );
     }
 
+    let seen = 0;
     for (const base of limited) {
+      // 늦게 끝나는 옛 실행이 더 새로운 실행의 결과를 덮어쓰지 않도록 주기적으로 확인한다.
+      if (!options.dryRun && seen++ % 25 === 0) {
+        const newer = await db
+          .select({ id: syncRuns.id })
+          .from(syncRuns)
+          .where(gt(syncRuns.id, run.id))
+          .limit(1);
+        if (newer.length > 0) {
+          collectionComplete = false;
+          console.warn("[sync-tourapi] superseded by a newer run - stop");
+          break;
+        }
+      }
       try {
         const detail = await fetchFestivalDetail(base.contentid);
         await sleep(RPS_DELAY_MS);
@@ -104,6 +146,7 @@ async function main() {
       }
     }
 
+    if (!options.dryRun)
     await db
       .update(syncRuns)
       .set({
@@ -112,7 +155,7 @@ async function main() {
         updatedCount: updated,
         skippedCount: skipped,
         errorCount: errors,
-        notes: `processed=${limited.length}/${items.length}; range=${options.from ?? "auto"}..${options.to ?? "auto"}`,
+        notes: `processed=${limited.length}/${items.length}; complete=${collectionComplete}; range=${options.from ?? "auto"}..${options.to ?? "auto"}`,
         errorJson:
           errorSamples.length > 0
             ? JSON.stringify(errorSamples.slice(0, 20))
@@ -121,13 +164,23 @@ async function main() {
       .where(eq(syncRuns.id, run.id));
 
     console.log(
-      `[sync-tourapi] done. inserted=${inserted} updated=${updated} skipped=${skipped} errors=${errors}`,
+      `[sync-tourapi] ${options.dryRun ? "DRY-RUN " : ""}complete=${collectionComplete} done. inserted=${inserted} updated=${updated} skipped=${skipped} errors=${errors}`,
     );
 
-    if (changedUrls.size > 0) {
-      await notifySearchEngines([...changedUrls]);
+    if (!options.dryRun && changedUrls.size > 0) {
+      const notified = await notifySearchEngines([...changedUrls]);
+      const failed = notified.filter((n) => n.status === "failed").length;
+      if (failed > 0) {
+        // 데이터 반영은 성공, 후속(검색엔진 알림) 실패는 별도로 남겨 재처리할 수 있게 한다.
+        await db
+          .update(syncRuns)
+          .set({ notes: `processed=${limited.length}/${items.length}; complete=${collectionComplete}; indexnow_failed=${failed}` })
+          .where(eq(syncRuns.id, run.id));
+        console.warn(`[sync-tourapi] indexnow failed endpoints=${failed}`);
+      }
     }
   } catch (fatal) {
+    if (!options.dryRun)
     await db
       .update(syncRuns)
       .set({
@@ -155,11 +208,19 @@ async function collectIncremental() {
   let pageNo = 1;
   while (true) {
     const { items, totalCount } = await fetchSyncList(ymd, pageNo);
+    if (items.length && all.some((a) => a.contentid === items[0].contentid)) {
+      collectionComplete = false; // 같은 페이지 반복: 불완전 수집으로 종료
+      console.warn(`[sync-tourapi] repeated page ${pageNo} - stop`);
+      break;
+    }
     all.push(...items);
     await sleep(RPS_DELAY_MS);
     if (all.length >= totalCount || items.length === 0) break;
     pageNo++;
-    if (pageNo > 100) break; // safety
+    if (pageNo > 100) {
+      collectionComplete = false;
+      break; // safety
+    }
   }
   return all;
 }
@@ -185,11 +246,19 @@ async function collectFullYear(from?: string, to?: string) {
       pageNo,
       numOfRows: 100,
     });
+    if (items.length && all.some((a) => a.contentid === items[0].contentid)) {
+      collectionComplete = false;
+      console.warn(`[sync-tourapi] repeated page ${pageNo} - stop`);
+      break;
+    }
     all.push(...items);
     await sleep(RPS_DELAY_MS);
     if (all.length >= totalCount || items.length === 0) break;
     pageNo++;
-    if (pageNo > 100) break;
+    if (pageNo > 100) {
+      collectionComplete = false;
+      break;
+    }
   }
   return all;
 }
@@ -200,7 +269,7 @@ function parseOptions(args: string[]) {
   const from = readString(args, "--from");
   const to = readString(args, "--to");
 
-  return { mode, limit, from, to };
+  return { mode, limit, from, to, dryRun: args.includes("--dry-run") };
 }
 
 function readMode(args: string[]): SyncMode {
@@ -248,15 +317,16 @@ async function upsertFestival(row: typeof festivals.$inferInsert) {
     .limit(1);
 
   if (existing.length === 0) {
-    await db.insert(festivals).values(row);
+    if (!options.dryRun) await db.insert(festivals).values(row);
     return { status: "inserted" as const, slug: row.slug };
   }
 
   const update = prepareFestivalUpdate(existing[0], row);
-  await db
-    .update(festivals)
-    .set(update.row)
-    .where(eq(festivals.contentId, contentId));
+  if (!options.dryRun)
+    await db
+      .update(festivals)
+      .set(update.row)
+      .where(eq(festivals.contentId, contentId));
   return {
     status: update.changed ? ("updated" as const) : ("skipped" as const),
     slug: existing[0].slug,
