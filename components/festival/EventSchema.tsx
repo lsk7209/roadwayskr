@@ -2,6 +2,7 @@ import type { Festival } from "@/db";
 import { cleanTourText } from "@/lib/content";
 import { festivalPeriod, explicitFree } from "@/lib/festival-facts";
 import { eventSourceNote } from "@/lib/event-source-notes";
+import { eventSchemaEligible } from "@/lib/festival-dates";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 interface Props {
@@ -27,7 +28,13 @@ export function EventSchema({ festival, url }: Props) {
     !period.startDate ||
     !address ||
     !eventPlace ||
-    note?.programs
+    note?.programs ||
+    !eventSchemaEligible({
+      startDate: period.startDate,
+      endDate: period.endDate,
+      hasOfficialOccurrence: !!note?.officialOccurrence,
+      hasRecurrence: !!note?.recurrence,
+    })
   )
     return null;
 

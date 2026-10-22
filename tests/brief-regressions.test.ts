@@ -97,3 +97,20 @@ test("T06 long-running detection and T02/T10 canonical + share metadata", () => 
   assert.equal((m.openGraph as { url: string }).url, "https://roadways.kr/x");
   assert.equal((m.openGraph as { siteName: string }).siteName, "여행고고");
 });
+
+import { eventSchemaEligible } from "../lib/festival-dates";
+
+test("9.4 year-long ranges without confirmed dates are not emitted as Event schema", () => {
+  const base = { hasOfficialOccurrence: false, hasRecurrence: false };
+  assert.equal(eventSchemaEligible({ ...base, startDate: "2026-01-01", endDate: "2026-12-31" }), false);
+  assert.equal(eventSchemaEligible({ ...base, startDate: "2026-10-31", endDate: "2026-11-02" }), true);
+  assert.equal(
+    eventSchemaEligible({ ...base, hasOfficialOccurrence: true, startDate: "2026-10-31", endDate: "2026-12-31" }),
+    true,
+  );
+  assert.equal(
+    eventSchemaEligible({ ...base, hasRecurrence: true, startDate: "2026-04-25", endDate: "2026-10-31" }),
+    true,
+  );
+  assert.equal(eventSchemaEligible({ ...base, startDate: null, endDate: null }), false);
+});

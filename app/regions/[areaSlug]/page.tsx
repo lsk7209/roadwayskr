@@ -116,7 +116,22 @@ export default async function AreaHub(props: Props) {
       )}
       {area.code !== "unknown" && <MonthLinks areaSlug={area.slug} />}
       {result.total === 0 ? (
-        <p className="my-8">선택한 조건에 등록된 행사가 없습니다.</p>
+        <div className="my-8 text-sm">
+          <p>선택한 조건에 등록된 행사가 없습니다. 수집 오류가 아니라 이 조건에 해당하는 행사가 없다는 뜻입니다.</p>
+          <p className="mt-2 space-x-4">
+            {search.range && (
+              <Link href={path} className="underline">
+                날짜 조건 해제
+              </Link>
+            )}
+            <Link href="/weekend" className="underline">
+              이번 주말 전체
+            </Link>
+            <Link href="/regions" className="underline">
+              다른 지역 보기
+            </Link>
+          </p>
+        </div>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
           {result.items.map((festival, i) => (

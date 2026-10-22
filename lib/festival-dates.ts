@@ -157,3 +157,18 @@ export function isLongRunning(start: unknown, end: unknown): boolean {
     LONG_RUNNING_DAYS
   );
 }
+
+/**
+ * 구조화 데이터(Event/Festival)로 낼 수 있는 일정인지 판단한다. 31일을 넘는 전체 기간만
+ * 있고 공식 확인된 개최일이나 운영 요일 규칙이 없으면 연속 운영 회차로 단정할 수 없다.
+ */
+export function eventSchemaEligible(args: {
+  startDate: string | null;
+  endDate: string | null;
+  hasOfficialOccurrence: boolean;
+  hasRecurrence: boolean;
+}): boolean {
+  if (!validDate(args.startDate)) return false;
+  if (args.hasOfficialOccurrence || args.hasRecurrence) return true;
+  return !isLongRunning(args.startDate, args.endDate);
+}

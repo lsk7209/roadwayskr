@@ -76,7 +76,17 @@ export default async function WeekendPage({ searchParams }: Props) {
         먼저, 31일을 넘는 장기·상설 행사를 뒤에 보여줍니다.
       </p>
       {total === 0 && (
-        <p className="my-8">선택한 기간에 등록된 행사가 없습니다.</p>
+        <div className="my-8 text-sm">
+          <p>선택한 기간에 등록된 행사가 없습니다. 수집 오류가 아니라 해당 기간과 겹치는 행사가 없다는 뜻입니다.</p>
+          <p className="mt-2 space-x-4">
+            <Link href="/weekend" className="underline">
+              이번 주말 보기
+            </Link>
+            <Link href="/regions" className="underline">
+              지역별로 찾기
+            </Link>
+          </p>
+        </div>
       )}
       <div className="not-prose mt-8 space-y-10">
         {previews.map((group) => {

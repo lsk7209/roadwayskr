@@ -154,7 +154,17 @@ export default async function MonthlyAreaPage(props: Props) {
         )}
       </nav>
       {result.total === 0 ? (
-        <p className="my-8">이달에 등록된 행사가 없습니다.</p>
+        <div className="my-8 text-sm">
+          <p>이달에 이 지역으로 등록된 행사가 없습니다. 수집 오류가 아니라 해당 조건의 행사가 없다는 뜻입니다.</p>
+          <p className="mt-2 space-x-4">
+            <Link href={`/regions/${area.slug}`} className="underline">
+              {area.shortName} 진행 중·예정 전체
+            </Link>
+            <Link href="/regions" className="underline">
+              다른 지역 보기
+            </Link>
+          </p>
+        </div>
       ) : (
         <ul className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
           {result.items.map((festival) => (
