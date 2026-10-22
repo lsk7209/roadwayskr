@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { db, festivals } from "@/db";
 import { sql } from "drizzle-orm";
@@ -13,7 +13,7 @@ const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
   .trim()
   .replace(/\/+$/, "");
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "지역별 축제·행사",

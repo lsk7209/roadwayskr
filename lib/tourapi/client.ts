@@ -66,18 +66,21 @@ export async function callTourApi<T = unknown>(
 
   let lastErr: unknown;
   for (let attempt = 0; attempt < retries; attempt++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), timeoutMs);
       const res = await fetch(url, {
         signal: ctrl.signal,
         headers: { Accept: "application/json" },
       });
-      clearTimeout(t);
 
       if (!res.ok) {
-        if (res.status >= 500 && attempt < retries - 1) {
-          await sleep(backoff(attempt));
+        // Retryable: server-side (5xx) and rate limiting (429). Anything
+        // else (4xx auth/format errors) is permanent and must not retry.
+        const retryable = res.status >= 500 || res.status === 429;
+        if (retryable && attempt < retries - 1) {
+          const retryAfterMs = parseRetryAfter(res.headers.get("retry-after"));
+          await sleep(retryAfterMs ?? backoff(attempt));
           continue;
         }
         throw new TourApiError(
@@ -87,6 +90,8 @@ export async function callTourApi<T = unknown>(
         );
       }
 
+      // Timeout must also cover body consumption, not just the initial
+      // response headers, since a stalled body would otherwise hang.
       const json = await res.json();
       const parsed = TourApiEnvelope.safeParse(json);
       if (!parsed.success) {
@@ -125,14 +130,34 @@ export async function callTourApi<T = unknown>(
       return { items, totalCount, raw: json };
     } catch (err) {
       lastErr = err;
+      // Permanent errors (TourApiError from the checks above, including
+      // non-retryable HTTP status and invalid/permanent result codes) must
+      // not be retried again here; only network/abort failures retry.
+      if (err instanceof TourApiError) throw err;
       if (attempt < retries - 1) {
         await sleep(backoff(attempt));
         continue;
       }
       throw err;
+    } finally {
+      clearTimeout(timer);
     }
   }
-  throw lastErr;
+  throw lastErr instanceof Error
+    ? lastErr
+    : new TourApiError("TourAPI request failed with no captured error");
+}
+
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  const dateMs = Date.parse(value);
+  if (Number.isFinite(dateMs)) {
+    const delta = dateMs - Date.now();
+    return delta > 0 ? delta : 0;
+  }
+  return undefined;
 }
 
 function backoff(attempt: number): number {

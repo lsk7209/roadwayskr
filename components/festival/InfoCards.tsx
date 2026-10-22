@@ -96,7 +96,7 @@ export function InfoCards({ festival }: Props) {
             {c.value}
           </dd>
           {c.hint && (
-            <p className="mt-0.5 text-[10px] text-[var(--color-ink-muted)]">
+            <p className="mt-0.5 text-[11px] leading-snug text-[var(--color-ink-muted)]">
               {c.hint}
             </p>
           )}

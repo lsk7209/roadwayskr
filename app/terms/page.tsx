@@ -4,7 +4,7 @@ const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(
 
 export const metadata: Metadata = {
   title: "이용약관",
-  description: "Roadways 사이트 이용, 콘텐츠 이용 범위, 광고·게시물 규칙을 안내합니다.",
+  description: "여행고고 사이트 이용, 콘텐츠 이용 범위, 광고·게시물 규칙을 안내합니다.",
   alternates: { canonical: `${SITE_URL}/terms` },
 };
 

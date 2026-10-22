@@ -2,6 +2,7 @@ import { db, festivals } from "@/db";
 import type { Metadata } from "next";
 import { desc } from "drizzle-orm";
 import Link from "next/link";
+import { GUIDES } from "@/lib/guides";
 
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
 import {
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 async function getThisWeekend() {
   const { satIso, sunIso } = getWeekendRange();
@@ -75,8 +76,12 @@ async function getLatestEvents() {
 }
 
 export default async function Home() {
-  const weekend = await getThisWeekend();
-  const latest = await getLatestEvents();
+  // These two queries are independent of each other; running them
+  // sequentially only added latency without any data dependency.
+  const [weekend, latest] = await Promise.all([
+    getThisWeekend(),
+    getLatestEvents(),
+  ]);
   const currentMonth = relativeMonth();
   const nextMonth = relativeMonth(1);
 
@@ -175,6 +180,32 @@ export default async function Home() {
         <Link href="/regions" className="mt-3 inline-block underline">
           다른 지역 월별 행사
         </Link>
+      </section>
+      <section>
+        <div className="flex items-end justify-between gap-4">
+          <h2 className="text-2xl font-semibold">축제 나들이 가이드</h2>
+          <Link
+            href="/guides"
+            className="text-sm font-semibold text-[var(--color-brand)] hover:underline"
+          >
+            전체 보기
+          </Link>
+        </div>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {GUIDES.slice(0, 4).map((g) => (
+            <li key={g.slug}>
+              <Link
+                href={`/guides/${g.slug}`}
+                className="block h-full rounded-xl border border-[var(--color-line)] bg-white p-4 hover:border-[var(--color-brand)]"
+              >
+                <p className="text-xs font-semibold text-[var(--color-brand)]">
+                  {g.category}
+                </p>
+                <h3 className="mt-1 font-semibold leading-snug">{g.title}</h3>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
       <section className="grid gap-4 md:grid-cols-3">
         {planCards.map((card) => (

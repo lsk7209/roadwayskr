@@ -36,7 +36,7 @@ describe("Health route", () => {
     const body = await response.json();
 
     assert.equal(response.status, 503);
-    assert.equal(body.status, "fail");
+    assert.equal(body.status, "failed");
     assert.equal(body.reason, "missing_env");
     assert.deepEqual(body.missingEnv, [
       "TURSO_DATABASE_URL",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { desc, sql } from "drizzle-orm";
 import { isAuthorizedCronRequest } from "@/lib/http/cron-auth";
+import { evaluateHealth } from "@/lib/http/health-evaluation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
   if (missingEnv.length > 0) {
     return healthResponse(
       {
-        status: "fail",
+        status: "failed",
         reason: "missing_env",
         missingEnv,
         latencyMs: Date.now() - startedAt,
@@ -52,12 +53,17 @@ export async function GET(request: Request) {
       .limit(1);
 
     const festivalCount = Number(countRow?.count ?? 0);
-    const ok = festivalCount > 0 && (!latestSync || latestSync.errorCount === 0);
+    const evaluation = evaluateHealth(festivalCount, latestSync, Date.now());
 
     return healthResponse(
       {
-        status: ok ? "ok" : "fail",
+        status: evaluation.status,
+        dbReachable: true,
         festivalCount,
+        lastRunState: evaluation.lastRunState,
+        lastCompletedSuccessAt: evaluation.lastCompletedSuccessAt,
+        sourceAgeMs: evaluation.sourceAgeMs,
+        backlog: evaluation.backlog,
         latestSync: latestSync
           ? {
               ...latestSync,
@@ -67,12 +73,13 @@ export async function GET(request: Request) {
           : null,
         latencyMs: Date.now() - startedAt,
       },
-      ok ? 200 : 503,
+      evaluation.httpStatus,
     );
   } catch (error) {
     return healthResponse(
       {
-        status: "fail",
+        status: "failed",
+        dbReachable: false,
         reason: error instanceof Error ? error.message : "unknown_error",
         latencyMs: Date.now() - startedAt,
       },

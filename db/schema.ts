@@ -1,5 +1,5 @@
 /**
- * 여행고고 (gogotrip.kr) - DB 스키마
+ * 여행고고 (roadways.kr) - DB 스키마
  *
  * - libSQL(Turso, SQLite 호환)이라 Postgres 기능(JSONB·TIMESTAMPTZ·gin·BIGSERIAL) 사용 불가.
  * - JSON은 text() 컬럼에 JSON.stringify로 저장.

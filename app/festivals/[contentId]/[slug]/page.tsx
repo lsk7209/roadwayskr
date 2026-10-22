@@ -1,5 +1,5 @@
 ﻿import { db, festivals } from "@/db";
-import { eq } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -23,6 +23,10 @@ import { eventSourceNote } from "@/lib/event-source-notes";
 import { BackToList } from "@/components/festival/BackToList";
 import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { PageAds } from "@/components/ads/PageAds";
+import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { currentFestivalCondition } from "@/lib/current-festivals";
+import { hasSubstantiveContent } from "@/lib/festival-quality";
+import { findAreaByCode } from "@/lib/regions";
 
 export const dynamic = "force-dynamic";
 
@@ -57,14 +61,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       : "";
 
   const title = `${festival.title}${period}`;
-  const description =
+  const description = truncateDescription(
     cleanTourText(festival.description) ??
-    `${festival.title} 일정·장소·입장료·주차 정보를 한눈에 정리했습니다.`;
+      cleanTourText(festival.overview) ??
+      `${festival.title} 일정·장소·입장료 정보를 정리했습니다.`,
+  );
 
   const isIndexable =
     festival.isIndexable &&
     festival.status !== "cancelled" &&
-    festival.status !== "ended";
+    festival.status !== "ended" &&
+    hasSubstantiveContent(festival);
 
   return {
     title,
@@ -75,8 +82,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description,
       url: canonical,
       type: "article",
+      // TourAPI 원본 이미지 크기는 제각각이라 width/height를 선언하지 않는다.
       images: festival.imageUrl
-        ? [{ url: festival.imageUrl, width: 1200, height: 630 }]
+        ? [{ url: festival.imageUrl }]
         : [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
     robots: isIndexable
@@ -117,10 +125,16 @@ export default async function FestivalPage({ params }: Params) {
   const homepageUrl = extractFirstUrl(festival.homepage ?? festival.sourceUrl);
   const playTime = operatingTime(festival);
   const address = cleanTourText(festival.address);
+  const area = festival.areaCode ? findAreaByCode(festival.areaCode) : undefined;
+  const areaPath = area
+    ? `/regions/${encodePathSegment(area.slug)}`
+    : "/regions";
+  const areaLabel = area?.shortName ?? "지역별";
+  const related = await getRelatedFestivals(festival);
 
   const breadcrumbLd = buildBreadcrumbListLd([
     { name: "홈", url: SITE_URL },
-    { name: "지역별", url: `${SITE_URL}/regions` },
+    { name: areaLabel, url: `${SITE_URL}${areaPath}` },
     { name: festival.title, url: canonical },
   ]);
 
@@ -135,8 +149,8 @@ export default async function FestivalPage({ params }: Params) {
           홈
         </Link>{" "}
         ›{" "}
-        <Link href="/regions" className="hover:underline">
-          지역별
+        <Link href={areaPath} className="hover:underline">
+          {areaLabel}
         </Link>{" "}
         › <span>{festival.title}</span>
       </nav>
@@ -320,6 +334,35 @@ export default async function FestivalPage({ params }: Params) {
         </section>
       )}
 
+      {related.length > 0 && (
+        <section className="mt-10">
+          <h2 className={SECTION_TITLE_CLASS}>
+            {area ? `${area.shortName}에서 함께 볼 만한 행사` : "함께 볼 만한 행사"}
+          </h2>
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+            {related.map((item) => (
+              <FestivalListCard
+                key={item.contentId}
+                festival={item}
+                href={`/festivals/${item.contentId}/${encodeURIComponent(item.slug)}`}
+                titleLevel="h3"
+                sizes="(min-width: 640px) 33vw, 50vw"
+              />
+            ))}
+          </ul>
+          {area && (
+            <p className="mt-4 text-sm">
+              <Link
+                href={areaPath}
+                className="text-[var(--color-brand)] hover:underline"
+              >
+                {area.shortName} 축제·행사 전체 보기
+              </Link>
+            </p>
+          )}
+        </section>
+      )}
+
       <hr className="my-8 border-[var(--color-line)]" />
 
       <footer className="text-xs text-[var(--color-ink-muted)] space-y-1">
@@ -347,6 +390,19 @@ export default async function FestivalPage({ params }: Params) {
           행사 정보는 변경·취소될 수 있어요. 방문 전에 공식 홈페이지나 주최 측
           연락처로 다시 한번 확인하시면 좋습니다.
         </p>
+        <p>
+          출발 전 참고:{" "}
+          <Link
+            href="/guides/festival-cancellation-check"
+            className="underline"
+          >
+            취소·연기 확인 순서
+          </Link>{" "}
+          ·{" "}
+          <Link href="/guides/how-to-read-festival-info" className="underline">
+            이 페이지 정보 읽는 법
+          </Link>
+        </p>
       </footer>
       <PageAds
         eligible={Boolean(
@@ -357,6 +413,52 @@ export default async function FestivalPage({ params }: Params) {
       />
     </article>
   );
+}
+
+const MAX_DESCRIPTION_CHARS = 155;
+
+function truncateDescription(text: string): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  return flat.length > MAX_DESCRIPTION_CHARS
+    ? `${flat.slice(0, MAX_DESCRIPTION_CHARS - 1).trimEnd()}…`
+    : flat;
+}
+
+const RELATED_LIMIT = 6;
+
+/** 같은 시도의 현재 진행·예정 행사. 같은 시군구를 먼저, 그다음 시작일 순. */
+async function getRelatedFestivals(festival: {
+  contentId: number;
+  areaCode: string | null;
+  sigunguCode: string | null;
+}) {
+  if (!festival.areaCode) return [];
+  return db
+    .select({
+      contentId: festivals.contentId,
+      slug: festivals.slug,
+      title: festivals.title,
+      startDate: festivals.startDate,
+      endDate: festivals.endDate,
+      address: festivals.address,
+      imageUrl: festivals.imageUrl,
+      status: festivals.status,
+      rawJson: festivals.rawJson,
+      playTime: festivals.playTime,
+    })
+    .from(festivals)
+    .where(
+      and(
+        currentFestivalCondition(),
+        eq(festivals.areaCode, festival.areaCode),
+        ne(festivals.contentId, festival.contentId),
+      ),
+    )
+    .orderBy(
+      sql`case when ${festivals.sigunguCode} = ${festival.sigunguCode ?? ""} then 0 else 1 end`,
+      asc(festivals.startDate),
+    )
+    .limit(RELATED_LIMIT);
 }
 
 const getFestival = cache(async (contentId: number) => {

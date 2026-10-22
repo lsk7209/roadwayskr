@@ -4,6 +4,8 @@ import { desc, eq } from "drizzle-orm";
 import { AREAS } from "@/lib/regions";
 import { THEMES } from "@/lib/themes";
 import { currentFestivalCondition } from "@/lib/current-festivals";
+import { hasSubstantiveContent } from "@/lib/festival-quality";
+import { GUIDES } from "@/lib/guides";
 
 import { seoulDate, relativeMonth } from "@/lib/festival-dates";
 
@@ -85,39 +87,64 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let monthlyAreaPages: MetadataRoute.Sitemap = [];
   let themePages: MetadataRoute.Sitemap = [];
 
-  try {
-    const rows = await db
-      .select({
-        contentId: festivals.contentId,
-        slug: festivals.slug,
-        areaCode: festivals.areaCode,
-        startDate: festivals.startDate,
-        endDate: festivals.endDate,
-        themesCsv: festivals.themesCsv,
-        updatedAt: festivals.updatedAt,
-      })
-      .from(festivals)
-      .where(currentFestivalCondition(now))
-      .limit(45_000);
+  // A DB failure and a genuinely empty result set are different facts. A
+  // failure must not be silently downgraded to "no dynamic pages" for an
+  // extended, cached period — that would look like a healthy but sparse
+  // sitemap instead of the outage it actually is. We let the error
+  // propagate so the route returns a 5xx instead of a quietly truncated
+  // 200 sitemap.
+  const rows = await db
+    .select({
+      contentId: festivals.contentId,
+      slug: festivals.slug,
+      areaCode: festivals.areaCode,
+      startDate: festivals.startDate,
+      endDate: festivals.endDate,
+      themesCsv: festivals.themesCsv,
+      updatedAt: festivals.updatedAt,
+      overview: festivals.overview,
+      rawJson: festivals.rawJson,
+    })
+    .from(festivals)
+    .where(currentFestivalCondition(now))
+    .limit(45_000);
 
-    areaPages = buildAreaPages(rows, now, siteUrl);
-    festivalPages = rows.map((festival) => ({
-      url: urlWithPath(
-        `/festivals/${encodePathSegment(festival.contentId)}/${encodePathSegment(festival.slug)}`,
+  areaPages = buildAreaPages(rows, now, siteUrl);
+  // 허브 페이지 집계에는 전체 행사를 쓰되, 상세 URL은 본문이 충분한 것만 제출한다.
+  festivalPages = rows.filter(hasSubstantiveContent).map((festival) => ({
+    url: urlWithPath(
+      `/festivals/${encodePathSegment(festival.contentId)}/${encodePathSegment(festival.slug)}`,
+    ),
+    lastModified: festival.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  monthlyAreaPages = buildMonthlyAreaPages(rows, now, siteUrl);
+  themePages = buildThemePages(rows, now, siteUrl);
+
+  // 편집 가이드는 DB와 무관하므로 각 글의 실제 수정일을 lastmod로 쓴다.
+  const guidePages: MetadataRoute.Sitemap = [
+    {
+      url: urlWithPath("/guides"),
+      lastModified: GUIDES.reduce(
+        (latest, g) => (g.updatedAt > latest ? g.updatedAt : latest),
+        GUIDES[0]!.updatedAt,
       ),
-      lastModified: festival.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    }));
-
-    monthlyAreaPages = buildMonthlyAreaPages(rows, now, siteUrl);
-    themePages = buildThemePages(rows, now, siteUrl);
-  } catch {
-    // Skip dynamic sitemap sections before DB setup or migration.
-  }
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    ...GUIDES.map((g) => ({
+      url: urlWithPath(`/guides/${g.slug}`),
+      lastModified: g.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+  ];
 
   return [
     ...staticPages,
+    ...guidePages,
     ...areaPages,
     ...themePages,
     ...monthlyAreaPages,

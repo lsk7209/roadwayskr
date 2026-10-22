@@ -39,10 +39,18 @@ export default async function WeekendPage({ searchParams }: Props) {
   if (!range) notFound();
   const groups = await festivalGroups(db, { range });
   const total = groups.reduce((sum, group) => sum + group.count, 0);
+  // festivalGroups() already computed each area's total via GROUP BY, so
+  // festivalPage() does not need to redundantly re-run count(*) per area.
+  // This turns the fan-out from 1 + 2*G queries into 1 + G.
   const previews = await Promise.all(
     groups.map(async (group) => ({
       ...group,
-      ...(await festivalPage(db, { range, areaCode: group.code, pageSize: 6 })),
+      ...(await festivalPage(db, {
+        range,
+        areaCode: group.code,
+        pageSize: 6,
+        knownTotal: group.count,
+      })),
     })),
   );
   return (
@@ -85,6 +93,7 @@ export default async function WeekendPage({ searchParams }: Props) {
                     festival={festival}
                     href={`/festivals/${festival.contentId}/${festival.slug}`}
                     titleLevel="h3"
+                    sizes="(min-width: 640px) 50vw, 100vw"
                   />
                 ))}
               </ul>

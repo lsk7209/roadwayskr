@@ -60,6 +60,35 @@ export interface CalendarEvent {
   status?: string;
 }
 
+const ISO_WEEKDAY_LABELS = ["", "월", "화", "수", "목", "금", "토", "일"];
+
+/**
+ * Builds a human-readable recurrence phrase from recurrence.mode/isoWeekdays
+ * instead of assuming every recurring event is Friday/Saturday. Unknown or
+ * missing recurrence stays explicitly "unknown" rather than a guessed
+ * schedule.
+ */
+export function recurrenceLabel(
+  recurrence: CalendarEvent["recurrence"] | undefined,
+): string {
+  if (!recurrence) return "개별 운영일·시간 확인 필요";
+  if (recurrence.mode === "daily") return "매일 운영 · 당일 변경 공지 확인";
+  if (
+    recurrence.mode === "iso_weekdays" &&
+    Array.isArray(recurrence.isoWeekdays) &&
+    recurrence.isoWeekdays.length > 0
+  ) {
+    const days = [...new Set(recurrence.isoWeekdays)]
+      .filter((d) => d >= 1 && d <= 7)
+      .sort((a, b) => a - b)
+      .map((d) => ISO_WEEKDAY_LABELS[d]);
+    if (days.length > 0) {
+      return `${days.join("·")} 운영 · 당일 변경 공지 확인`;
+    }
+  }
+  return "운영일 확인 필요 · 당일 변경 공지 확인";
+}
+
 export function scheduleOnDate(event: CalendarEvent, date: string) {
   const s = validDate(event.startDate),
     e = validDate(event.endDate);

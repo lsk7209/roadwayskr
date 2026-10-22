@@ -119,6 +119,7 @@ export default async function AreaHub(props: Props) {
               festival={festival}
               href={`/festivals/${festival.contentId}/${festival.slug}`}
               priority={i === 0}
+              sizes="(min-width: 640px) 50vw, 100vw"
             />
           ))}
         </ul>

@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   poweredByHeader: false,
   experimental: {
-    optimizePackageImports: ["drizzle-orm", "lucide-react", "date-fns"],
+    optimizePackageImports: ["drizzle-orm"],
   },
   images: {
     remotePatterns: [

@@ -1,17 +1,19 @@
 import type { MetadataRoute } from "next";
-import { headers } from "next/headers";
 
 const ROBOTS_RULE_INDEX = ["/"];
 
-export default async function robots(): Promise<MetadataRoute.Robots> {
-  const headerList = await headers();
-  const host =
-    headerList.get("x-forwarded-host") ??
-    headerList.get("host") ??
-    "roadways.kr";
-  const scheme = headerList.get("x-forwarded-proto") ?? "https";
-  const SITE_URL = `${scheme}://${host}`;
+/**
+ * The request Host/X-Forwarded-Host header is client-controlled. Building
+ * robots.txt's sitemap/host fields from it verbatim would let a spoofed
+ * header point search engines at an attacker-controlled domain. Instead we
+ * always use the operator-configured SITE_URL, which matches the
+ * canonical/JSON-LD/sitemap URLs used elsewhere in the app.
+ */
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {

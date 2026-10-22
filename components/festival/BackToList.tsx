@@ -17,7 +17,11 @@ export function BackToList() {
     }
   }, []);
   return (
-    <Link href={href} className="mb-4 inline-block text-sm underline">
+    <Link
+      href={href}
+      aria-label="이전 목록으로 돌아가기"
+      className="mb-4 inline-block py-1 text-sm underline underline-offset-2"
+    >
       목록으로 돌아가기
     </Link>
   );

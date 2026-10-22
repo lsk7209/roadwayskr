@@ -1,4 +1,3 @@
-import type { NextRequest } from "next/server";
 import { db, festivals } from "@/db";
 import { desc } from "drizzle-orm";
 import { currentFestivalCondition } from "@/lib/current-festivals";
@@ -7,17 +6,22 @@ const FEED_TITLE = "RoadWays 축제 리스트";
 const FEED_DESCRIPTION =
   "진행 중·예정 지역 축제의 일정과 장소·기간·요약 정보를 빠르게 확인할 수 있습니다.";
 const MAX_FEED_ITEMS = 50;
+/**
+ * The request Host/X-Forwarded-Host header is client-controlled. Building
+ * feed item links from it verbatim would let a spoofed header make the
+ * public RSS feed advertise an attacker-controlled domain. We always use
+ * the operator-configured SITE_URL instead, matching canonical/sitemap/
+ * robots URLs used elsewhere in the app.
+ */
+const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
+  .trim()
+  .replace(/\/+$/, "");
 
 export const revalidate = 3600;
 export const runtime = "nodejs";
 
-export async function GET(request: NextRequest) {
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const host = forwardedHost ?? request.headers.get("host") ?? "roadways.kr";
-  const schemeHeader =
-    request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol;
-  const scheme = schemeHeader.replace(":", "");
-  const requestHost = `${scheme}://${host}`;
+export async function GET() {
+  const requestHost = SITE_URL;
 
   const items = await db
     .select({

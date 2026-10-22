@@ -56,7 +56,6 @@ export const metadata: Metadata = {
     description: "전국 축제·행사 큐레이션",
   },
   robots: { index: true, follow: true },
-  icons: { icon: "/favicon.ico" },
   other: {
     "naver-site-verification": NAVER_VERIFICATION,
     "google-site-verification": GOOGLE_SITE_VERIFICATION,
@@ -79,7 +78,7 @@ export default function RootLayout({
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
+    logo: `${SITE_URL}/icon.svg`,
     description: SITE_DESCRIPTION,
   };
   const webSiteSchema = {
@@ -137,8 +136,11 @@ export default function RootLayout({
               <Link href="/themes" className="hover:text-[var(--color-ink)]">
                 테마별
               </Link>
+              <Link href="/guides" className="hover:text-[var(--color-ink)]">
+                가이드
+              </Link>
               <Link href="/blog" className="hover:text-[var(--color-ink)]">
-                최근 소식
+                최근 업데이트
               </Link>
             </nav>
           </div>
@@ -165,6 +167,9 @@ export default function RootLayout({
             <div className="flex flex-wrap gap-4 pt-2">
               <Link href="/about" className="hover:underline">
                 소개
+              </Link>
+              <Link href="/guides" className="hover:underline">
+                나들이 가이드
               </Link>
               <Link href="/contact" className="hover:underline">
                 문의

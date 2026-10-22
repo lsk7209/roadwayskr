@@ -108,6 +108,7 @@ test("date-overlapping cancelled events cannot enter weekend discovery", async (
 
 test("every current-discovery surface reuses the canonical condition", async () => {
   const surfaces = [
+    "../app/blog/page.tsx",
     "../app/regions/page.tsx",
     "../lib/festival-list.ts",
     "../app/themes/page.tsx",

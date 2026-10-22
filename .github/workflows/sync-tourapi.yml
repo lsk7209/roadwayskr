@@ -37,6 +37,8 @@ jobs:
           TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           TOUR_API_SERVICE_KEY: ${{ secrets.TOUR_API_SERVICE_KEY }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://roadways.kr' }}
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY || 'cf1bbae352df4a22a23cbf48bb08350d' }}
         run: |
           if [ "${{ github.event.inputs.mode }}" = "full" ]; then
             pnpm sync:tourapi:full

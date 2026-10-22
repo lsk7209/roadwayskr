@@ -1,0 +1,194 @@
+{
+  "_comment": "Purely synthetic fixture data for tests/roadways-acceptance.test.ts. No real festival IDs, venues, or user data. Safe to commit and run in a clean checkout without ddd/ or any local-only files. Expected values are derived from lib/festival-dates.ts (scheduleOnDate, withinTimeWindow, seoulDate).",
+  "calendar_events": [
+    {
+      "id": "SYN-DAILY-1",
+      "start_date": "2026-09-14",
+      "end_date": "2026-09-27",
+      "recurrence": { "mode": "daily", "iso_weekdays": null },
+      "cancelled_dates": []
+    },
+    {
+      "id": "SYN-FRISAT-1",
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-30",
+      "recurrence": { "mode": "iso_weekdays", "iso_weekdays": [5, 6] },
+      "cancelled_dates": ["2026-09-19"]
+    },
+    {
+      "id": "SYN-UNKNOWN-1",
+      "start_date": "2026-09-19",
+      "end_date": "2026-09-20",
+      "recurrence": { "mode": "unknown", "iso_weekdays": null },
+      "cancelled_dates": []
+    }
+  ],
+  "calendar_cases": [
+    {
+      "case_id": "SYN-C01-utc-before-kst-midnight",
+      "event_id": "SYN-DAILY-1",
+      "at_utc": "2026-09-18T15:30:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C02-utc-after-kst-midnight",
+      "event_id": "SYN-DAILY-1",
+      "at_utc": "2026-09-19T00:30:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C03-friday-in-range",
+      "event_id": "SYN-FRISAT-1",
+      "at_utc": "2026-09-25T12:00:00Z",
+      "expected_kst_date": "2026-09-25",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C04-saturday-cancelled",
+      "event_id": "SYN-FRISAT-1",
+      "at_utc": "2026-09-19T12:00:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "CANCELLED_OCCURRENCE"
+    },
+    {
+      "case_id": "SYN-C05-sunday-not-in-recurrence",
+      "event_id": "SYN-FRISAT-1",
+      "at_utc": "2026-09-20T12:00:00Z",
+      "expected_kst_date": "2026-09-20",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C06-unknown-recurrence",
+      "event_id": "SYN-UNKNOWN-1",
+      "at_utc": "2026-09-19T12:00:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "UNVERIFIED_SCHEDULE"
+    },
+    {
+      "case_id": "SYN-C07-before-start",
+      "event_id": "SYN-DAILY-1",
+      "at_utc": "2026-09-01T12:00:00Z",
+      "expected_kst_date": "2026-09-01",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C08-after-end",
+      "event_id": "SYN-DAILY-1",
+      "at_utc": "2026-10-01T12:00:00Z",
+      "expected_kst_date": "2026-10-01",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C09-last-day-inclusive",
+      "event_id": "SYN-DAILY-1",
+      "at_utc": "2026-09-27T12:00:00Z",
+      "expected_kst_date": "2026-09-27",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C10-frisat-second-friday",
+      "event_id": "SYN-FRISAT-1",
+      "at_utc": "2026-09-04T12:00:00Z",
+      "expected_kst_date": "2026-09-04",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C11-frisat-non-cancelled-saturday",
+      "event_id": "SYN-FRISAT-1",
+      "at_utc": "2026-09-05T12:00:00Z",
+      "expected_kst_date": "2026-09-05",
+      "expected_schedule_state": "CONFIRMED_SCHEDULE_ON_DATE"
+    },
+    {
+      "case_id": "SYN-C12-kst-midnight-boundary-before",
+      "event_id": "SYN-UNKNOWN-1",
+      "at_utc": "2026-09-19T14:59:00Z",
+      "expected_kst_date": "2026-09-19",
+      "expected_schedule_state": "UNVERIFIED_SCHEDULE"
+    },
+    {
+      "case_id": "SYN-C13-kst-midnight-boundary-after",
+      "event_id": "SYN-UNKNOWN-1",
+      "at_utc": "2026-09-20T15:01:00Z",
+      "expected_kst_date": "2026-09-21",
+      "expected_schedule_state": "NO_SCHEDULE_ON_DATE"
+    }
+  ],
+  "time_window_cases": {
+    "starts_at": "2026-09-19T10:00:00+09:00",
+    "ends_at": "2026-09-19T18:00:00+09:00",
+    "cases": [
+      {
+        "case_id": "SYN-TW01-before-open",
+        "at_utc": "2026-09-19T00:30:00Z",
+        "expected_within_scheduled_time_window": false
+      },
+      {
+        "case_id": "SYN-TW02-at-open",
+        "at_utc": "2026-09-19T01:00:00Z",
+        "expected_within_scheduled_time_window": true
+      },
+      {
+        "case_id": "SYN-TW03-middle",
+        "at_utc": "2026-09-19T05:00:00Z",
+        "expected_within_scheduled_time_window": true
+      },
+      {
+        "case_id": "SYN-TW04-just-before-close",
+        "at_utc": "2026-09-19T08:59:00Z",
+        "expected_within_scheduled_time_window": true
+      },
+      {
+        "case_id": "SYN-TW05-at-close-exclusive",
+        "at_utc": "2026-09-19T09:00:00Z",
+        "expected_within_scheduled_time_window": false
+      },
+      {
+        "case_id": "SYN-TW06-after-close",
+        "at_utc": "2026-09-19T09:30:00Z",
+        "expected_within_scheduled_time_window": false
+      }
+    ]
+  },
+  "groups_fixture": {
+    "items": [
+      {
+        "id": "SYN-0001",
+        "region": "서울",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "published": true
+      },
+      {
+        "id": "SYN-0002",
+        "region": "서울",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "published": true
+      },
+      {
+        "id": "SYN-0003",
+        "region": "경기도",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "published": true
+      },
+      {
+        "id": "SYN-0004",
+        "region": "제주",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "published": true
+      },
+      {
+        "id": "SYN-0005",
+        "region": "미분류가상지역",
+        "start_date": "2026-09-19",
+        "end_date": "2026-09-20",
+        "published": true
+      }
+    ]
+  }
+}

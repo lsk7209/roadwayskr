@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { desc, sql } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 
 import { db, festivals } from "@/db";
 import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { currentFestivalCondition } from "@/lib/current-festivals";
 
 import { PageAds } from "@/components/ads/PageAds";
 
@@ -18,13 +19,13 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/blog` },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 async function getLatestFestivalGuides() {
   return db
     .select()
     .from(festivals)
-    .where(sql`${festivals.isIndexable} = 1`)
+    .where(currentFestivalCondition())
     .orderBy(desc(festivals.updatedAt))
     .limit(24);
 }

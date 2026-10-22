@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr").trim().replace(/\/+$/, "");
 
 export const metadata: Metadata = {
-  title: "큐레이터 소개",
-  description: "Roadways 콘텐츠 운영자와 데이터 운영 철학을 소개합니다.",
+  title: "운영자 소개",
+  description:
+    "여행고고를 운영하는 큐레이터 고고지기와 행사 정보를 고르고 정리하는 기준을 소개합니다.",
   alternates: { canonical: `${SITE_URL}/about/curator` },
 };
 
@@ -12,48 +15,69 @@ export default function CuratorPage() {
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "Roadways 큐레이터",
-    alternateName: "Roadways Editorial",
-    description: "축제·여행 콘텐츠 큐레이터. 지역/테마 기반 정보를 정렬·보정합니다.",
+    name: "고고지기",
+    alternateName: "여행고고 큐레이터",
+    description:
+      "여행고고 운영자. 공공데이터 기반 축제·행사 정보를 지역·일정·테마 기준으로 정리합니다.",
     url: `${SITE_URL}/about/curator`,
-    knowsAbout: ["축제", "여행", "지역 이벤트", "주말 일정", "여행 일정 플래닝"],
-    worksFor: { "@type": "Organization", name: "Roadways", url: SITE_URL },
+    knowsAbout: ["축제", "행사", "주말 나들이", "지역 관광", "공공데이터"],
+    worksFor: { "@type": "Organization", name: "여행고고", url: SITE_URL },
   };
 
   return (
     <article className="prose-body prose-ko max-w-3xl">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
-      />
+      <JsonLd id="curator-jsonld" data={personSchema} />
 
-      <h1 className="text-3xl font-bold tracking-tight">큐레이터 소개</h1>
+      <h1 className="text-3xl font-bold tracking-tight">운영자 소개</h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
-        Roadways 큐레이터는 공개 소스 기반 축제 데이터와 운영 규칙을 결합해 방문 동선에
-        바로 쓸 수 있는 콘텐츠를 만듭니다.
+        여행고고는 &lsquo;고고지기&rsquo;라는 이름으로 활동하는 개인이 기획하고
+        운영합니다. 데이터 수집 코드 작성, 페이지 구성, 오류 수정, 문의 응대를
+        한 사람이 맡고 있습니다.
       </p>
 
-      <h2>운영 원칙</h2>
+      <h2>이 사이트에서 하는 일</h2>
       <ul className="list-disc pl-5 space-y-1">
-        <li>중요 정보는 지역·기간·테마로 교차 확인</li>
-        <li>빈 페이지/오류 페이지를 줄이는 라우트 점검 우선</li>
-        <li>광고 정책 준수와 사용자 가독성 우선 설계</li>
+        <li>
+          한국관광공사 TourAPI 행사 데이터를 매일 받아, 종료·취소 행사를 걸러내고
+          지역·테마·주말 기준으로 다시 묶습니다.
+        </li>
+        <li>
+          날짜가 뒤바뀌었거나 장소가 비어 있는 원자료는 주최 측 공지와 대조해
+          보정하고, 보정한 항목과 대조일을 상세 페이지에 남깁니다.
+        </li>
+        <li>
+          제보받은 오류는 확인 후 수정하고, 같은 유형의 오류가 다시 생기지 않게
+          수집 규칙을 고칩니다.
+        </li>
       </ul>
 
-      <h2>작성 방식</h2>
+      <h2>정보를 고르고 쓰는 기준</h2>
       <ul className="list-disc pl-5 space-y-1">
-        <li>주요 이벤트는 간결한 제목과 실제 날짜·장소 중심으로 정리</li>
-        <li>중복 노출을 줄이기 위해 라벨과 카테고리 중복 최소화</li>
-        <li>문장 길이를 짧게 유지해 모바일 가독성 강화</li>
+        <li>
+          원자료에 없는 입장료·주차·편의시설 정보는 추정해서 채우지 않고
+          &ldquo;확인 필요&rdquo;로 둡니다.
+        </li>
+        <li>
+          &ldquo;최대 규모&rdquo;, &ldquo;꼭 가야 할&rdquo; 같은 출처 없는 단언은
+          쓰지 않습니다.
+        </li>
+        <li>
+          직접 방문하지 않은 행사를 다녀온 것처럼 쓰지 않습니다. 현장 확인이
+          아닌 정보는 &lsquo;공식 발표 기준&rsquo;임을 밝힙니다.
+        </li>
+        <li>
+          광고나 제휴 여부가 행사 노출 순서에 영향을 주지 않게 합니다.
+        </li>
       </ul>
 
-      <h2>문의</h2>
+      <h2>연락</h2>
       <p>
-        운영 제안은{" "}
-        <a className="underline" href="/contact">
-          /contact
-        </a>{" "}
-        에 남겨주세요.
+        잘못된 일정이나 장소를 발견하셨거나 다뤄 줬으면 하는 행사가 있다면{" "}
+        <Link className="underline" href="/contact">
+          문의 페이지
+        </Link>
+        의 이메일로 알려 주세요. 행사 이름과 페이지 주소를 함께 보내 주시면 더
+        빨리 확인할 수 있습니다.
       </p>
     </article>
   );

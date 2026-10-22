@@ -46,7 +46,7 @@ export function HubSourceGuide({ title, scope }: HubSourceGuideProps) {
           페이지로 추정하지 말고, 지자체나 주최기관의 최신 연락처와 공지를 직접 확인해야 합니다.
         </p>
         <p>
-          정보가 서로 다를 때는 Roadways의 요약보다 원본 공지의 게시일과 적용 범위를 먼저 확인합니다.
+          정보가 서로 다를 때는 여행고고의 요약보다 원본 공지의 게시일과 적용 범위를 먼저 확인합니다.
           수정 요청을 보낼 때는 행사 URL, 문제가 된 항목, 비교한 공식 링크와 확인 시각을 함께 적어
           주세요. 운영자는 원본과 대조한 뒤 수정하거나, 근거가 부족하면 기존 표시를 유지합니다.
         </p>
@@ -67,7 +67,7 @@ export function HubSourceGuide({ title, scope }: HubSourceGuideProps) {
           공공데이터포털에서 TourAPI 확인하기
         </a>
         <Link href="/data-policy" className="font-medium text-[var(--color-brand)] hover:underline">
-          Roadways 데이터 처리 기준
+          여행고고 데이터 처리 기준
         </Link>
         <Link href="/contact" className="font-medium text-[var(--color-brand)] hover:underline">
           정보 수정 요청하기

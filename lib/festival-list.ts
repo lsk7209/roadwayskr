@@ -23,6 +23,11 @@ export type ListFilter = {
   now?: Date;
   page?: number;
   pageSize?: number;
+  /**
+   * Skips the redundant count(*) query when the caller already computed
+   * the total for this exact condition (e.g. via festivalGroups()).
+   */
+  knownTotal?: number;
 };
 
 export function parseListSearch(search: SearchValues) {
@@ -90,6 +95,23 @@ export async function festivalPage<T extends Record<string, unknown>>(
   const condition = festivalListCondition(filter);
   const size = filter.pageSize ?? 24;
   const page = filter.page ?? 1;
+
+  // When the caller already knows the total (e.g. from a prior
+  // festivalGroups() call for the same condition), skip the redundant
+  // count(*) query. This turns the weekend page's per-area fan-out from
+  // 1 (groups) + 2*G (items + count per area) into 1 + G queries.
+  if (filter.knownTotal !== undefined) {
+    const items = await db
+      .select()
+      .from(festivals)
+      .where(condition)
+      .orderBy(festivals.startDate, festivals.contentId)
+      .limit(size)
+      .offset((page - 1) * size);
+    const total = filter.knownTotal;
+    return { items, total, pages: Math.max(1, Math.ceil(total / size)), page };
+  }
+
   const [items, counts] = await Promise.all([
     db
       .select()

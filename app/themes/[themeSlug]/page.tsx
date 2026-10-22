@@ -132,6 +132,7 @@ export default async function ThemePage({ params, searchParams }: Params) {
               href={`/festivals/${festival.contentId}/${festival.slug}`}
               festival={festival}
               priority={i === 0}
+              sizes="(min-width: 640px) 50vw, 100vw"
             />
           ))}
         </ul>

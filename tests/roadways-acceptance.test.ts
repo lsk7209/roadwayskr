@@ -27,7 +27,7 @@ import { trackAction } from "../lib/analytics";
 
 const fixture = JSON.parse(
   readFileSync(
-    new URL("../ddd/06_SYNTHETIC_TEST_FIXTURES.json", import.meta.url),
+    new URL("./fixtures/synthetic-test-fixtures.json", import.meta.url),
     "utf8",
   ),
 );

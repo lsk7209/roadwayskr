@@ -142,7 +142,7 @@ async function main() {
       const { status } = await fetchHtml(path);
       add({ id: 11 + idx, name: `Menu path check: ${path}`, status: isSuccessful(status) ? "pass" : status === 0 ? "warn" : "fail", detail: `HTTP ${status}` });
     }
-    add({ id: 15, name: "Plan page", status: isSuccessful((await fetchHtml("/plan")).status) ? "pass" : "warn", detail: "GET /plan" });
+    add({ id: 15, name: "Blog page", status: isSuccessful((await fetchHtml("/blog")).status) ? "pass" : "warn", detail: "GET /blog" });
   }
 
   const home = await fetchHtml("/");
