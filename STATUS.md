@@ -1,6 +1,6 @@
 # Status | 마지막: 2026-10-22
 ## 현재 작업
-- 프로젝트 종합 검토 후 P0~P2 아키텍처·성능·보안·SEO·브랜딩·CI 개선 적용 및 검증 완료.
+- 2026-10-22 AdSense 개선 작업 종료. 커밋 `af54bcc` main push 완료(Vercel 자동 배포). 남은 일은 아래 TODO의 계정 작업.
 
 ## 최근 변경 (최근 5개만)
 - 2026-10-22: 편집 가이드 12편 + `/guides` 라우트(Article JSON-LD, sitemap, 헤더·푸터·홈·축제 상세 연결), `tests/guides.test.ts` 품질 테스트.
@@ -12,6 +12,12 @@
 - 2026-09-08: 취소/종료 행사가 현재 진행 목록·지역·테마·RSS·사이트맵에 노출되지 않도록 `currentFestivalCondition` 일원화.
 
 ## TODO
+- [ ] Vercel 배포 성공 및 `/guides` 정상 노출 확인
+- [ ] GSC에 `/guides`·가이드 12편 색인 요청
+- [ ] `hello@`·`privacy@roadways.kr` 수신 확인, GA4 데이터 보관 14개월 설정
+- [ ] 색인 2~4주 후 AdSense 심사 신청
+- [ ] Dependabot 취약점 35건(치명 3·높음 20) 정리
+- [ ] (보류) 대표 축제 큐레이터 코멘트 — DB 쓰기 권한·실제 방문 경험 필요
 - [x] Vercel 환경변수 `INDEXNOW_KEY=cf1bbae352df4a22a23cbf48bb08350d` 설정 완료 (`public/cf1bbae352df4a22a23cbf48bb08350d.txt` 및 `sync-tourapi.yml` 연동 완료)
 - [ ] Google Rich Results Test로 BreadcrumbList/CollectionPage 확인
 - [ ] 네이버 Search Advisor `/feed.xml` 재검증 확인
