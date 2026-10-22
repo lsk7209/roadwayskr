@@ -24,6 +24,7 @@ import {
 } from "../lib/tourapi";
 import { notifySearchEngines } from "../lib/search-indexing";
 import { prepareFestivalUpdate } from "../lib/tourapi/merge";
+import { isRepeatedPage } from "../lib/tourapi/paging";
 
 type SyncMode = "incremental" | "full";
 
@@ -208,7 +209,7 @@ async function collectIncremental() {
   let pageNo = 1;
   while (true) {
     const { items, totalCount } = await fetchSyncList(ymd, pageNo);
-    if (items.length && all.some((a) => a.contentid === items[0].contentid)) {
+    if (isRepeatedPage(all, items)) {
       collectionComplete = false; // 같은 페이지 반복: 불완전 수집으로 종료
       console.warn(`[sync-tourapi] repeated page ${pageNo} - stop`);
       break;
@@ -246,7 +247,7 @@ async function collectFullYear(from?: string, to?: string) {
       pageNo,
       numOfRows: 100,
     });
-    if (items.length && all.some((a) => a.contentid === items[0].contentid)) {
+    if (isRepeatedPage(all, items)) {
       collectionComplete = false;
       console.warn(`[sync-tourapi] repeated page ${pageNo} - stop`);
       break;
