@@ -300,7 +300,7 @@ export default async function Home() {
             href="/blog"
             className="text-sm font-semibold text-[var(--color-brand)] hover:underline"
           >
-            최근 소식 보기
+            최근 업데이트 보기
           </Link>
         </div>
 

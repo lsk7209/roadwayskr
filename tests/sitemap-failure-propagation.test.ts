@@ -19,7 +19,11 @@ test("sitemap propagates a DB failure instead of silently returning a truncated 
     const db = drizzle(client);
     await assert.rejects(
       db.select().from(festivals).limit(1),
-      /no such table/i,
+      // drizzle 0.45+는 원인 에러를 cause에 감싸므로 cause 체인까지 확인한다.
+      (err: unknown) => {
+        const chain = `${err} ${(err as { cause?: unknown }).cause ?? ""}`;
+        return /no such table/i.test(chain);
+      },
     );
   } finally {
     client.close();
