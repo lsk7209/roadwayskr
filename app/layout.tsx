@@ -65,7 +65,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#faf7f2",
+  themeColor: "#f5f1e7",
 };
 
 export default function RootLayout({
@@ -98,6 +98,12 @@ export default function RootLayout({
         ) : null}
       </head>
       <body>
+        <Link
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-[var(--color-card)] focus:px-4 focus:py-3 focus:font-bold"
+        >
+          본문 바로가기
+        </Link>
         <Suspense fallback={null}>
           <AdDocumentGuard />
         </Suspense>
@@ -118,35 +124,40 @@ export default function RootLayout({
             </Script>
           </>
         ) : null}
-        <header className="border-b border-[var(--color-line)] bg-[var(--color-card)]">
-          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-            <Link href="/" className="text-lg font-bold tracking-tight">
-              여행<span className="text-[var(--color-brand)]">고고</span>
+        <header className="border-b-2 border-[var(--color-ink)] bg-[var(--color-paper)]">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3">
+            <Link href="/" className="flex items-baseline gap-2">
+              <span className="text-2xl font-extrabold tracking-tight">
+                여행고고
+              </span>
+              <span className="text-xs font-semibold text-[var(--color-muted)]">
+                주말 편집부
+              </span>
             </Link>
             <nav
               aria-label="주 메뉴"
-              className="flex items-center gap-3 text-xs sm:text-sm text-[var(--color-ink-muted)]"
+              className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-semibold"
             >
-              <Link href="/weekend" className="hover:text-[var(--color-ink)]">
+              <Link href="/weekend" className="inline-flex min-h-[32px] items-center hover:underline">
                 이번 주말
               </Link>
-              <Link href="/regions" className="hover:text-[var(--color-ink)]">
+              <Link href="/regions" className="inline-flex min-h-[32px] items-center hover:underline">
                 지역별
               </Link>
-              <Link href="/themes" className="hover:text-[var(--color-ink)]">
+              <Link href="/themes" className="inline-flex min-h-[32px] items-center hover:underline">
                 테마별
               </Link>
-              <Link href="/guides" className="hover:text-[var(--color-ink)]">
+              <Link href="/guides" className="inline-flex min-h-[32px] items-center hover:underline">
                 가이드
               </Link>
-              <Link href="/blog" className="hover:text-[var(--color-ink)]">
+              <Link href="/blog" className="inline-flex min-h-[32px] items-center hover:underline">
                 최근 업데이트
               </Link>
             </nav>
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1200px] px-5 py-8">{children}</main>
 
         <footer className="mt-16 border-t border-[var(--color-line)] bg-[var(--color-card)] py-8">
           <div className="mx-auto max-w-6xl space-y-2 px-4 text-sm text-[var(--color-ink-muted)]">

@@ -156,7 +156,7 @@ export default async function FestivalPage({ params }: Params) {
         › <span>{festival.title}</span>
       </nav>
 
-      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+      <h1 className="text-[32px] font-extrabold leading-tight tracking-tight md:text-5xl">
         {festival.title}
       </h1>
 

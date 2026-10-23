@@ -13,6 +13,14 @@ import {
 import { festivalPage } from "@/lib/festival-list";
 import { relativeMonth } from "@/lib/festival-dates";
 import { PageAds } from "@/components/ads/PageAds";
+import { HomeSearch } from "@/components/home/HomeSearch";
+
+/** `10.24 — 25`, 월이 바뀌면 `10.31 — 11.01`. 날짜는 Asia/Seoul 기준 ISO에서 만든다. */
+function weekendPlateLabel(satIso: string, sunIso: string) {
+  const [, sm, sd] = satIso.split("-");
+  const [, um, ud] = sunIso.split("-");
+  return sm === um ? `${sm}.${sd} — ${ud}` : `${sm}.${sd} — ${um}.${ud}`;
+}
 
 const SITE_URL = (process.env.SITE_URL ?? "https://roadways.kr")
   .trim()
@@ -84,36 +92,58 @@ export default async function Home() {
   ]);
   const currentMonth = relativeMonth();
   const nextMonth = relativeMonth(1);
+  const { satIso, sunIso } = getWeekendRange();
+  const weekendPlate = weekendPlateLabel(satIso, sunIso);
+  const weekendAriaLabel = `${satIso}부터 ${sunIso}까지, 토요일과 일요일`;
 
   return (
     <div className="space-y-14">
-      <section className="mx-auto max-w-3xl text-center">
-        <p className="text-sm font-semibold tracking-[0.12em] text-[var(--color-brand)]">
-          여행고고
-        </p>
-        <h1 className="mt-3 text-[32px] font-bold leading-tight text-[var(--color-ink)] sm:text-[38px]">
-          주말 축제는 여행고고로 한 번에
-        </h1>
-        <p className="prose-body mt-4 text-[1.04rem] leading-8 text-[var(--color-ink-muted)]">
-          전국 축제 정보를 한 페이지에서 찾고, 지역과 테마로 나누어 빠르게
-          살펴보세요. 행사 기간, 운영 요일과 장소를 함께 확인해 보세요.
-        </p>
-
-        <div className="mt-5 grid gap-2 md:mt-8 md:grid-cols-3 md:gap-3">
-          {quickFilters.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-2xl border border-[var(--color-line)] bg-white p-3 text-left md:p-4 shadow-[var(--shadow-float)] transition hover:border-[var(--color-brand)]"
+      <section aria-labelledby="home-title">
+        <div className="grid items-end gap-6 md:grid-cols-[1.2fr_1fr]">
+          <div>
+            <h1
+              id="home-title"
+              className="text-[40px] font-extrabold leading-[1.1] tracking-tight md:text-[72px]"
             >
-              <p className="text-sm font-semibold text-[var(--color-ink)]">
-                {item.label}
-              </p>
-              <p className="mt-1 text-sm text-[var(--color-muted)]">
-                {item.value}
-              </p>
-            </Link>
-          ))}
+              나갈 핑계가
+              <br />
+              <span className="mark-underline">생겼다.</span>
+            </h1>
+            <p className="mt-4 text-base md:text-lg">
+              이번 주말 축제와 행사, 날짜부터 골라보세요.
+            </p>
+          </div>
+          <div className="md:text-right">
+            <p
+              className="text-[48px] font-extrabold leading-none tracking-tight md:text-[88px]"
+              aria-label={weekendAriaLabel}
+            >
+              <span aria-hidden="true">{weekendPlate}</span>
+            </p>
+            <p className="mt-2 text-base font-semibold text-[var(--color-muted)]">
+              토요일 · 일요일
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 md:mt-8">
+          <HomeSearch weekendLabel="이번 주말" from={satIso} to={sunIso} />
+          <p className="mt-3 text-sm text-[var(--color-muted)]">
+            이번 주말에는 행사 기간이 겹치는 후보가 포함됩니다. 실제 운영일은
+            상세에서 확인해 주세요.
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {quickFilters.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-[var(--color-control)] px-4 text-sm font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

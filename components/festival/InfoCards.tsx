@@ -83,30 +83,32 @@ export function InfoCards({ festival }: Props) {
   ];
 
   return (
-    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {cards.map((c) => (
-        <div
-          key={c.label}
-          className="rounded-lg border border-[var(--color-line)] bg-[var(--color-card)] p-3 sm:p-4"
-        >
-          <dt className="text-xs text-[var(--color-ink-muted)]">{c.label}</dt>
-          <dd
-            className={
-              "mt-1 text-sm leading-tight font-semibold break-words " +
-              (c.accent
-                ? "text-[var(--color-brand)]"
-                : "text-[var(--color-ink)]")
-            }
-          >
-            {c.value}
-          </dd>
-          {c.hint && (
-            <p className="mt-0.5 text-[11px] leading-snug text-[var(--color-ink-muted)]">
-              {c.hint}
-            </p>
-          )}
-        </div>
-      ))}
-    </dl>
+    <section
+      aria-labelledby="before-you-go"
+      className="mt-6 bg-[var(--color-highlight)] p-4 sm:p-5"
+    >
+      <h2
+        id="before-you-go"
+        className="text-xl font-extrabold leading-tight sm:text-2xl"
+      >
+        <span className="mark-underline">가기 전에, 이것만</span>
+      </h2>
+      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-4">
+        {cards.map((c) => (
+          <div key={c.label} className="border-t-2 border-[var(--color-ink)] pt-2">
+            <dt className="text-sm font-semibold">{c.label}</dt>
+            <dd
+              className={
+                "mt-1 text-base leading-snug font-bold break-words " +
+                (c.accent ? "text-[var(--color-brand-dark)]" : "")
+              }
+            >
+              {c.value}
+            </dd>
+            {c.hint && <p className="mt-1 text-sm leading-snug">{c.hint}</p>}
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

@@ -14,19 +14,27 @@
     "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-display: "Pretendard", system-ui, sans-serif;
 
-  --color-paper: #ffffff;
-  --color-card: #ffffff;
-  --color-surface-soft: #f7f7f7;
-  --color-surface-strong: #f2f2f2;
-  --color-ink: #222222;
-  --color-body: #3f3f3f;
-  --color-muted: #6a6a6a;
-  --color-ink-muted: #6a6a6a;
-  --color-line: #dddddd;
-  --color-line-soft: #ebebeb;
-  --color-brand: #ff385c;
-  --color-brand-dark: #e00b41;
-  --color-trust: #222222;
+  /* 주말 편집부 토큰 (docs: roadways_redesign_concept 10.2) */
+  --color-paper: #f5f1e7;
+  --color-card: #fffcf6;
+  --color-surface-soft: #efeadc;
+  --color-surface-strong: #e6e0d0;
+  --color-ink: #18382f;
+  --color-body: #2b4a40;
+  --color-muted: #59645c;
+  --color-ink-muted: #59645c;
+  --color-line: #d6d9cb;
+  --color-line-soft: #e4e4d6;
+  --color-control: #738271;
+  /* 읽어야 하는 강조 글자는 brand(베리), 장식은 accent(기존 분홍) */
+  --color-brand: #b9234a;
+  --color-brand-dark: #8f1a39;
+  --color-accent: #ff385c;
+  --color-highlight: #ebd979;
+  --color-confirmed-bg: #e3ece2;
+  --color-unknown-bg: #f7e7b8;
+  --color-unknown-text: #73501d;
+  --color-trust: #18382f;
   --color-success: #2f9e6c;
   --color-warn: #d97a3a;
 
@@ -44,6 +52,27 @@ body {
   -webkit-font-smoothing: antialiased;
   word-break: keep-all;
   overflow-wrap: break-word;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* 분홍 표식 밑줄 — 제목 강조용 장식 */
+.mark-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.12em;
+  text-decoration-skip-ink: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 .prose-ko {

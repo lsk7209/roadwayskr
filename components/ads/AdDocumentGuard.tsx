@@ -15,7 +15,10 @@ export function AdDocumentGuard() {
 
   useEffect(() => {
     const onHistory = () => {
-      if (document.documentElement.dataset.autoAdsLocation) location.reload();
+      const loadedAt = document.documentElement.dataset.autoAdsLocation;
+      // Hash-only navigation (e.g. the skip link) stays in the same document.
+      if (loadedAt && loadedAt !== location.pathname + location.search)
+        location.reload();
     };
     window.addEventListener("popstate", onHistory, true);
     return () => window.removeEventListener("popstate", onHistory, true);

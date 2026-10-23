@@ -39,7 +39,7 @@ const DEFAULT_SIZES =
   "(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
 
 const TITLE_CLASS =
-  "line-clamp-2 text-[15px] font-semibold leading-snug text-[var(--color-ink)]";
+  "line-clamp-2 text-lg font-bold leading-snug text-[var(--color-ink)]";
 
 export function FestivalListCard({
   festival,
@@ -57,7 +57,7 @@ export function FestivalListCard({
   return (
     <li className="h-full min-w-0">
       <Link href={href} className="group block h-full min-w-0">
-        <div className="relative aspect-square overflow-hidden rounded-[14px] bg-[var(--color-surface-strong)]">
+        <div className="relative aspect-square overflow-hidden rounded-[4px] bg-[var(--color-surface-strong)]">
           {festival.imageUrl ? (
             <SafeImage
               src={festival.imageUrl}
@@ -73,7 +73,7 @@ export function FestivalListCard({
               썸네일 준비중
             </div>
           )}
-          <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[var(--color-ink)] shadow-[var(--shadow-float)]">
+          <span className="absolute left-3 top-3 rounded-[4px] bg-[var(--color-card)] px-2.5 py-1 text-xs font-semibold text-[var(--color-ink)] ring-1 ring-[var(--color-ink)]">
             {
               PERIOD_LABELS[
                 periodState(shown.startDate, shown.endDate, festival.status)
@@ -88,12 +88,18 @@ export function FestivalListCard({
             {formatPeriod(shown.startDate, shown.endDate)}
             {longRunning && " · 장기·상설 행사"}
           </p>
-          <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+          <p
+            className={
+              note?.recurrence || note?.programs
+                ? "mt-1 text-sm leading-5 text-[var(--color-muted)]"
+                : "mt-1.5 inline-block rounded-[4px] bg-[var(--color-unknown-bg)] px-2 py-0.5 text-sm font-semibold leading-5 text-[var(--color-unknown-text)]"
+            }
+          >
             {note?.recurrence
               ? recurrenceLabel(note.recurrence)
               : note?.programs
                 ? "여러 장소 · 프로그램별 일정 확인"
-                : "개별 운영일·시간 확인 필요"}
+                : "운영일 확인 필요"}
           </p>
           {festival.address && (
             <p className="mt-1 line-clamp-1 text-sm leading-5 text-[var(--color-muted)]">

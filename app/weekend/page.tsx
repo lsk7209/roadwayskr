@@ -11,7 +11,7 @@ import {
   type SearchValues,
 } from "@/lib/festival-list";
 import { findAreaByCode } from "@/lib/regions";
-import { FestivalListCard } from "@/components/festival/FestivalListCard";
+import { FestivalRow } from "@/components/festival/FestivalRow";
 import { shareMetadata } from "@/lib/page-meta";
 import { PageAds } from "@/components/ads/PageAds";
 
@@ -66,7 +66,9 @@ export default async function WeekendPage({ searchParams }: Props) {
   );
   return (
     <article className="prose-body prose-ko">
-      <h1 className="text-3xl font-bold tracking-tight">주말 축제 모아보기</h1>
+      <h1 className="text-[32px] font-extrabold tracking-tight md:text-5xl">
+        주말 축제 모아보기
+      </h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
         {range.from} ~ {range.to} 기간과 겹치는 행사 전체 {total}건
       </p>
@@ -108,14 +110,13 @@ export default async function WeekendPage({ searchParams }: Props) {
                   {name} 선택 기간 전체 보기
                 </Link>
               </div>
-              <ul className="grid gap-4 sm:grid-cols-2">
+              <ul className="border-t border-[var(--color-line)]">
                 {group.items.map((festival) => (
-                  <FestivalListCard
+                  <FestivalRow
                     key={festival.contentId}
                     festival={festival}
                     href={`/festivals/${festival.contentId}/${festival.slug}`}
                     titleLevel="h3"
-                    sizes="(min-width: 640px) 50vw, 100vw"
                   />
                 ))}
               </ul>
